@@ -14,6 +14,8 @@ class Student extends Model
         'address_id', 'phone_number', 'user_id'
     ];
 
+    public $timestamps = false; // 👈 zakáže automatické created_at a updated_at
+
     public function address()
     {
         return $this->belongsTo(Address::class);

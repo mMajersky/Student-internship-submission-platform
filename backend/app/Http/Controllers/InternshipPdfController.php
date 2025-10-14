@@ -5,12 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Student;
+use App\Models\Company;
 
 class InternshipPdfController extends Controller
 {
-    public function generate($id)
+    public function generate($studentId)
     {
-        $student = Student::with('address')->findOrFail($id);
+        // Načítať študenta aj s adresou
+        $student = Student::with('address')->findOrFail($studentId);
+
+        // Prednastavené ID spoločnosti (nastav podľa potreby)
+        $companyId = 1; // ← sem daj ID spoločnosti z DB
+
+        $company = Company::with('address')->findOrFail($companyId);
 
         $data = [
             'student_name' => $student->name . ' ' . $student->surname,
@@ -24,39 +31,25 @@ class InternshipPdfController extends Controller
             ),
             'study_program' => 'Aplikovaná informatika',
             'student_contact' => $student->student_email . ', ' . $student->phone_number,
-            'company_name' => 'Sample Company Ltd.',
-            'company_address' => 'Business Park 5, Bratislava',
-            'company_contact' => 'Ing. Peter Novák, +421 900 123 456',
+            'company_name' => $company->name,
+            'company_address' => sprintf(
+                '%s %s, %s %s, %s',
+                $company->address->street ?? '',
+                $company->address->house_number ?? '',
+                $company->address->postal_code ?? '',
+                $company->address->city ?? '',
+                $company->address->state ?? ''
+            ),
+            'company_contact' => $company->statutary,
             'position' => 'IT Intern',
             'start_date' => '2025-02-01',
             'end_date' => '2025-05-31',
             'generation_date' => now()->format('d.m.Y'),
         ];
 
-        $pdf = Pdf::loadView('pdf.internship_agreement', $data)->setPaper('A4', 'portrait');
+        $pdf = Pdf::loadView('pdf.internship_agreement', $data)
+            ->setPaper('A4', 'portrait');
 
         return $pdf->download('Dohoda_o_odbornej_praxi_' . $student->surname . '.pdf');
     }
-    public function generateEmpty()
-{
-    $data = [
-        'student_name' => '',
-        'student_address' => '',
-        'study_program' => '',
-        'student_contact' => '',
-        'company_name' => '',
-        'company_address' => '',
-        'company_contact' => '',
-        'position' => '',
-        'start_date' => '',
-        'end_date' => '',
-        'generation_date' => now()->format('d.m.Y'),
-    ];
-
-    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.internship_agreement', $data)
-        ->setPaper('A4', 'portrait');
-
-    return $pdf->download('Dohoda_o_odbornej_praxi_test.pdf');
-}
-
 }

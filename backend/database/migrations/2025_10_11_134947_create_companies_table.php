@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->integer('id', true);
             $table->string('name', 100);
+            $table->string('statutary', 100);
             $table->integer('address_id')->nullable()->index('address_id');
             $table->integer('user_id')->nullable()->index('companies_user_fk');
+            $table->timestamps(); // ← PRIDAJ TOTO
         });
     }
 

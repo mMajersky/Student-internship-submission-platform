@@ -12,14 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('address', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->string('state', 100)->nullable();
-            $table->string('region', 100)->nullable();
-            $table->string('city', 100)->nullable();
-            $table->string('postal_code', 20)->nullable();
-            $table->string('street', 100)->nullable();
-            $table->string('house_number', 20)->nullable();
-        });
+    $table->integer('id', true);
+    $table->string('state', 100)->nullable();
+    $table->string('region', 100)->nullable();
+    $table->string('city', 100)->nullable();
+    $table->string('postal_code', 20)->nullable();
+    $table->string('street', 100)->nullable();
+    $table->string('house_number', 20)->nullable();
+    $table->timestamps(); // Pridá created_at a updated_at
+});
     }
 
     /**

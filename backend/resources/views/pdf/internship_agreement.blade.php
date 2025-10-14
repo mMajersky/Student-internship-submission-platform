@@ -96,10 +96,12 @@
     </div>
 
     <div class="section">
-        <strong>Poskytovateľ odbornej praxe (organizácia, resp. inštitúcia)</strong><br>
-        Plný názov a adresa: {{ $company_name ?? '..............................................................' }}<br>
-        v zastúpení: {{ $company_contact ?? '.............................................................. (meno, pozícia)' }}
-    </div>
+    <strong>Poskytovateľ odbornej praxe (organizácia, resp. inštitúcia)</strong><br>
+    Plný názov: {{ $company_name ?? '..............................................................' }}<br>
+    Adresa: {{ $company_address ?? '..............................................................' }}<br>
+    v zastúpení: {{ $company_contact ?? '.............................................................. (meno, pozícia)' }}
+</div>
+
 
     <div class="section">
         <strong>Študent:</strong><br>
@@ -143,7 +145,7 @@
         <li>po ukončení odbornej praxe vydá študentovi „Výkaz o vykonanej odbornej praxi“, ktorý obsahuje popis vykonávaných činností a stručné hodnotenie študenta a je jedným z predpokladov úspešného ukončenia predmetu Odborná prax,</li>
         <li>umožní garantovi odbornej praxe a garantovi študijného predmetu kontrolu študentom plnených úloh.</li>
     </ul>
-
+<br>
     <p><strong>3. Študent FPVaI UKF v Nitre:</strong></p>
     <ul>
         <li>osobne zabezpečí podpísanie tejto dohody o odbornej praxi študenta,</li>
