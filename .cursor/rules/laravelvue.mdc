@@ -1,0 +1,90 @@
+---
+alwaysApply: true
+---
+
+*MANUÁL Vue + Laravel projekt
+
+0) Základné pravidlo
+Keď si niečím nie si istý, potlač svoje ego a over si to v oficiálnej dokumentácii. Odpovede musia obsahovať citácie na reputable sources (oficiálne dokumentácie, repozitáre, release notes). Pri tvrdeniach, ktoré sa môžu rýchlo meniť (verzie, príkazy, API), vždy informáciu over a uveď zdroj.
+
+Vhodné zdroje:
+
+Oficiálna dokumentácia Vue.js a Laravel
+Sekcie "Releases" na GitHube
+Dokumentácie pre jednotlivé použité nástroje (Pinia, Vite, atď.)
+Oficiálne release notes (napr. Laravel)
+
+
+Lokálny server: Laragon. (XAMPP má problém s MariaDB 11+).
+
+Git Klient: Github Desktop
+
+Databáza: Projekt beží na MariaDB 12.
+
+2) Vstupná analytika pred každou úlohou
+Prečítaj si zadanie. Ak chýbajú kritické informácie, urob rozumné predpoklady a označ ich ako predpoklad. 
+
+Zisti verzie a limity prostredia:
+
+Backend: Skontroluj composer.json a verziu PHP (php -v).
+
+Frontend: Skontroluj package.json, verziu Node.js (node -v) a verziu Vite.
+
+Skontroluj architektúru repozitára. Očakáva sa štruktúra frontend/ (Vue + Vite) a backend/ (Laravel). Ak je tam chaos, navrhni nápravu.
+
+Zisti, či existujú interné konvencie (linting, testy, CI). Ak nie, použi štandardy z tohto manuálu.
+
+3) Git workflow a doručovanie
+
+Vetvenie: Vetva main je chránená a predstavuje produkčnú verziu. Nikdy do nej nepushuj priamo.
+
+Feature vetvy: Pre každú featuru (User Story alebo samostatný Task) vytvor novú vetvu. Pomenuj ju feature/nazov-feature.
+
+Commity: Používaj konvenciu Conventional Commits. Píš zrozumiteľné správy, nie "oprava".
+
+Pull Request (PR):
+
+Keď je featura hotová a spĺňa všetky kritériá, vytvor Merge Request (alebo Pull Request) do vetvy develop.
+
+Každý PR musí obsahovať:
+
+Stručný popis implementovaného riešenia.
+Návod na testovanie pre toho chudáka, čo to bude po tebe kontrolovať.
+Linky na zdroje (napr. dokumentáciu), ktoré ovplyvnili tvoje rozhodnutie, if necessary.
+
+4) Backend (Laravel)
+Štart a štruktúra
+Verzia: Projekt používa Laravel 12. Rešpektuj jeho štruktúru a príkazy. Pri akomkoľvek upgrade sleduj oficiálny upgrade guide.
+
+Kódová kvalita
+Štýl: Laravel Pint na formátovanie kódu.
+
+Statická analýza: Larastan / PHPStan.
+Logovanie: Štandardne cez Monolog.
+
+Doména a perzistencia
+Eloquent: Vždy používaj eager loading (->with(...)) pri načítavaní vzťahov, aby si predišiel N+1 problému. Vstupné dáta validuj cez FormRequest triedy.
+
+Migrácie a seedre: Musia byť spätne kompatibilné, umožňovať bezpečné rollbacky a seedre musia byť idempotentné.
+
+Konzistencia: Zabezpeč konzistentné správanie pre pagináciu, filtrovanie a triedenie. Chybové stavy musia mať jednotný formát odpovede.
+
+5) Frontend (Vue)
+Základy
+Verzia: Vue 3 s Composition API.
+
+Build nástroj: Vite.
+
+Jazyk: TypeScript ako predvolený.
+
+Štruktúra: Používaj aliasy a path mapping pre čisté importy. Rozhodnutia opieraj o oficiálnu dokumentáciu.
+
+Architektúra
+Správa stavu: Pinia je odporúčaný nástroj. Uprednostni ju pred vlastnými riešeniami, najmä pri SSR.
+
+Stores: Používaj stores so striktne typovaným API a vyhýbaj sa implicitnému zdieľaniu reaktívnych objektov medzi komponentmi.
+
+Notes:
+- komunikácia medzi frontendom a backendom bude výlučne cez fetch
+- styling má byť ideálne výlučne cez bootstrap (uisti sa, že používaš najnovšiu verziu)
+- pri merge konfliktoch ber ohľad, že to, na čom sme pracovali je jeden z mojich ticketov, to, čo už je na gite je práca kolegov, čiže musíš to čo najopatrnejšie zlepiť dokopy 
