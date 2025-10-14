@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('file_path')->nullable();
             $table->dateTime('created_at')->nullable()->useCurrent();
             $table->string('name', 100)->nullable();
+            
+            $table->foreign(['internship_id'], 'documents_internship_FK')->references(['id'])->on('internships')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

@@ -13,16 +13,17 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@vueup/vue-quill": "^1.2.0",
     "bootstrap": "^5.3.8",
-    "bootstrap-vue": "^2.23.1",
+    "bootstrap-icons": "^1.13.1",
     "pinia": "^3.0.3",
+    "quill": "^2.0.3",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
     "prettier": "3.6.2",
-    "vite": "^7.1.7",
-    "vite-plugin-vue-devtools": "^8.0.2"
+    "vite": "^7.1.7"
   }
 }

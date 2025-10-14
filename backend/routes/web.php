@@ -9,6 +9,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Ensure auth middleware redirects don't break API usage
+Route::get('/login', function () {
+    return response()->json(['error' => 'Please use API login endpoint'], 401);
+})->name('login');
+
 Route::get('/users', [UserController::class, 'index']);
 
 
@@ -18,7 +23,7 @@ Route::get('/add-user', function () {
 
     $user = User::create([
         'role' => 'admin',
-        'pwd' => bcrypt('secret123'), // bezpečne zahashované heslo
+        'pwd' => bcrypt('secret123'),
         'email' => "admin{$random}@example.com"
     ]);
 

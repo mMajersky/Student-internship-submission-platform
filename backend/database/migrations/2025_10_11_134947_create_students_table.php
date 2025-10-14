@@ -22,6 +22,9 @@ return new class extends Migration
             $table->integer('user_id')->nullable()->index('students_user_fk');
 
             $table->unique(['student_email', 'alternative_email', 'phone_number'], 'students_unique');
+            
+            $table->foreign(['address_id'], 'students_address_FK')->references(['id'])->on('address')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign(['user_id'], 'students_user_FK')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

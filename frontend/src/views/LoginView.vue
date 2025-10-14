@@ -102,8 +102,6 @@ const formData = reactive({
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-
 const handleLogin = async () => {
   if (!formData.email || !formData.password) {
     errorMessage.value = 'Email a heslo sú povinné polia.'
@@ -114,7 +112,7 @@ const handleLogin = async () => {
   errorMessage.value = ''
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -138,7 +136,6 @@ const handleLogin = async () => {
     router.push('/dashboard')
   } catch (error) {
     errorMessage.value = 'Neplatný email alebo heslo.'
-
     console.error('Login error:', error.message)
   } finally {
     isLoading.value = false
