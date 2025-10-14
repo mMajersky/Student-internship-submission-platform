@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('surname', 100);
             $table->string('faculty', 100)->nullable();
             $table->integer('user_id')->nullable()->index('garants_user_fk');
+            
+            $table->foreign(['user_id'], 'garants_user_FK')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

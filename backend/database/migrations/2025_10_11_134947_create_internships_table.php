@@ -23,6 +23,10 @@ return new class extends Migration
             $table->date('approved_date')->nullable();
             $table->dateTime('created_at')->nullable()->useCurrent();
             $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
+            
+            $table->foreign(['company_id'], 'internships_company_FK')->references(['id'])->on('companies')->onUpdate('restrict')->onDelete('restrict');
+            $table->foreign(['garant_id'], 'internships_garant_FK')->references(['id'])->on('garants')->onUpdate('cascade')->onDelete('set null');
+            $table->foreign(['student_id'], 'internships_student_FK')->references(['id'])->on('students')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
