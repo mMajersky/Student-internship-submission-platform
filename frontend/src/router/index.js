@@ -6,6 +6,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      name: 'landing',
+      component: () => import('@/views/LandingView.vue'),
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginView
@@ -14,7 +19,6 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
-
       meta: { requiresAuth: true }
     },
   ]
