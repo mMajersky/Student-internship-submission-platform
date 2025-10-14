@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('user_id')->index('notifications_user_fk');
+            $table->unsignedBigInteger('user_id')->index('notifications_user_fk');
             $table->string('title', 100)->nullable();
             $table->text('message')->nullable();
             $table->dateTime('created_at')->useCurrent();

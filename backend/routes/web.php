@@ -9,6 +9,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/login', function () {
+    return response()->json(['error' => 'Please use API login endpoint'], 401);
+})->name('login');
+
 Route::get('/users', [UserController::class, 'index']);
 
 

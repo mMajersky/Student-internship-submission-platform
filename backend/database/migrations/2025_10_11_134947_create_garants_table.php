@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('surname', 100);
             $table->string('faculty', 100)->nullable();
-            $table->integer('user_id')->nullable()->index('garants_user_fk');
+            $table->unsignedBigInteger('user_id')->nullable()->index('garants_user_fk');
         });
     }
 

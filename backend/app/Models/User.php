@@ -15,18 +15,19 @@ class User extends Authenticatable
     protected $table = 'users'; // názov tabuľky v DB
 
     protected $fillable = [
-        'role',
-        'pwd',
-        'email'
+        'name',
+        'email',
+        'password',
+        'role'
     ];
 
     protected $hidden = [
-        'pwd',
+        'password',
         'remember_token',
     ];
 
-    public function getAuthPassword()
-    {
-        return $this->pwd;
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 }

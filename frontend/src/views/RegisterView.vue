@@ -6,8 +6,8 @@
           <div class="card-body">
             <!-- HEADER -->
             <div class="text-center mb-4">
-              <h3 class="card-title fw-bolder">Prihlásenie</h3>
-              <p class="text-muted">Použite email a heslo.</p>
+              <h3 class="card-title fw-bolder">Registrácia</h3>
+              <p class="text-muted">Vytvorte si nový účet.</p>
             </div>
 
             <!-- ERROR -->
@@ -16,7 +16,21 @@
             </div>
 
             <!-- FORM -->
-            <form @submit.prevent="handleLogin" novalidate>
+            <form @submit.prevent="handleRegister" novalidate>
+              <div class="mb-3">
+                <label for="name" class="form-label">
+                  Meno <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  v-model="formData.name"
+                  required
+                  placeholder="Vaše meno"
+                />
+              </div>
+
               <div class="mb-3">
                 <label for="email" class="form-label">
                   Email <span class="text-danger">*</span>
@@ -45,17 +59,34 @@
                 />
               </div>
 
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    v-model="formData.remember"
-                    id="rememberMe"
-                  />
-                  <label class="form-check-label" for="rememberMe">Zapamätať</label>
-                </div>
-                <a href="#" class="small">Zabudli ste heslo?</a>
+              <div class="mb-3">
+                <label for="password_confirmation" class="form-label">
+                  Potvrdenie hesla <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password_confirmation"
+                  v-model="formData.password_confirmation"
+                  required
+                  placeholder="********"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="role" class="form-label">
+                  Typ účtu <span class="text-danger">*</span>
+                </label>
+                <select
+                  class="form-select"
+                  id="role"
+                  v-model="formData.role"
+                  required
+                >
+                  <option value="">Vyberte typ účtu</option>
+                  <option value="student">Študent</option>
+                  <option value="company">Firma</option>
+                </select>
               </div>
 
               <div class="d-grid">
@@ -66,18 +97,17 @@
                     role="status"
                     aria-hidden="true"
                   ></span>
-                  <span v-else>Prihlásiť sa</span>
+                  <span v-else>Registrovať sa</span>
                 </button>
               </div>
             </form>
 
             <div class="text-center mt-4">
               <p class="text-muted small">
-                Nemáte účet?
-
-                <a href="#">Registrácia študenta</a> alebo
-
-                <a href="#">registrácia firmy</a>.
+                Už máte účet?
+                <router-link to="/login" class="text-primary text-decoration-none fw-medium">
+                  Prihláste sa
+                </router-link>
               </p>
             </div>
           </div>
@@ -94,17 +124,24 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const formData = reactive({
+  name: '',
   email: '',
   password: '',
-  remember: false,
+  password_confirmation: '',
+  role: '',
 })
 
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-const handleLogin = async () => {
-  if (!formData.email || !formData.password) {
-    errorMessage.value = 'Email a heslo sú povinné polia.'
+const handleRegister = async () => {
+  if (!formData.name || !formData.email || !formData.password || !formData.role) {
+    errorMessage.value = 'Všetky polia sú povinné.'
+    return
+  }
+
+  if (formData.password !== formData.password_confirmation) {
+    errorMessage.value = 'Heslá sa nezhodujú.'
     return
   }
 
@@ -112,15 +149,18 @@ const handleLogin = async () => {
   errorMessage.value = ''
 
   try {
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
       body: JSON.stringify({
+        name: formData.name,
         email: formData.email,
         password: formData.password,
+        password_confirmation: formData.password_confirmation,
+        role: formData.role,
       }),
     })
 
@@ -135,9 +175,9 @@ const handleLogin = async () => {
     localStorage.setItem('user_role', user.role)
     router.push('/dashboard')
   } catch (error) {
-    errorMessage.value = 'Neplatný email alebo heslo.'
+    errorMessage.value = 'Registrácia zlyhala. Skúste to znova.'
 
-    console.error('Login error:', error.message)
+    console.error('Registration error:', error.message)
   } finally {
     isLoading.value = false
   }
