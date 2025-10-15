@@ -1,16 +1,40 @@
 <script setup>
-import { onMounted, computed } from 'vue'
-import { useAnnouncementsStore } from '@/stores/announcements'
+import { ref, onMounted, computed } from 'vue'
 
-const store = useAnnouncementsStore()
+const publishedAnnouncement = ref(null)
+const loading = ref(false)
+const error = ref('')
 
-const hasAnnouncement = computed(() => store.hasPublishedAnnouncement)
-const content = computed(() => store.publishedAnnouncement?.content_sanitized || '')
-const date = computed(() => store.publishedAnnouncement?.updated_at || '')
+const hasAnnouncement = computed(() => {
+  return publishedAnnouncement.value && publishedAnnouncement.value.content_sanitized
+})
+
+const content = computed(() => publishedAnnouncement.value?.content_sanitized || '')
+const date = computed(() => publishedAnnouncement.value?.updated_at || '')
 const fmt = (d) => (d ? new Date(d).toLocaleDateString('sk-SK') : '')
 
-onMounted(async () => {
-  await store.fetchPublishedAnnouncement()
+const fetchPublishedAnnouncement = async () => {
+  try {
+    loading.value = true
+    error.value = ''
+    
+    const response = await fetch('/api/announcements/published')
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch published announcement')
+    }
+
+    publishedAnnouncement.value = await response.json()
+  } catch (err) {
+    error.value = err.message
+    console.error('Error fetching published announcement:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchPublishedAnnouncement()
 })
 </script>
 
@@ -29,6 +53,10 @@ onMounted(async () => {
     </div>
   </div>
   
+  <!-- Error state (hidden by default, only shows if there's an error) -->
+  <div v-if="error && !hasAnnouncement" class="d-none">
+    <!-- Error is logged to console but not displayed to users -->
+  </div>
 </template>
 
 <style scoped>

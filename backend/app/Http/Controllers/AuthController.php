@@ -18,13 +18,24 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            /** @var User $user */ //
+            /** @var User $user */
             $user = Auth::user();
+            
+            // Load role relationship
+            $user->load('role');
+            
             $token = $user->createToken('authToken')->accessToken;
 
             return response()->json([
                 'token' => $token,
-                'user' => $user
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role ? $user->role->name : null,
+                    'role_display_name' => $user->role ? $user->role->display_name : null,
+                    'permissions' => $user->role ? $user->role->permissions : []
+                ]
             ]);
         }
 
