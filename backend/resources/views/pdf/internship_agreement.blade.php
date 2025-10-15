@@ -153,9 +153,8 @@
 
     <div style="margin-top:30px;">
         V Nitre, dňa {{ $generation_date ?? '....................' }} &nbsp;&nbsp;&nbsp;&nbsp;
-        V {{ $company_city ?? '....................' }}, dňa {{ $sign_date ?? '....................' }}
     </div>
-
+<br>
     <table class="signature-table">
         <tr>
             <td>
