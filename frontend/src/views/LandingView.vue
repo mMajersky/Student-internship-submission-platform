@@ -6,6 +6,7 @@ import TheFooter from '@/components/landing/TheFooter.vue'
 
 <template>
   <div>
+
     <NotificationBar />
     <section class="bg-light py-5">
       <div class="container px-4">

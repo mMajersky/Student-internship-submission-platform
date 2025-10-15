@@ -10,9 +10,9 @@
             <router-link to="/login" class="text-decoration-none text-muted">
               Prihlásenie
             </router-link>
-            <router-link to="/register" class="text-decoration-none text-muted">
+            <a href="#" class="text-decoration-none text-muted">
               Registrácia študenta
-            </router-link>
+            </a>
             <a href="#" class="text-decoration-none text-muted">
               Registrácia firmy
             </a>

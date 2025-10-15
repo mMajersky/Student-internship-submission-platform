@@ -8,77 +8,69 @@ use Illuminate\Support\Facades\Auth;
 
 class AnnouncementController extends Controller
 {
-    public function index()
-    {
-        $announcements = Announcement::with(['creator', 'updater'])
-            ->orderBy('updated_at', 'desc')
-            ->get();
-
-        return response()->json($announcements);
-    }
-
     public function published()
     {
         $announcement = Announcement::published()
             ->orderBy('updated_at', 'desc')
             ->first();
 
-        if (!$announcement) {
+        return response()->json([
+            'content_sanitized' => $announcement?->content_sanitized ?? null,
+            'updated_at' => $announcement?->updated_at ?? null,
+        ]);
+    }
+
+    /**
+     * Get or update the single announcement for landing page
+     */
+    public function single(Request $request)
+    {
+        if ($request->isMethod('GET')) {
+            // Get the current announcement (published or unpublished for editing)
+            $announcement = Announcement::orderBy('updated_at', 'desc')->first();
+
             return response()->json([
-                'content_sanitized' => null,
-                'updated_at' => null,
+                'content' => $announcement?->content ?? '',
+                'content_sanitized' => $announcement?->content_sanitized ?? '',
+                'is_published' => $announcement?->is_published ?? false,
+                'updated_at' => $announcement?->updated_at ?? null,
             ]);
         }
 
-        return response()->json([
-            'content_sanitized' => $announcement->content_sanitized,
-            'updated_at' => $announcement->updated_at,
-        ]);
-    }
+        if ($request->isMethod('PUT')) {
+            // Update the single announcement
+            $validated = $request->validate([
+                'content' => 'required|string',
+                'is_published' => 'boolean',
+            ]);
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'content' => 'required|string',
-            'is_published' => 'boolean',
-        ]);
+            // Find existing announcement or create new one
+            $announcement = Announcement::orderBy('updated_at', 'desc')->first();
+            
+            if ($announcement) {
+                // Update existing announcement
+                $announcement->update([
+                    'content' => $validated['content'],
+                    'is_published' => $validated['is_published'] ?? true,
+                    'updated_by' => Auth::id(),
+                ]);
+            } else {
+                // Create new announcement
+                $announcement = Announcement::create([
+                    'content' => $validated['content'],
+                    'is_published' => $validated['is_published'] ?? true,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]);
+            }
 
-        $validated['created_by'] = Auth::id();
-        $validated['updated_by'] = Auth::id();
-
-        $announcement = Announcement::create($validated);
-
-        return response()->json($announcement, 201);
-    }
-
-    public function show(string $id)
-    {
-        $announcement = Announcement::with(['creator', 'updater'])->findOrFail($id);
-        return response()->json($announcement);
-    }
-
-    public function update(Request $request, string $id)
-    {
-        $announcement = Announcement::findOrFail($id);
-
-        $validated = $request->validate([
-            'content' => 'sometimes|required|string',
-            'is_published' => 'sometimes|boolean',
-        ]);
-
-        $validated['updated_by'] = Auth::id();
-
-        $announcement->update($validated);
-
-        return response()->json($announcement);
-    }
-
-    public function destroy(string $id)
-    {
-        $announcement = Announcement::findOrFail($id);
-        $announcement->delete();
-
-        return response()->json(['message' => 'Announcement deleted successfully']);
+            return response()->json([
+                'content' => $announcement->content,
+                'content_sanitized' => $announcement->content_sanitized,
+                'is_published' => $announcement->is_published,
+                'updated_at' => $announcement->updated_at,
+            ]);
+        }
     }
 }
 

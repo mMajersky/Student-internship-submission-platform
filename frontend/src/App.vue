@@ -17,19 +17,19 @@
             <li class="nav-item">
               <router-link to="/" class="nav-link" :class="{ active: $route.path === '/' }">Domov</router-link>
             </li>
-            <li class="nav-item" v-if="isAuthenticated && canManageAnnouncements">
+            <li class="nav-item" v-if="authStore.isAuthenticated && authStore.canManageAnnouncements">
               <router-link to="/dashboard" class="nav-link" :class="{ active: $route.path === '/dashboard' }">Dashboard</router-link>
             </li>
           </ul>
 
           <ul class="navbar-nav">
-            <li class="nav-item" v-if="!isAuthenticated">
+            <li class="nav-item" v-if="!authStore.isAuthenticated">
               <router-link to="/login" class="nav-link">Prihlásiť sa</router-link>
             </li>
-            <li class="nav-item dropdown" v-if="isAuthenticated">
+            <li class="nav-item dropdown" v-if="authStore.isAuthenticated">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle me-1"></i>
-                {{ userRole }}
+                {{ authStore.userRole }}
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
@@ -59,52 +59,36 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from './stores/auth'
 
 const router = useRouter()
-
-// Reactive state
-const userRole = ref('')
-const isAuthenticated = ref(false)
-
-// Computed properties
-const canManageAnnouncements = computed(() => {
-  return userRole.value === 'admin' || userRole.value === 'garant'
-})
+const authStore = useAuthStore()
 
 // Methods
-const checkAuthStatus = () => {
-  const token = localStorage.getItem('jwt_token')
-  const role = localStorage.getItem('user_role')
-  
-  isAuthenticated.value = !!token
-  userRole.value = role || ''
-}
-
 const logout = () => {
-  localStorage.removeItem('jwt_token')
-  localStorage.removeItem('user_role')
-  isAuthenticated.value = false
-  userRole.value = ''
+  authStore.logout()
   router.push('/')
 }
 
 // Lifecycle
 onMounted(() => {
-  checkAuthStatus()
+  authStore.initializeAuth()
   
   // Listen for storage changes (login/logout from other tabs)
-  window.addEventListener('storage', checkAuthStatus)
+  window.addEventListener('storage', () => {
+    authStore.initializeAuth()
+  })
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('storage', checkAuthStatus)
+  window.removeEventListener('storage', authStore.initializeAuth)
 })
 
 // Watch for route changes to update auth status
 watch(() => router.currentRoute.value, () => {
-  checkAuthStatus()
+  authStore.initializeAuth()
 })
 </script>
 

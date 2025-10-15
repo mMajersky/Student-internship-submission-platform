@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Mews\Purifier\Facades\Purifier;
 
 class Announcement extends Model
@@ -27,18 +26,9 @@ class Announcement extends Model
         parent::boot();
 
         static::saving(function ($announcement) {
+            // Sanitize the HTML content from QuillEditor
             $announcement->content_sanitized = Purifier::clean($announcement->content, 'announcements');
         });
-    }
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function scopePublished($query)
