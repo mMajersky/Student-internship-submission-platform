@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Address;
 use App\Models\Company;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,7 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call seeders from develop
+        // Call seeders in correct order
         $this->call([
             RoleSeeder::class,
             AdminUserSeeder::class,
@@ -25,17 +26,21 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create a company user for testing purposes
+        $companyRole = Role::where('name', Role::COMPANY)->first();
         $companyUser = User::create([
+            'name' => 'Company User',
             'email' => 'company@example.com',
-            'role' => 'company',
-            'pwd' => Hash::make('admin'),
+            'role_id' => $companyRole ? $companyRole->id : null,
+            'password' => Hash::make('admin'),
         ]);
 
         // Create a student user for testing purposes
+        $studentRole = Role::where('name', Role::STUDENT)->first();
         $studentUser = User::create([
+            'name' => 'Test Student',
             'email' => 'test@example.com',
-            'role' => 'student',
-            'pwd' => Hash::make('password'),
+            'role_id' => $studentRole ? $studentRole->id : null,
+            'password' => Hash::make('password'),
         ]);
 
         // Create an address
