@@ -88,10 +88,12 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const formData = reactive({
   email: '',
@@ -99,49 +101,33 @@ const formData = reactive({
   remember: false,
 })
 
-const isLoading = ref(false)
-const errorMessage = ref('')
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+const isLoading = computed(() => authStore.isLoading)
+const errorMessage = computed(() => authStore.error)
 
 const handleLogin = async () => {
   if (!formData.email || !formData.password) {
-    errorMessage.value = 'Email a heslo sú povinné polia.'
+    authStore.error = 'Email a heslo sú povinné polia.'
     return
   }
 
-  isLoading.value = true
-  errorMessage.value = ''
-
   try {
-    const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
+    await authStore.login({
+      email: formData.email,
+      password: formData.password,
     })
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const serverMessage = errorData.message || `HTTP error! status: ${response.status}`
-      throw new Error(serverMessage)
+    // Redirect based on user role
+    if (authStore.isAdmin || authStore.isGarant) {
+      router.push('/dashboard')
+    } else if (authStore.isStudent) {
+      router.push('/student-dashboard')
+    } else if (authStore.isCompany) {
+      router.push('/company-dashboard')
+    } else {
+      router.push('/')
     }
-
-    const { token, user } = await response.json()
-    localStorage.setItem('jwt_token', token)
-    localStorage.setItem('user_role', user.role)
-    router.push('/dashboard')
   } catch (error) {
-    errorMessage.value = 'Neplatný email alebo heslo.'
-
     console.error('Login error:', error.message)
-  } finally {
-    isLoading.value = false
   }
 }
 </script>

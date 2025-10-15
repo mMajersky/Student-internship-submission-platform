@@ -17,7 +17,11 @@ return new class extends Migration
             $table->string('statutary', 100);
             $table->integer('address_id')->nullable()->index('address_id');
             $table->integer('user_id')->nullable()->index('companies_user_fk');
-            $table->timestamps(); // ← PRIDAJ TOTO
+            $table->timestamps(); // Added from feature/Generate_PDF_template
+
+            // Foreign keys from develop
+            $table->foreign(['address_id'], 'companies_address_FK')->references(['id'])->on('address')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign(['user_id'], 'companies_user_FK')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

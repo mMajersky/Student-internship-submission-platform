@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('email', 100);
             $table->string('phone_number', 20)->nullable();
             $table->integer('company_id')->index('contact_persons_company_fk');
+            
+            $table->foreign(['company_id'], 'contact_persons_company_FK')->references(['id'])->on('companies')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

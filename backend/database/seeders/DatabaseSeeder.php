@@ -15,25 +15,30 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Vytvorí testovacích používateľov
+        // Call seeders from develop
+        $this->call([
+            RoleSeeder::class,
+            AdminUserSeeder::class,
+            StudentSeeder::class,
+            ContactPersonSeeder::class,
+            InternshipSeeder::class,
+        ]);
+
+        // Create a company user for testing purposes
+        $companyUser = User::create([
+            'email' => 'company@example.com',
+            'role' => 'company',
+            'pwd' => Hash::make('admin'),
+        ]);
+
+        // Create a student user for testing purposes
         $studentUser = User::create([
             'email' => 'test@example.com',
             'role' => 'student',
             'pwd' => Hash::make('password'),
         ]);
 
-        $companyUser = User::create([
-            'email' => 'company@example.com',
-            'role' => 'company',
-            'pwd' => Hash::make('admin'),
-        ]);
-        $this->call([
-            StudentSeeder::class,
-            ContactPersonSeeder::class,
-            InternshipSeeder::class,
-        ]);
-
-        // Vytvoríme adresu
+        // Create an address
         $address = Address::create([
             'state' => 'Slovensko',
             'region' => 'Bratislavský kraj',
@@ -43,7 +48,7 @@ class DatabaseSeeder extends Seeder
             'house_number' => '10',
         ]);
 
-        // Vytvoríme firmu
+        // Create a company
         Company::create([
             'name' => 'Example Company s.r.o.',
             'statutary' => 'Ing. Jozef Mrkvička',

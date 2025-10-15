@@ -18,6 +18,8 @@ return new class extends Migration
             $table->text('message')->nullable();
             $table->dateTime('created_at')->useCurrent();
             $table->boolean('is_read')->default(false);
+            
+            $table->foreign(['user_id'], 'notifications_user_FK')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
