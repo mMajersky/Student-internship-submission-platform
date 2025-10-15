@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
         ]);
         $this->call([
             StudentSeeder::class,
+            ContactPersonSeeder::class,
+            InternshipSeeder::class,
         ]);
 
         // Vytvoríme adresu

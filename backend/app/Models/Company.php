@@ -9,20 +9,14 @@ class Company extends Model
 {
     use HasFactory;
 
-    // Ak názov tabuľky nie je "companies", nastav ho
+    // Ak sa tabuľka volá "companies", toto netreba odkomentovať
     // protected $table = 'companies';
 
-    // Primárny kľúč
     protected $primaryKey = 'id';
-
-    // Ak primárny kľúč nie je auto-increment integer, treba nastaviť $incrementing a $keyType
     public $incrementing = true;
     protected $keyType = 'int';
-
-    // Ak nechceš, aby Laravel automaticky spracovával created_at a updated_at
     public $timestamps = true;
 
-    // Hromadne priraditeľné polia
     protected $fillable = [
         'name',
         'statutary',
@@ -30,15 +24,35 @@ class Company extends Model
         'user_id',
     ];
 
-    // Príklad vzťahu na adresu (ak máš model Address)
+    /**
+     * Vzťah: firma patrí k adrese
+     */
     public function address()
     {
         return $this->belongsTo(Address::class);
     }
 
-    // Príklad vzťahu na používateľa (ak máš model User)
+    /**
+     * Vzťah: firma patrí používateľovi
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Vzťah: firma má viac kontakt­ných osôb
+     */
+    public function contactPersons()
+    {
+        return $this->hasMany(ContactPerson::class, 'company_id');
+    }
+
+    /**
+     * Vzťah: firma má viac stáží
+     */
+    public function internships()
+    {
+        return $this->hasMany(Internship::class, 'company_id');
     }
 }

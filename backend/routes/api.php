@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InternshipPdfController;
 
-Route::get('/vykaz-generate/{id}', [InternshipPdfController::class, 'generate']);
+Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
 Route::get('/vykaz-generate-empty', [InternshipPdfController::class, 'generateEmpty']);
 
 

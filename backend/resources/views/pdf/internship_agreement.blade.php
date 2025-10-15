@@ -29,11 +29,6 @@
             margin-bottom: 15px;
         }
 
-        .field {
-            margin-left: 30px;
-            margin-bottom: 5px;
-        }
-
         .article-title {
             font-weight: bold;
             margin-top: 20px;
@@ -42,14 +37,11 @@
         ul {
             margin-left: 20px;
             margin-top: 5px;
+            list-style-type: '- ';
         }
 
         ol {
             margin-left: 20px;
-        }
-
-        .page-break {
-            page-break-after: always;
         }
 
         .signature-table {
@@ -72,7 +64,7 @@
 
         footer {
             position: fixed;
-            bottom: 15px;
+            bottom: -20px; /* Posunutie pätičky mierne nižšie */
             left: 0;
             right: 0;
             text-align: center;
@@ -96,12 +88,11 @@
     </div>
 
     <div class="section">
-    <strong>Poskytovateľ odbornej praxe (organizácia, resp. inštitúcia)</strong><br>
-    Plný názov: {{ $company_name ?? '..............................................................' }}<br>
-    Adresa: {{ $company_address ?? '..............................................................' }}<br>
-    v zastúpení: {{ $company_contact ?? '.............................................................. (meno, pozícia)' }}
-</div>
-
+        <strong>Poskytovateľ odbornej praxe (organizácia, resp. inštitúcia)</strong><br>
+        Plný názov: {{ $company_name ?? '..............................................................' }}<br>
+        Adresa: {{ $company_address ?? '..............................................................' }}<br>
+        v zastúpení: {{ $company_contact ?? '.............................................................. (meno, pozícia)' }}
+    </div>
 
     <div class="section">
         <strong>Študent:</strong><br>
@@ -116,7 +107,7 @@
     <div class="article-title">I. Predmet dohody</div>
     <p>
         Predmetom tejto dohody je vykonanie odbornej praxe študenta v rozsahu 150 hodín,
-        v termíne od {{ $start_date ?? '....................' }} do {{ $end_date ?? '....................' }} bezodplatne.
+        v termíne od <strong>{{ $start_date ?? '....................' }}</strong> do <strong>{{ $end_date ?? '....................' }}</strong> bezodplatne.
     </p>
 
     <div class="article-title">II. Práva a povinnosti účastníkov dohody</div>
@@ -139,13 +130,13 @@
 
     <p><strong>2. Poskytovateľ odbornej praxe:</strong></p>
     <ul>
-        <li>poverí svojho zamestnanca (tútor - zodpovedný za odbornú prax v organizácii) {{ $tutor_name ?? '.....................................' }}, ktorý bude dohliadať na dodržiavanie dohody o odbornej praxi, plnenie obsahovej náplne odbornej praxe a bude nápomocný pri získavaní potrebných údajov pre vypracovanie správy z odbornej praxe,</li>
+        <li>poverí svojho zamestnanca (tútor - zodpovedný za odbornú prax v organizácii) <strong>{{ $tutor_name ?? '.....................................' }}</strong>, ktorý bude dohliadať na dodržiavanie dohody o odbornej praxi, plnenie obsahovej náplne odbornej praxe a bude nápomocný pri získavaní potrebných údajov pre vypracovanie správy z odbornej praxe,</li>
         <li>na začiatku praxe vykoná poučenie o bezpečnosti a ochrane zdravia pri práci v zmysle platných predpisov,</li>
         <li>vzniknuté organizačné problémy súvisiace s plnením dohody rieši spolu s garantom odbornej praxe,</li>
         <li>po ukončení odbornej praxe vydá študentovi „Výkaz o vykonanej odbornej praxi“, ktorý obsahuje popis vykonávaných činností a stručné hodnotenie študenta a je jedným z predpokladov úspešného ukončenia predmetu Odborná prax,</li>
         <li>umožní garantovi odbornej praxe a garantovi študijného predmetu kontrolu študentom plnených úloh.</li>
     </ul>
-<br>
+    <br>
     <p><strong>3. Študent FPVaI UKF v Nitre:</strong></p>
     <ul>
         <li>osobne zabezpečí podpísanie tejto dohody o odbornej praxi študenta,</li>
@@ -153,7 +144,7 @@
         <li>zabezpečí doručenie dokladu „Výkaz o vykonanej odbornej praxi“ najneskôr v termínoch predpísaných garantom pre daný semester,</li>
         <li>okamžite, bez zbytočného odkladu informuje garanta odbornej praxe o problémoch, ktoré bránia plneniu odbornej praxe.</li>
     </ul>
-    
+
     <div class="article-title">III. Všeobecné a záverečné ustanovenia</div>
     <ol>
         <li>Dohoda sa uzatvára na dobu určitú. Dohoda nadobúda platnosť a účinnosť dňom podpísania obidvomi zmluvnými stranami. Obsah dohody sa môže meniť písomne len po súhlase jej zmluvných strán.</li>
@@ -174,17 +165,19 @@
             </td>
             <td>
                 <div class="signature-line"></div><br>
+                {{ $company_contact ?? '..............................................................' }}<br>
                 <small>štatutárny zástupca pracoviska odb. praxe</small>
             </td>
             <td>
                 <div class="signature-line"></div><br>
+                {{ $student_name ?? '..............................................................' }}<br>
                 <small>meno a priezvisko študenta</small>
             </td>
         </tr>
     </table>
 
     <footer>
-        Vygenerované: {{ $generation_date ?? date('d.m.Y') }} | Strana 2
+        Vygenerované: {{ $generation_date ?? now()->format('d.m.Y') }}
     </footer>
 
 </body>
