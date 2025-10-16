@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import StudentCreateIntershipView from '../views/StudentCreateIntershipView.vue'
+import StudentIntershipView from '../views/StudentIntershipView.vue'
 const LandingView = () => import('../views/LandingView.vue')
 
 const router = createRouter({
@@ -32,6 +34,24 @@ const router = createRouter({
       path: '/student-dashboard',
       name: 'student-dashboard',
       component: () => import('../views/StudentDashboardView.vue'),
+      meta: { 
+        requiresAuth: true,
+        roles: ['STUDENT']
+      }
+    },
+    {
+      path: '/create-intership',
+      name: 'create-intership',
+      component: () => import('../views/StudentCreateIntershipView.vue'),
+      meta: { 
+        requiresAuth: true,
+        roles: ['STUDENT']
+      }
+    },
+    {
+      path: '/interships',
+      name: 'interships',
+      component: () => import('../views/StudentIntershipView.vue'),
       meta: { 
         requiresAuth: true,
         roles: ['STUDENT']
