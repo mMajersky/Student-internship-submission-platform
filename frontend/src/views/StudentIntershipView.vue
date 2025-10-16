@@ -2,13 +2,10 @@
    <div class="container">
      <header class="header">
        <div class="logo">
-         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-xmlns="http://www.w3.org/2000/svg">
-           <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="#2563eb"
-stroke-width="2" stroke-linejoin="round"/>
+         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+           <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="#2563eb" stroke-width="2" stroke-linejoin="round"/>
            <path d="M12 22V12" stroke="#2563eb" stroke-width="2"/>
-           <path d="M2 7L12 12L22 7" stroke="#2563eb" stroke-width="2"
-stroke-linejoin="round"/>
+           <path d="M2 7L12 12L22 7" stroke="#2563eb" stroke-width="2" stroke-linejoin="round"/>
          </svg>
          <span class="logo-text">Odborná prax</span>
        </div>
@@ -45,10 +42,8 @@ stroke-linejoin="round"/>
        <div class="section-header">
          <h2 class="section-title">Praxe</h2>
          <button @click="handleNovaPrax" class="btn btn-primary">
-           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-xmlns="http://www.w3.org/2000/svg">
-             <path d="M8 3V13M3 8H13" stroke="currentColor"
-stroke-width="2" stroke-linecap="round"/>
+           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+             <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
            </svg>
            Nová prax
          </button>
@@ -71,20 +66,12 @@ stroke-width="2" stroke-linecap="round"/>
                <td>{{ prax.rok }} / {{ prax.semester }}</td>
                <td>{{ prax.termin }}</td>
                <td>
-                 <span
-                   class="status-badge"
-                   :class="`status-${prax.stav.toLowerCase()}`"
-                 >
+                 <span class="status-badge" :class="`status-${prax.stav.toLowerCase()}`">
                    {{ prax.stav }}
                  </span>
                </td>
                <td class="td-actions">
-                 <button
-                   @click="handleDokumenty(prax)"
-                   class="btn btn-outline"
-                 >
-                   Dokumenty
-                 </button>
+                 <button @click="handleDokumenty(prax)" class="btn btn-outline">Dokumenty</button>
                </td>
              </tr>
            </tbody>
@@ -100,6 +87,9 @@ stroke-width="2" stroke-linecap="round"/>
 
 <script setup>
 import { ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const stats = reactive({
    aktivne: 1,
@@ -127,13 +117,11 @@ const praxe = ref([
 ]);
 
 const handleNovaPrax = () => {
-   console.log('Vytvoriť novú prax');
-   // Tu by bolo presmerovanie na stránku s formulárom
+   router.push('/create-intership');
 };
 
 const handleDokumenty = (prax) => {
    console.log('Otvoriť dokumenty pre prax:', prax);
-   // Tu by bolo presmerovanie na dokumenty
 };
 </script>
 
@@ -148,8 +136,7 @@ const handleDokumenty = (prax) => {
    min-height: 100vh;
    display: flex;
    flex-direction: column;
-   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-'Helvetica Neue', Arial, sans-serif;
+   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
    color: #1f2937;
    background-color: #f9fafb;
 }
