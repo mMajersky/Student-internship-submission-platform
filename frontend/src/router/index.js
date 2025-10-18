@@ -2,8 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
-import StudentCreateIntershipView from '../views/StudentCreateIntershipView.vue'
-import StudentIntershipView from '../views/StudentIntershipView.vue'
+// Importy sú v poriadku, môžeme ich nechať
 const LandingView = () => import('../views/LandingView.vue')
 
 const router = createRouter({
@@ -29,7 +28,6 @@ const router = createRouter({
         roles: ['ADMIN', 'GARANT']
       }
     },
-    // Future routes with role-based access
     {
       path: '/student-dashboard',
       name: 'student-dashboard',
@@ -40,8 +38,9 @@ const router = createRouter({
       }
     },
     {
-      path: '/create-intership',
-      name: 'create-intership',
+      // --- OPRAVENÉ TU ---
+      path: '/create-internship', // Pridané písmeno 'n'
+      name: 'create-internship',
       component: () => import('../views/StudentCreateIntershipView.vue'),
       meta: { 
         requiresAuth: true,
@@ -49,8 +48,9 @@ const router = createRouter({
       }
     },
     {
-      path: '/interships',
-      name: 'interships',
+      // --- OPRAVENÉ AJ TU ---
+      path: '/internships', // Pridané písmeno 'n'
+      name: 'internships',
       component: () => import('../views/StudentIntershipView.vue'),
       meta: { 
         requiresAuth: true,
@@ -83,10 +83,10 @@ const router = createRouter({
   ]
 })
 
+// Váš beforeEach guard je v poriadku, nie je potrebné ho meniť
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  // Initialize auth store if not already done
   if (!authStore.isAuthenticated && authStore.token) {
     await authStore.fetchUser()
   }
@@ -95,15 +95,12 @@ router.beforeEach(async (to, from, next) => {
   const allowedRoles = to.meta.roles || []
   const isGuestRoute = to.matched.some(record => record.meta.guest)
 
-  // Check if user is authenticated
   if (requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login' })
     return
   }
 
-  // Check if authenticated user is trying to access guest routes
   if (isGuestRoute && authStore.isAuthenticated) {
-    // Redirect to appropriate dashboard based on role
     if (authStore.isAdmin || authStore.isGarant) {
       next({ name: 'dashboard' })
     } else if (authStore.isStudent) {
@@ -116,7 +113,6 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  // Check role-based access
   if (requiresAuth && allowedRoles.length > 0) {
     if (!authStore.hasAnyRole(allowedRoles)) {
       next({ name: 'unauthorized' })

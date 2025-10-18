@@ -1,155 +1,131 @@
 <template>
-   <div class="container">
-     <header class="header">
-       <div class="logo">
-         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-xmlns="http://www.w3.org/2000/svg">
-           <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="#2563eb"
-stroke-width="2" stroke-linejoin="round"/>
-           <path d="M12 22V12" stroke="#2563eb" stroke-width="2"/>
-           <path d="M2 7L12 12L22 7" stroke="#2563eb" stroke-width="2"
-stroke-linejoin="round"/>
-         </svg>
-         <span class="logo-text">Odborná prax</span>
-       </div>
-       <nav class="nav">
-         <a href="#" class="nav-link">Prehľad</a>
-         <a href="#" class="nav-link">Moje praxe</a>
-         <a href="#" class="nav-link active">Nová prax</a>
-         <a href="#" class="nav-link">Dokumenty</a>
-       </nav>
-       <div class="user-section">
-         <span class="badge">Študent</span>
-         <button class="btn-link">Nastavenia</button>
-         <button class="btn-link">Odhlásiť</button>
-       </div>
-     </header>
+  <div class="container">
+    <main class="main">
+      <h1 class="title">Nová prax</h1>
 
-     <main class="main">
-       <h1 class="title">Nová prax</h1>
+      <form @submit.prevent="handleSubmit" class="form">
+        <div class="form-group">
+          <label for="firma" class="label">Firma<span class="required">*</span></label>
+          <input id="firma" v-model="formData.firma" type="text" placeholder="Zadajte názov firmy" class="input" required />
+        </div>
 
-       <form @submit.prevent="handleSubmit" class="form">
-         <div class="form-group">
-           <label for="firma" class="label">
-             Firma<span class="required">*</span>
-           </label>
-           <input
-             id="firma"
-             v-model="formData.firma"
-             type="text"
-             placeholder="Zadajte názov firmy"
-             class="input"
-             required
-           />
-         </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rok" class="label">Rok<span class="required">*</span></label>
+            <input id="rok" v-model="formData.rok" type="number" class="input" required />
+          </div>
 
-         <div class="form-row">
-           <div class="form-group">
-             <label for="rok" class="label">
-               Rok<span class="required">*</span>
-             </label>
-             <input
-               id="rok"
-               v-model="formData.rok"
-               type="number"
-               class="input"
-               required
-             />
-           </div>
+          <div class="form-group">
+            <label for="semester" class="label">Semester<span class="required">*</span></label>
+            <select id="semester" v-model="formData.semester" class="input" required>
+              <option value="LS">LS</option>
+              <option value="ZS">ZS</option>
+            </select>
+          </div>
 
-           <div class="form-group">
-             <label for="semester" class="label">
-               Semester<span class="required">*</span>
-             </label>
-             <select
-               id="semester"
-               v-model="formData.semester"
-               class="input"
-               required
-             >
-               <option value="LS">LS</option>
-               <option value="ZS">ZS</option>
-             </select>
-           </div>
+          <div class="form-group">
+            <label for="datumZaciatku" class="label">Dátum začiatku<span class="required">*</span></label>
+            <input id="datumZaciatku" v-model="formData.datumZaciatku" type="date" class="input" required />
+          </div>
 
-           <div class="form-group">
-             <label for="datumZaciatku" class="label">
-               Dátum začiatku<span class="required">*</span>
-             </label>
-             <input
-               id="datumZaciatku"
-               v-model="formData.datumZaciatku"
-               type="date"
-               class="input"
-               required
-             />
-           </div>
+          <div class="form-group">
+            <label for="datumKonca" class="label">Dátum konca<span class="required">*</span></label>
+            <input id="datumKonca" v-model="formData.datumKonca" type="date" class="input" required />
+          </div>
+        </div>
 
-           <div class="form-group">
-             <label for="datumKonca" class="label">
-               Dátum konca<span class="required">*</span>
-             </label>
-             <input
-               id="datumKonca"
-               v-model="formData.datumKonca"
-               type="date"
-               class="input"
-               required
-             />
-           </div>
-         </div>
+        <div class="form-actions">
+          <button type="button" @click="handleCancel" class="btn btn-secondary">Zrušiť</button>
+          <button type="submit" class="btn btn-primary">Vytvoriť prax</button>
+        </div>
 
-         <div class="form-actions">
-           <button type="button" @click="handleCancel" class="btn
-btn-secondary">
-             Zrušiť
-           </button>
-           <button type="submit" class="btn btn-primary">
-             Vytvoriť prax
-           </button>
-         </div>
+        <div class="info-box">
+          Po vytvorení praxe systém vygeneruje PDF „Dohoda o odbornej praxi“. Stav bude <strong>Vytvorená</strong>.
+        </div>
+      </form>
+    </main>
 
-         <div class="info-box">
-           Po vytvorení praxe systém vygeneruje PDF „Dohoda o odbornej
-praxi". Stav bude <strong>Vytvorená</strong>.
-         </div>
-       </form>
-     </main>
-
-     <footer class="footer">
-       © 2025 Odborná prax CRM
-     </footer>
-   </div>
+    <footer class="footer">
+      © 2025 Odborná prax CRM
+    </footer>
+  </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { reactive } from 'vue';
+import { useRouter } from 'vue-router';
+// 1. Importujte váš Pinia auth store
+import { useAuthStore } from '../stores/auth';
+
+const router = useRouter();
+// 2. Vytvorte inštanciu store
+const authStore = useAuthStore();
 
 const formData = reactive({
-   firma: '',
-   rok: 2025,
-   semester: 'LS',
-   datumZaciatku: '',
-   datumKonca: ''
+  firma: '',
+  rok: new Date().getFullYear(),
+  semester: 'LS',
+  datumZaciatku: '',
+  datumKonca: ''
 });
 
-const handleSubmit = () => {
-   console.log('Formulár odoslaný:', formData);
-   alert('Prax bola vytvorená!');
-   // Tu by ste normálne odoslali dáta na server
+const handleSubmit = async () => {
+  // 3. Získajte token priamo z auth storu
+  const token = authStore.token;
+
+  // 4. Skontrolujte, či token vôbec existuje
+  if (!token) {
+    alert('Chyba: Neboli nájdené prihlasovacie údaje. Prosím, prihláste sa znova.');
+    router.push('/login');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/api/internships', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        // 5. Priložte token do hlavičky Authorization
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Špecifická chyba pre 401
+      if (response.status === 401) {
+        throw new Error(data.message || 'Neoprávnený prístup. Vaše prihlásenie mohlo vypršať.');
+      }
+      // Validačné chyby
+      if (response.status === 422) {
+          const errors = Object.values(data.errors).flat().join('\n');
+          throw new Error(`Chyba validácie:\n${errors}`);
+      }
+      throw new Error(data.message || 'Nepodarilo sa vytvoriť prax.');
+    }
+
+    alert(data.message || 'Prax bola úspešne vytvorená!');
+    router.push('/internships');
+
+  } catch (error) {
+    console.error('Chyba:', error);
+    alert(error.message); // Zobrazíme presnú chybovú hlášku používateľovi
+  }
 };
 
 const handleCancel = () => {
-   if (confirm('Naozaj chcete zrušiť vytvorenie praxe?')) {
-     // Reset formulára alebo presmerovanie
-     Object.assign(formData, {
-       firma: '',
-       rok: 2025,
-       semester: 'LS',
-       datumZaciatku: '',
-       datumKonca: ''
-     });
-   }
+  if (confirm('Naozaj chcete zrušiť vytvorenie praxe?')) {
+    Object.assign(formData, {
+      firma: '',
+      rok: new Date().getFullYear(),
+      semester: 'LS',
+      datumZaciatku: '',
+      datumKonca: ''
+    });
+  }
 };
 </script>
 

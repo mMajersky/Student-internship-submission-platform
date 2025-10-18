@@ -5,10 +5,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\InternshipPdfController;
+use App\Http\Controllers\InternshipController;
+
 
 // PDF generation routes from feature/Generate_PDF_template
 Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
-Route::get('/vykaz-generate-empty', [InternshipPdfController::class, 'generateEmpty']);
 
 // User retrieval route from develop
 Route::get('/user', function (Request $request) {
@@ -51,4 +52,9 @@ Route::middleware(['auth:api', 'role:COMPANY'])->group(function () {
 // Admin-only routes from develop
 Route::middleware(['auth:api', 'role:ADMIN'])->group(function () {
     // Future admin-only routes
+});
+// Routy prístupné iba pre prihláseného študenta
+Route::middleware(['auth:api', 'role:STUDENT'])->group(function () {
+    Route::get('/internships', [InternshipController::class, 'index']);
+    Route::post('/internships', [InternshipController::class, 'store']);
 });
