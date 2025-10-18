@@ -24,7 +24,7 @@ const router = createRouter({
       component: DashboardView,
       meta: { 
         requiresAuth: true,
-        roles: ['ADMIN', 'GARANT']
+        roles: ['admin', 'garant']
       }
     },
     // Future routes with role-based access
@@ -34,7 +34,7 @@ const router = createRouter({
       component: () => import('../views/StudentDashboardView.vue'),
       meta: { 
         requiresAuth: true,
-        roles: ['STUDENT']
+        roles: ['student']
       }
     },
     {
@@ -43,7 +43,7 @@ const router = createRouter({
       component: () => import('../views/CompanyDashboardView.vue'),
       meta: { 
         requiresAuth: true,
-        roles: ['COMPANY']
+        roles: ['company']
       }
     },
     {
@@ -52,7 +52,7 @@ const router = createRouter({
       component: () => import('../views/AdminPanelView.vue'),
       meta: { 
         requiresAuth: true,
-        roles: ['ADMIN']
+        roles: ['admin']
       }
     },
     {

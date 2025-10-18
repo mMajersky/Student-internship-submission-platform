@@ -17,11 +17,10 @@ return new class extends Migration
             $table->string('surname')->nullable();
             $table->string('role', 50);
             $table->string('password');
-            $table->string('email', 100)->unique('email');
+            $table->string('email', 100)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('remember_token')->nullable();
-            $table->dateTime('created_at')->nullable()->useCurrent();
-            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
+            $table->timestamps();
         });
     }
 

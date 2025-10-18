@@ -12,18 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('internships', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->integer('student_id')->index('internships_student_idx');
-            $table->integer('company_id')->index('internships_company_idx');
-            $table->integer('garant_id')->nullable()->index('internships_garant_idx');
+            $table->increments('id');
+            $table->integer('student_id');
+            $table->integer('company_id');
+            $table->integer('garant_id')->nullable();
             $table->string('status', 50);
             $table->string('academy_year', 9);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->date('confirmed_date')->nullable();
             $table->date('approved_date')->nullable();
-            $table->dateTime('created_at')->nullable()->useCurrent();
-            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
+            $table->timestamps();
+
+            $table->foreign('student_id')->references('id')->on('students')->onDelete('restrict');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('restrict');
+            $table->foreign('garant_id')->references('id')->on('garants')->onDelete('set null');
         });
     }
 

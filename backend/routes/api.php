@@ -8,20 +8,18 @@ use App\Http\Controllers\InternshipPdfController;
 
 // PDF generation routes from feature/Generate_PDF_template
 Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
-Route::get('/vykaz-generate-empty', [InternshipPdfController::class, 'generateEmpty']);
 
 // User retrieval route from develop
 Route::get('/user', function (Request $request) {
     $user = $request->user();
-    $user->load('role');
 
     return response()->json([
         'id' => $user->id,
         'name' => $user->name,
         'email' => $user->email,
-        'role' => $user->role ? $user->role->name : null,
-        'role_display_name' => $user->role ? $user->role->display_name : null,
-        'permissions' => $user->role ? $user->role->permissions : []
+        'role' => $user->role, // Direct string field
+        'role_display_name' => ucfirst($user->role ?? ''),
+        'permissions' => [] // TODO: Implement permissions based on role string
     ]);
 })->middleware('auth:api');
 
@@ -30,7 +28,7 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 
 // Public announcements endpoint from develop
-//Route::get('/announcements/published', [AnnouncementController::class, 'published']); //dava error 500, table announcements sa pouzivat pravdepodbne nebude
+Route::get('/announcements/published', [AnnouncementController::class, 'published']);
 
 // Protected routes for Admin/Garant
 Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {

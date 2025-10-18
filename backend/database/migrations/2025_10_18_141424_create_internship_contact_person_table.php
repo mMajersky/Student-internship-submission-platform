@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('internship_contact_person', function (Blueprint $table) {
             $table->integer('internship_id');
-            $table->integer('contact_person_id')->index('icp_contact_fk');
+            $table->integer('contact_person_id');
 
             $table->primary(['internship_id', 'contact_person_id']);
+            $table->foreign('internship_id')->references('id')->on('internships')->onDelete('cascade');
+            $table->foreign('contact_person_id')->references('id')->on('contact_persons')->onDelete('cascade');
         });
     }
 
