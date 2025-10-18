@@ -9,7 +9,6 @@ class ContactPerson extends Model
 {
     use HasFactory;
 
-    // Tu opravíme názov tabuľky
     protected $table = 'contact_persons';
 
     protected $fillable = [
@@ -21,8 +20,30 @@ class ContactPerson extends Model
         'company_id',
     ];
 
+    /**
+     * Kontakt patrí jednej firme
+     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
     }
+
+    /**
+     * Kontakt môže byť priradený k viacerým stážam (N:N)
+     */
+    public function internships()
+    {
+        return $this->belongsToMany(
+            Internship::class,
+            'contact_person_internships', // názov pivot tabuľky
+            'contact_person_id',          // FK na contact_persons
+            'internship_id'               // FK na internships
+        );
+    }
+
+    public function getFullNameAttribute()
+    {
+        return "{$this->name} {$this->surname}";
+    }
+
 }

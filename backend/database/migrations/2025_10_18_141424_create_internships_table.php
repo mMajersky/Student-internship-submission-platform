@@ -13,20 +13,17 @@ return new class extends Migration
     {
         Schema::create('internships', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('student_id')->index('internships_student_fk');
-            $table->integer('company_id')->index('internships_company_fk');
-            $table->integer('garant_id')->nullable()->index('internships_garant_fk');
+            $table->integer('student_id')->index('internships_student_idx');
+            $table->integer('company_id')->index('internships_company_idx');
+            $table->integer('garant_id')->nullable()->index('internships_garant_idx');
             $table->string('status', 50);
+            $table->string('academy_year', 9);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->date('confirmed_date')->nullable();
             $table->date('approved_date')->nullable();
             $table->dateTime('created_at')->nullable()->useCurrent();
             $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
-            
-            $table->foreign(['company_id'], 'internships_company_FK')->references(['id'])->on('companies')->onUpdate('restrict')->onDelete('restrict');
-            $table->foreign(['garant_id'], 'internships_garant_FK')->references(['id'])->on('garants')->onUpdate('cascade')->onDelete('set null');
-            $table->foreign(['student_id'], 'internships_student_FK')->references(['id'])->on('students')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 

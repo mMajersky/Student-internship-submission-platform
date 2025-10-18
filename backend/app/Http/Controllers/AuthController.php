@@ -20,10 +20,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             /** @var User $user */
             $user = Auth::user();
-            
-            // Load role relationship
-            $user->load('role');
-            
+
             $token = $user->createToken('authToken')->accessToken;
 
             return response()->json([
@@ -32,9 +29,9 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->role ? $user->role->name : null,
-                    'role_display_name' => $user->role ? $user->role->display_name : null,
-                    'permissions' => $user->role ? $user->role->permissions : []
+                    'role' => $user->role, // priamo string z DB
+                    'role_display_name' => ucfirst($user->role), // napr. 'Admin'
+                    'permissions' => $this->getPermissionsForRole($user->role)
                 ]
             ]);
         }
@@ -43,7 +40,17 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle user registration.
+     * Optionálne – jednoduché mapovanie rolí na povolenia
      */
-  
+    private function getPermissionsForRole(string $role): array
+    {
+        $permissions = [
+            'admin' => ['manage_users', 'manage_internships', 'manage_announcements'],
+            'garant' => ['manage_internships', 'manage_announcements'],
+            'company' => ['review_interns'],
+            'student' => ['create_internships'],
+        ];
+
+        return $permissions[$role] ?? [];
+    }
 }

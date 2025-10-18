@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('surname', 100);
             $table->string('faculty', 100)->nullable();
-            $table->integer('user_id')->nullable()->index('garants_user_fk');
-            
-            $table->foreign(['user_id'], 'garants_user_FK')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id')->nullable()->index('garants_user_idx');
+            $table->dateTime('created_at')->nullable()->useCurrent();
+            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });
     }
 
