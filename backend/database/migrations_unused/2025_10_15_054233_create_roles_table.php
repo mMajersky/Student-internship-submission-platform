@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name', 50)->unique();
-            $table->string('display_name', 100);
-            $table->text('description')->nullable();
-            $table->json('permissions')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->id();
+            $table->string('name', 50)->unique(); // ADMIN, GARANT, COMPANY, STUDENT, ANONYMOUS
+            $table->string('display_name', 100); // Human readable name
+            $table->text('description')->nullable(); // Role description
+            $table->json('permissions')->nullable(); // Future granular permissions
+            $table->boolean('is_active')->default(true); // Enable/disable roles
             $table->timestamps();
         });
     }

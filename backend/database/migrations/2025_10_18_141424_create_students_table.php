@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('students', function (Blueprint $table) {
-            $table->increments('id');
+            $table->integer('id', true);
             $table->string('name', 100);
             $table->string('surname', 100);
             $table->string('student_email', 100);
             $table->string('alternative_email', 100)->nullable();
             $table->string('phone_number', 20)->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable()->index('students_user_idx');
             $table->string('study_level', 50);
             $table->string('state', 100)->nullable();
             $table->string('region', 100)->nullable();
@@ -26,10 +26,10 @@ return new class extends Migration
             $table->string('postal_code', 20)->nullable();
             $table->string('street', 100)->nullable();
             $table->string('house_number', 20)->nullable();
-            $table->timestamps();
+            $table->dateTime('created_at')->nullable()->useCurrent();
+            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
 
             $table->unique(['student_email', 'alternative_email', 'phone_number'], 'students_unique');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

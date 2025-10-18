@@ -40,43 +40,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle user registration
-     */
-    public function register(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:admin,garant,student,company',
-        ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'surname' => $validated['surname'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-        ]);
-
-        $token = $user->createToken('authToken')->accessToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'surname' => $user->surname,
-                'email' => $user->email,
-                'role' => $user->role,
-                'role_display_name' => ucfirst($user->role),
-                'permissions' => $this->getPermissionsForRole($user->role)
-            ]
-        ], 201);
-    }
-
-    /**
      * Optionálne – jednoduché mapovanie rolí na povolenia
      */
     private function getPermissionsForRole(string $role): array

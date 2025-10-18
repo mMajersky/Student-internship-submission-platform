@@ -12,18 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('companies', function (Blueprint $table) {
-            $table->increments('id');
+            $table->integer('id', true);
             $table->string('name', 100);
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable()->index('companies_user_idx');
             $table->string('state', 100)->nullable();
             $table->string('region', 100)->nullable();
             $table->string('city', 100)->nullable();
             $table->string('postal_code', 20)->nullable();
             $table->string('street', 100)->nullable();
             $table->string('house_number', 20)->nullable();
-            $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->dateTime('created_at')->nullable()->useCurrent();
+            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });
     }
 

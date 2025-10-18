@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('internship_contact_person', function (Blueprint $table) {
-            $table->integer('internship_id');
-            $table->integer('contact_person_id')->index('icp_contact_fk');
-
-            $table->primary(['internship_id', 'contact_person_id']);
+        Schema::table('documents', function (Blueprint $table) {
+            $table->foreign(['internship_id'], 'documents_internship_FK')->references(['id'])->on('internships')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('internship_contact_person');
+        Schema::table('documents', function (Blueprint $table) {
+            $table->dropForeign('documents_internship_FK');
+        });
     }
 };

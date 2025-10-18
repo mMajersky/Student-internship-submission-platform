@@ -15,7 +15,6 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'surname',
         'email',
         'password',
         'role',
@@ -89,13 +88,5 @@ class User extends Authenticatable
     public function canCreateInternships(): bool
     {
         return $this->hasRole('student');
-    }
-
-    /**
-     * Get the student associated with this user
-     */
-    public function student()
-    {
-        return $this->hasOne(Student::class, 'user_id');
     }
 }
