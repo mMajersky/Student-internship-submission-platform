@@ -10,17 +10,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Getters
   const isAuthenticated = computed(() => !!token.value && !!user.value)
-  const userRole = computed(() => user.value?.role || null)
+  const userRole = computed(() => user.value?.role?.toLowerCase?.() || null) // normalize role
   const userPermissions = computed(() => user.value?.permissions || [])
-  const userDisplayName = computed(() => user.value?.name || '')
+  const userDisplayName = computed(() => user.value?.role_display_name || user.value?.name || '')
   const userEmail = computed(() => user.value?.email || '')
 
   // Role-based computed properties
-  const isAdmin = computed(() => userRole.value === 'ADMIN')
-  const isGarant = computed(() => userRole.value === 'GARANT')
-  const isCompany = computed(() => userRole.value === 'COMPANY')
-  const isStudent = computed(() => userRole.value === 'STUDENT')
-  const isAnonymous = computed(() => userRole.value === 'ANONYMOUS' || !isAuthenticated.value)
+  const isAdmin = computed(() => userRole.value === 'admin')
+  const isGarant = computed(() => userRole.value === 'garant')
+  const isCompany = computed(() => userRole.value === 'company')
+  const isStudent = computed(() => userRole.value === 'student')
+  const isAnonymous = computed(() => !isAuthenticated.value || userRole.value === 'anonymous')
 
   // Permission-based computed properties
   const canManageAnnouncements = computed(() => 

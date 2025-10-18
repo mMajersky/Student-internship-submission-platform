@@ -19,18 +19,16 @@ class Company extends Model
 
     protected $fillable = [
         'name',
-        'statutary',
-        'address_id',
+//        'statutary',  //este nevieme ci tu bude, MM
         'user_id',
+        'state',
+        'region',
+        'city',
+        'postal_code',
+        'street',
+        'house_number',
     ];
 
-    /**
-     * Vzťah: firma patrí k adrese
-     */
-    public function address()
-    {
-        return $this->belongsTo(Address::class);
-    }
 
     /**
      * Vzťah: firma patrí používateľovi
@@ -41,7 +39,7 @@ class Company extends Model
     }
 
     /**
-     * Vzťah: firma má viac kontakt­ných osôb
+     * Vzťah: firma má viac kontaktných osôb
      */
     public function contactPersons()
     {

@@ -97,12 +97,16 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Check role-based access
-  if (requiresAuth && allowedRoles.length > 0) {
-    if (!authStore.hasAnyRole(allowedRoles)) {
-      next({ name: 'unauthorized' })
-      return
-    }
+if (requiresAuth && allowedRoles.length > 0) {
+  const normalizedRoles = allowedRoles.map(r => r.toLowerCase())
+  const userRole = authStore.userRole?.toLowerCase()
+
+  if (!normalizedRoles.includes(userRole)) {
+    next({ name: 'unauthorized' })
+    return
   }
+}
+
 
   next()
 })
