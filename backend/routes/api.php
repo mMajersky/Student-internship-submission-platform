@@ -9,6 +9,7 @@ use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CompanyController;
 
+
 // PDF generation routes from feature/Generate_PDF_template
 Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
 Route::get('/vykaz-generate-empty', [InternshipPdfController::class, 'generateEmpty']);

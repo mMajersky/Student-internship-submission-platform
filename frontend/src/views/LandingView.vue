@@ -2,6 +2,7 @@
 import NotificationBar from '@/components/landing/NotificationBar.vue'
 import InfoCardsSection from '@/components/landing/InfoCardsSection.vue'
 import TheFooter from '@/components/landing/TheFooter.vue'
+import AboutInternship from '@/components/landing/AboutInternship.vue'
 </script>
 
 <template>
@@ -16,14 +17,21 @@ import TheFooter from '@/components/landing/TheFooter.vue'
             <p class="lead text-muted mb-4">
               Lorem ipsum dolor sit amet consectetur. Blandit felis sed feugiat sapien imperdiet quam suspendisse enim nec.
             </p>
-            <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
-              <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-center">
-                <i class="bi bi-person-plus me-2"></i> Registrovať študenta
-              </button>
-              <button class="btn btn-outline-primary btn-lg d-flex align-items-center justify-content-center">
-                <i class="bi bi-building me-2"></i> Registrovať firmu
-              </button>
-            </div>
+              <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
+                <router-link
+                  :to="{ name: 'register', state: { role: 'student' } }"
+                  class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
+                >
+                  <i class="bi bi-person-plus me-2"></i> Registrovať študenta
+                </router-link>
+
+                <router-link
+                  :to="{ name: 'register', state: { role: 'company' } }"
+                  class="btn btn-outline-primary btn-lg d-flex align-items-center justify-content-center"
+                >
+                  <i class="bi bi-building me-2"></i> Registrovať firmu
+                </router-link>
+              </div>
             <p class="text-muted small">
               Alebo sa <router-link to="/login" class="text-primary text-decoration-none fw-medium">prihláste</router-link> do existujúceho účtu.
             </p>
@@ -35,18 +43,10 @@ import TheFooter from '@/components/landing/TheFooter.vue'
       </div>
     </section>
 
-    <section class="py-5 bg-white">
-      <div class="container px-4">
-        <div class="row justify-content-center">
-          <div class="col-lg-8 text-center">
-            <h2 class="display-6 fw-bold text-dark mb-4">Čo je to odborná prax?</h2>
-            <p class="text-muted">
-              Lorem ipsum dolor sit amet consectetur. Gravida neque lobortis fermentum neque amet. Volutpat augue gravida vel.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
+
+    <AboutInternship />
+
+
     
     <!-- Info Cards Section -->
     <InfoCardsSection />
