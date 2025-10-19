@@ -13,6 +13,12 @@ const router = createRouter({
       component: LandingView,
     },
     {
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/RegisterView.vue'),
+      meta: { guest: true }
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginView,

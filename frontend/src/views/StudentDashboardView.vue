@@ -70,7 +70,7 @@
             </h5>
           </div>
           <div class="card-body">
-            <p><strong>Rola:</strong> {{ authStore.userRole }}</strong></p>
+            <p><strong>Rola:</strong> {{ authStore.userRole }}</p>
             <p><strong>Meno:</strong> {{ authStore.userDisplayName }}</p>
             <p><strong>Email:</strong> {{ authStore.userEmail }}</p>
             <p><strong>Oprávnenia:</strong></p>
