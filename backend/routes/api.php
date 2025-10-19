@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\InternshipPdfController;
+use App\Http\Controllers\InternshipController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\CompanyController;
 
 // PDF generation routes from feature/Generate_PDF_template
 Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
@@ -35,6 +38,21 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 // Protected routes for Admin/Garant
 Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::match(['GET', 'PUT'], '/announcement', [AnnouncementController::class, 'single']);
+    
+    // Internship management routes
+    Route::get('/internships', [InternshipController::class, 'index']);
+    Route::post('/internships', [InternshipController::class, 'store']);
+    Route::get('/internships/{id}', [InternshipController::class, 'show']);
+    Route::put('/internships/{id}', [InternshipController::class, 'update']);
+    Route::delete('/internships/{id}', [InternshipController::class, 'destroy']);
+    
+    // Student routes - for dropdown selection
+    Route::get('/students', [StudentController::class, 'index']);
+    Route::get('/students/{id}', [StudentController::class, 'show']);
+    
+    // Company routes - for dropdown selection
+    Route::get('/companies', [CompanyController::class, 'index']);
+    Route::get('/companies/{id}', [CompanyController::class, 'show']);
 });
 
 // Student routes

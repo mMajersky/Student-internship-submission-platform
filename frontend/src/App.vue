@@ -20,6 +20,11 @@
             <li class="nav-item" v-if="authStore.isAuthenticated && authStore.canManageAnnouncements">
               <router-link to="/dashboard" class="nav-link" :class="{ active: $route.path === '/dashboard' }">Dashboard</router-link>
             </li>
+            <li class="nav-item" v-if="authStore.isAuthenticated && authStore.isGarant">
+              <router-link to="/garant-dashboard" class="nav-link" :class="{ active: $route.path === '/garant-dashboard' }">
+                Správa Praxe
+              </router-link>
+            </li>
           </ul>
 
           <ul class="navbar-nav">
