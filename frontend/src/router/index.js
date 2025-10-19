@@ -47,6 +47,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/garant-dashboard',
+      name: 'garant-dashboard',
+      component: () => import('../views/GarantDashboardView.vue'),
+      meta: { 
+        requiresAuth: true,
+        roles: ['GARANT']
+      }
+    },
+    {
       path: '/admin-panel',
       name: 'admin-panel',
       component: () => import('../views/AdminPanelView.vue'),
