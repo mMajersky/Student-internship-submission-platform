@@ -203,4 +203,131 @@ class AnnouncementTest extends TestCase
         $this->assertStringNotContainsString('<script>', $announcement->content_sanitized);
         $this->assertStringContainsString('<p>Safe content</p>', $announcement->content_sanitized);
     }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function published_endpoint_returns_only_published_announcements()
+    {
+        // Create unpublished announcement
+        Announcement::create([
+            'content' => '<p>Unpublished content</p>',
+            'is_published' => false,
+            'created_by' => $this->adminUser->id,
+            'updated_by' => $this->adminUser->id,
+        ]);
+
+        // Create published announcement
+        $published = Announcement::create([
+            'content' => '<p>Published content</p>',
+            'is_published' => true,
+            'created_by' => $this->adminUser->id,
+            'updated_by' => $this->adminUser->id,
+        ]);
+
+        $response = $this->getJson('/api/announcements/published');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'content_sanitized',
+                'updated_at',
+            ]);
+
+        // Should return the published content
+        $this->assertStringContainsString('Published content', $response->json('content_sanitized'));
+        $this->assertStringNotContainsString('Unpublished content', $response->json('content_sanitized') ?? '');
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function published_endpoint_returns_most_recent_announcement()
+    {
+        // Create older published announcement
+        $older = Announcement::create([
+            'content' => '<p>Older announcement</p>',
+            'is_published' => true,
+            'created_by' => $this->adminUser->id,
+            'updated_by' => $this->adminUser->id,
+        ]);
+
+        sleep(1); // Ensure different timestamps
+
+        // Create newer published announcement
+        $newer = Announcement::create([
+            'content' => '<p>Newer announcement</p>',
+            'is_published' => true,
+            'created_by' => $this->adminUser->id,
+            'updated_by' => $this->adminUser->id,
+        ]);
+
+        $response = $this->getJson('/api/announcements/published');
+
+        $response->assertStatus(200);
+
+        // Should return the newer content
+        $this->assertStringContainsString('Newer announcement', $response->json('content_sanitized'));
+        $this->assertStringNotContainsString('Older announcement', $response->json('content_sanitized') ?? '');
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function published_endpoint_returns_null_when_no_published_announcements()
+    {
+        // Create only unpublished announcement
+        Announcement::create([
+            'content' => '<p>Unpublished content</p>',
+            'is_published' => false,
+            'created_by' => $this->adminUser->id,
+            'updated_by' => $this->adminUser->id,
+        ]);
+
+        $response = $this->getJson('/api/announcements/published');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'content_sanitized' => null,
+                'updated_at' => null,
+            ]);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function published_endpoint_is_accessible_without_authentication()
+    {
+        $published = Announcement::create([
+            'content' => '<p>Public announcement</p>',
+            'is_published' => true,
+            'created_by' => $this->adminUser->id,
+            'updated_by' => $this->adminUser->id,
+        ]);
+
+        // Test without authentication
+        $response = $this->getJson('/api/announcements/published');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'content_sanitized',
+                'updated_at',
+            ]);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function announcement_can_be_unpublished()
+    {
+        $announcement = Announcement::create([
+            'content' => '<p>Test announcement</p>',
+            'is_published' => true,
+            'created_by' => $this->adminUser->id,
+            'updated_by' => $this->adminUser->id,
+        ]);
+
+        $response = $this->actingAs($this->adminUser, 'api')
+            ->putJson('/api/announcement', [
+                'content' => '<p>Updated announcement</p>',
+                'is_published' => false,
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'is_published' => false,
+            ]);
+
+        $announcement->refresh();
+        $this->assertFalse($announcement->is_published);
+    }
 }

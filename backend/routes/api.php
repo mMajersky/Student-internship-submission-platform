@@ -7,11 +7,21 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\InternshipPdfController;
 
 // PDF generation routes from feature/Generate_PDF_template
-Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
+// Protected endpoint - requires authentication
+Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate'])
+    ->middleware('auth:api');
 
 // User retrieval route from develop
 Route::get('/user', function (Request $request) {
     $user = $request->user();
+
+    // Get permissions based on role
+    $permissions = [
+        'admin' => ['manage_users', 'manage_internships', 'manage_announcements'],
+        'garant' => ['manage_internships', 'manage_announcements'],
+        'company' => ['review_interns'],
+        'student' => ['create_internships'],
+    ];
 
     return response()->json([
         'id' => $user->id,
@@ -19,13 +29,12 @@ Route::get('/user', function (Request $request) {
         'email' => $user->email,
         'role' => $user->role, // Direct string field
         'role_display_name' => ucfirst($user->role ?? ''),
-        'permissions' => [] // TODO: Implement permissions based on role string
+        'permissions' => $permissions[$user->role] ?? []
     ]);
 })->middleware('auth:api');
 
 // Auth routes from develop
 Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/register', [AuthController::class, 'register']);
 
 // Public announcements endpoint from develop
 Route::get('/announcements/published', [AnnouncementController::class, 'published']);

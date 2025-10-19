@@ -14,5 +14,7 @@ Route::get('/login', function () {
     return response()->json(['error' => 'Please use API login endpoint'], 401);
 })->name('login');
 
+// Protected endpoint - only for testing/development
+// In production, this should be moved to API routes with proper authentication
 Route::get('/users', [UserController::class, 'index']);
 

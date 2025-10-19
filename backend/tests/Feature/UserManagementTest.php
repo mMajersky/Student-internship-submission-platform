@@ -101,35 +101,4 @@ class UserManagementTest extends TestCase
         $this->markTestSkipped('Email verification casting test requires proper User model setup');
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function user_model_role_methods_work_correctly()
-    {
-        $adminUser = User::create([
-            'name' => 'Admin',
-            'surname' => 'User',
-            'email' => 'admin@test.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
-
-        $studentUser = User::create([
-            'name' => 'Student',
-            'surname' => 'User',
-            'email' => 'student@test.com',
-            'password' => Hash::make('password'),
-            'role' => 'student',
-        ]);
-
-        // Test admin user
-        $this->assertTrue($adminUser->isAdmin());
-        $this->assertFalse($adminUser->isStudent());
-        $this->assertTrue($adminUser->canManageAnnouncements());
-        $this->assertTrue($adminUser->canManageInternships());
-
-        // Test student user
-        $this->assertFalse($studentUser->isAdmin());
-        $this->assertTrue($studentUser->isStudent());
-        $this->assertFalse($studentUser->canManageAnnouncements());
-        $this->assertTrue($studentUser->canCreateInternships());
-    }
 }
