@@ -12,14 +12,8 @@ class Company extends Model
     // Ak sa tabuľka volá "companies", toto netreba odkomentovať
     // protected $table = 'companies';
 
-    protected $primaryKey = 'id';
-    public $incrementing = true;
-    protected $keyType = 'int';
-    public $timestamps = true;
-
     protected $fillable = [
         'name',
-//        'statutary',  //este nevieme ci tu bude, MM
         'user_id',
         'state',
         'region',

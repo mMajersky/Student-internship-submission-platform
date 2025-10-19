@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
@@ -15,19 +14,14 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get roles
-        $adminRole = Role::getByName(Role::ADMIN);
-        $garantRole = Role::getByName(Role::GARANT);
-        $studentRole = Role::getByName(Role::STUDENT);
-        $companyRole = Role::getByName(Role::COMPANY);
-
         // Create admin user if it doesn't exist
         User::firstOrCreate(
             ['email' => 'admin@test.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'Admin',
+                'surname' => 'User',
                 'password' => Hash::make('password123'),
-                'role_id' => $adminRole->id,
+                'role' => 'admin',
             ]
         );
 
@@ -35,9 +29,10 @@ class AdminUserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'garant@test.com'],
             [
-                'name' => 'Garant User',
+                'name' => 'Garant',
+                'surname' => 'User',
                 'password' => Hash::make('password123'),
-                'role_id' => $garantRole->id,
+                'role' => 'garant',
             ]
         );
 
@@ -45,9 +40,10 @@ class AdminUserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'student@test.com'],
             [
-                'name' => 'Student User',
+                'name' => 'Student',
+                'surname' => 'User',
                 'password' => Hash::make('password123'),
-                'role_id' => $studentRole->id,
+                'role' => 'student',
             ]
         );
 
@@ -55,9 +51,10 @@ class AdminUserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'company@test.com'],
             [
-                'name' => 'Company User',
+                'name' => 'Company',
+                'surname' => 'User',
                 'password' => Hash::make('password123'),
-                'role_id' => $companyRole->id,
+                'role' => 'company',
             ]
         );
 
@@ -65,36 +62,40 @@ class AdminUserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'admin2@test.com'],
             [
-                'name' => 'Admin User 2',
+                'name' => 'Admin',
+                'surname' => 'User 2',
                 'password' => Hash::make('password123'),
-                'role_id' => $adminRole->id,
+                'role' => 'admin',
             ]
         );
 
         User::firstOrCreate(
             ['email' => 'garant2@test.com'],
             [
-                'name' => 'Garant User 2',
+                'name' => 'Garant',
+                'surname' => 'User 2',
                 'password' => Hash::make('password123'),
-                'role_id' => $garantRole->id,
+                'role' => 'garant',
             ]
         );
 
         User::firstOrCreate(
             ['email' => 'company2@test.com'],
             [
-                'name' => 'Company User 2',
+                'name' => 'Company',
+                'surname' => 'User 2',
                 'password' => Hash::make('password123'),
-                'role_id' => $companyRole->id,
+                'role' => 'company',
             ]
         );
 
         User::firstOrCreate(
             ['email' => 'student2@test.com'],
             [
-                'name' => 'Student User 2',
+                'name' => 'Student',
+                'surname' => 'User 2',
                 'password' => Hash::make('password123'),
-                'role_id' => $studentRole->id,
+                'role' => 'student',
             ]
         );
     }

@@ -12,14 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('documents', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->integer('internship_id')->index('documents_internship_idx');
+            $table->increments('id');
+            $table->integer('internship_id');
             $table->string('type', 100);
             $table->string('status', 50)->nullable();
             $table->string('file_path')->nullable();
             $table->string('name', 100)->nullable();
-            $table->dateTime('created_at')->nullable()->useCurrent();
-            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
+            $table->timestamps();
+
+            $table->foreign('internship_id')->references('id')->on('internships')->onDelete('cascade');
         });
     }
 

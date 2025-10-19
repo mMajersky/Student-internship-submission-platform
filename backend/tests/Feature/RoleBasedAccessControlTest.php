@@ -6,7 +6,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
-use App\Models\Role;
 use Laravel\Passport\Passport;
 
 class RoleBasedAccessControlTest extends TestCase
@@ -22,84 +21,42 @@ class RoleBasedAccessControlTest extends TestCase
     {
         parent::setUp();
         
-        // Create roles
-        $this->seedRoles();
-        
-        // Create test users
+        // Create test users with string roles
         $this->createTestUsers();
-    }
-
-    private function seedRoles(): void
-    {
-        $roles = [
-            [
-                'name' => Role::ADMIN,
-                'display_name' => 'Administrator',
-                'description' => 'System administrator',
-                'permissions' => ['manage_users', 'manage_announcements'],
-                'is_active' => true,
-            ],
-            [
-                'name' => Role::GARANT,
-                'display_name' => 'Garant',
-                'description' => 'Academic supervisor',
-                'permissions' => ['manage_announcements'],
-                'is_active' => true,
-            ],
-            [
-                'name' => Role::COMPANY,
-                'display_name' => 'Company',
-                'description' => 'Company representative',
-                'permissions' => ['create_internships'],
-                'is_active' => true,
-            ],
-            [
-                'name' => Role::STUDENT,
-                'display_name' => 'Student',
-                'description' => 'Student user',
-                'permissions' => ['apply_internships'],
-                'is_active' => true,
-            ],
-        ];
-
-        foreach ($roles as $roleData) {
-            Role::create($roleData);
-        }
     }
 
     private function createTestUsers(): void
     {
-        $adminRole = Role::where('name', Role::ADMIN)->first();
-        $garantRole = Role::where('name', Role::GARANT)->first();
-        $companyRole = Role::where('name', Role::COMPANY)->first();
-        $studentRole = Role::where('name', Role::STUDENT)->first();
-
         $this->adminUser = User::create([
-            'name' => 'Admin User',
+            'name' => 'Admin',
+            'surname' => 'User',
             'email' => 'admin@test.com',
             'password' => bcrypt('password'),
-            'role_id' => $adminRole->id,
+            'role' => 'admin',
         ]);
 
         $this->garantUser = User::create([
-            'name' => 'Garant User',
+            'name' => 'Garant',
+            'surname' => 'User',
             'email' => 'garant@test.com',
             'password' => bcrypt('password'),
-            'role_id' => $garantRole->id,
+            'role' => 'garant',
         ]);
 
         $this->companyUser = User::create([
-            'name' => 'Company User',
+            'name' => 'Company',
+            'surname' => 'User',
             'email' => 'company@test.com',
             'password' => bcrypt('password'),
-            'role_id' => $companyRole->id,
+            'role' => 'company',
         ]);
 
         $this->studentUser = User::create([
-            'name' => 'Student User',
+            'name' => 'Student',
+            'surname' => 'User',
             'email' => 'student@test.com',
             'password' => bcrypt('password'),
-            'role_id' => $studentRole->id,
+            'role' => 'student',
         ]);
     }
 
@@ -177,8 +134,8 @@ class RoleBasedAccessControlTest extends TestCase
             'permissions'
         ]);
         $response->assertJson([
-            'role' => Role::ADMIN,
-            'role_display_name' => 'Administrator'
+            'role' => 'admin',
+            'role_display_name' => 'Admin'
         ]);
     }
 
@@ -194,44 +151,28 @@ class RoleBasedAccessControlTest extends TestCase
     {
         // Test admin user
         $this->assertTrue($this->adminUser->isAdmin());
-        $this->assertTrue($this->adminUser->hasRole(Role::ADMIN));
-        $this->assertTrue($this->adminUser->hasAnyRole([Role::ADMIN, Role::GARANT]));
+        $this->assertTrue($this->adminUser->hasRole('admin'));
+        $this->assertTrue($this->adminUser->hasAnyRole(['admin', 'garant']));
         $this->assertTrue($this->adminUser->canManageAnnouncements());
 
         // Test garant user
         $this->assertTrue($this->garantUser->isGarant());
-        $this->assertTrue($this->garantUser->hasRole(Role::GARANT));
-        $this->assertTrue($this->garantUser->hasAnyRole([Role::ADMIN, Role::GARANT]));
+        $this->assertTrue($this->garantUser->hasRole('garant'));
+        $this->assertTrue($this->garantUser->hasAnyRole(['admin', 'garant']));
         $this->assertTrue($this->garantUser->canManageAnnouncements());
 
         // Test company user
         $this->assertTrue($this->companyUser->isCompany());
-        $this->assertTrue($this->companyUser->hasRole(Role::COMPANY));
-        $this->assertFalse($this->companyUser->hasAnyRole([Role::ADMIN, Role::GARANT]));
+        $this->assertTrue($this->companyUser->hasRole('company'));
+        $this->assertFalse($this->companyUser->hasAnyRole(['admin', 'garant']));
         $this->assertFalse($this->companyUser->canManageAnnouncements());
 
         // Test student user
         $this->assertTrue($this->studentUser->isStudent());
-        $this->assertTrue($this->studentUser->hasRole(Role::STUDENT));
-        $this->assertFalse($this->studentUser->hasAnyRole([Role::ADMIN, Role::GARANT]));
+        $this->assertTrue($this->studentUser->hasRole('student'));
+        $this->assertFalse($this->studentUser->hasAnyRole(['admin', 'garant']));
         $this->assertFalse($this->studentUser->canManageAnnouncements());
         $this->assertTrue($this->studentUser->canCreateInternships());
-    }
-
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function role_model_permission_methods_work_correctly(): void
-    {
-        $adminRole = Role::where('name', Role::ADMIN)->first();
-        $studentRole = Role::where('name', Role::STUDENT)->first();
-
-        // Test admin role permissions
-        $this->assertTrue($adminRole->hasPermission('manage_users'));
-        $this->assertTrue($adminRole->hasPermission('manage_announcements'));
-        $this->assertFalse($adminRole->hasPermission('nonexistent_permission'));
-
-        // Test student role permissions
-        $this->assertTrue($studentRole->hasPermission('apply_internships'));
-        $this->assertFalse($studentRole->hasPermission('manage_users'));
     }
 
     #[\PHPUnit\Framework\Attributes\Test]

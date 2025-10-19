@@ -18,17 +18,3 @@ Route::get('/login', function () {
 // In production, this should be moved to API routes with proper authentication
 Route::get('/users', [UserController::class, 'index']);
 
-
-
-Route::get('/add-user', function () {
-    $random = rand(1000, 9999);
-
-    $user = User::create([
-        'role' => 'admin',
-        'password' => bcrypt('secret123'),
-        'email' => "admin{$random}@example.com"
-    ]);
-
-    return 'Používateľ pridaný s ID: ' . $user->id . "\n email: " . $user->email;
-});
-
