@@ -17,13 +17,18 @@ Route::get('/user', function (Request $request) {
     $user = $request->user();
     $user->load('role');
 
+    // <-- ZMENA 1: Prikáž Laravelu, aby načítal aj prepojený študentský profil
+    $user->load('student');
+
     return response()->json([
         'id' => $user->id,
         'name' => $user->name,
         'email' => $user->email,
         'role' => $user->role ? $user->role->name : null,
         'role_display_name' => $user->role ? $user->role->display_name : null,
-        'permissions' => $user->role ? $user->role->permissions : []
+        'permissions' => $user->role ? $user->role->permissions : [],
+        // <-- ZMENA 2: Pridaj načítaný profil do JSON odpovede
+        'student' => $user->student,
     ]);
 })->middleware('auth:api');
 
@@ -56,7 +61,8 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
 
 // Student routes
 Route::middleware(['auth:api', 'role:student'])->group(function () {
-    // Future student-specific routes
+    Route::get('/companies', [CompanyController::class, 'index']);
+    Route::get('/companies/{id}', [CompanyController::class, 'show']);
 });
 
 // Company routes

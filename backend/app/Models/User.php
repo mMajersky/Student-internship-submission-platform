@@ -7,6 +7,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
+// --- PRIDANÝ IMPORT ---
+use App\Models\Student;
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
@@ -29,6 +32,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // --- TOTO JE NOVÁ METÓDA ---
+    /**
+     * Získa študentský profil, ktorý patrí tomuto používateľovi.
+     */
+    public function student()
+    {
+        // Definujeme, že jeden User má jeden záznam v tabuľke Student
+        // prepojený cez user_id
+        return $this->hasOne(Student::class, 'user_id', 'id');
+    }
+    // --- KONIEC NOVEJ METÓDY ---
+
 
     /**
      * Check if user has a specific role

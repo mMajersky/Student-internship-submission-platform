@@ -4,33 +4,32 @@
       <h1 class="title">Nová prax</h1>
 
       <form @submit.prevent="handleSubmit" class="form">
+        <!-- ZMENA: Namiesto textového poľa je tu výber firmy -->
         <div class="form-group">
-          <label for="firma" class="label">Firma<span class="required">*</span></label>
-          <input id="firma" v-model="formData.firma" type="text" placeholder="Zadajte názov firmy" class="input" required />
+          <label for="company" class="label">Firma<span class="required">*</span></label>
+          <select id="company" v-model="formData.company_id" class="input" required>
+            <option disabled value="">Vyberte firmu zo zoznamu</option>
+            <option v-for="company in companies" :key="company.id" :value="company.id">
+              {{ company.name }}
+            </option>
+          </select>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="rok" class="label">Rok<span class="required">*</span></label>
-            <input id="rok" v-model="formData.rok" type="number" class="input" required />
-          </div>
-
-          <div class="form-group">
-            <label for="semester" class="label">Semester<span class="required">*</span></label>
-            <select id="semester" v-model="formData.semester" class="input" required>
-              <option value="LS">LS</option>
-              <option value="ZS">ZS</option>
-            </select>
+            <label for="rok" class="label">Akademický rok<span class="required">*</span></label>
+            <!-- ZMENA: Input je teraz text, aby sme mohli vložiť formát RRRR/RRRR -->
+            <input id="rok" v-model="formData.academy_year" type="text" placeholder="napr. 2025/2026" class="input" required />
           </div>
 
           <div class="form-group">
             <label for="datumZaciatku" class="label">Dátum začiatku<span class="required">*</span></label>
-            <input id="datumZaciatku" v-model="formData.datumZaciatku" type="date" class="input" required />
+            <input id="datumZaciatku" v-model="formData.start_date" type="date" class="input" required />
           </div>
 
           <div class="form-group">
             <label for="datumKonca" class="label">Dátum konca<span class="required">*</span></label>
-            <input id="datumKonca" v-model="formData.datumKonca" type="date" class="input" required />
+            <input id="datumKonca" v-model="formData.end_date" type="date" class="input" required />
           </div>
         </div>
 
@@ -52,33 +51,66 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-// 1. Importujte váš Pinia auth store
 import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
-// 2. Vytvorte inštanciu store
 const authStore = useAuthStore();
 
 const formData = reactive({
-  firma: '',
-  rok: new Date().getFullYear(),
-  semester: 'LS',
-  datumZaciatku: '',
-  datumKonca: ''
+  company_id: '',
+  academy_year: `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
+  start_date: '',
+  end_date: ''
+});
+
+const companies = ref([]);
+
+const loadCompanies = async () => {
+  const token = authStore.token;
+  if (!token) return;
+
+  try {
+    const response = await fetch('http://localhost:8000/api/companies', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Nepodarilo sa načítať firmy.');
+    
+    const data = await response.json();
+    companies.value = data.data; 
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+};
+
+onMounted(() => {
+  loadCompanies();
 });
 
 const handleSubmit = async () => {
-  // 3. Získajte token priamo z auth storu
   const token = authStore.token;
-
-  // 4. Skontrolujte, či token vôbec existuje
   if (!token) {
-    alert('Chyba: Neboli nájdené prihlasovacie údaje. Prosím, prihláste sa znova.');
+    alert('Chyba: Neboli nájdené prihlasovacie údaje.');
     router.push('/login');
     return;
   }
+
+  // Bezpečnostná kontrola, či má používateľ priradený študentský profil
+  if (!authStore.user || !authStore.user.student) {
+      alert('Chyba: Vášmu používateľskému účtu nebol priradený študentský profil. Kontaktujte administrátora.');
+      return;
+  }
+
+  // --- OPRÁVNENÝ PAYLOAD ---
+  const payload = {
+    ...formData,
+    // ZMENA 1: Používame ID zo študentského profilu (ktorý nám teraz posiela backend)
+    student_id: authStore.user.student.id,
+    // ZMENA 2: Pridávame správny status S DIAKRITIKOU
+    status: 'vytvorená'
+  };
 
   try {
     const response = await fetch('http://localhost:8000/api/internships', {
@@ -86,20 +118,14 @@ const handleSubmit = async () => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        // 5. Priložte token do hlavičky Authorization
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(payload) 
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      // Špecifická chyba pre 401
-      if (response.status === 401) {
-        throw new Error(data.message || 'Neoprávnený prístup. Vaše prihlásenie mohlo vypršať.');
-      }
-      // Validačné chyby
       if (response.status === 422) {
           const errors = Object.values(data.errors).flat().join('\n');
           throw new Error(`Chyba validácie:\n${errors}`);
@@ -112,24 +138,17 @@ const handleSubmit = async () => {
 
   } catch (error) {
     console.error('Chyba:', error);
-    alert(error.message); // Zobrazíme presnú chybovú hlášku používateľovi
+    alert(error.message);
   }
 };
 
 const handleCancel = () => {
-  if (confirm('Naozaj chcete zrušiť vytvorenie praxe?')) {
-    Object.assign(formData, {
-      firma: '',
-      rok: new Date().getFullYear(),
-      semester: 'LS',
-      datumZaciatku: '',
-      datumKonca: ''
-    });
-  }
+  router.push('/internships');
 };
 </script>
 
 <style scoped>
+/* Všetky štýly zostávajú rovnaké */
 * {
    margin: 0;
    padding: 0;
@@ -144,79 +163,6 @@ const handleCancel = () => {
 'Helvetica Neue', Arial, sans-serif;
    color: #1f2937;
    background-color: #f9fafb;
-}
-
-.header {
-   display: flex;
-   align-items: center;
-   padding: 1rem 2rem;
-   background: white;
-   border-bottom: 1px solid #e5e7eb;
-   gap: 2rem;
-}
-
-.logo {
-   display: flex;
-   align-items: center;
-   gap: 0.5rem;
-}
-
-.logo-text {
-   font-size: 1.125rem;
-   font-weight: 600;
-   color: #1f2937;
-}
-
-.nav {
-   display: flex;
-   gap: 1.5rem;
-   flex: 1;
-}
-
-.nav-link {
-   text-decoration: none;
-   color: #6b7280;
-   font-size: 0.875rem;
-   padding: 0.5rem 0;
-   border-bottom: 2px solid transparent;
-   transition: all 0.2s;
-}
-
-.nav-link:hover {
-   color: #2563eb;
-}
-
-.nav-link.active {
-   color: #2563eb;
-   border-bottom-color: #2563eb;
-}
-
-.user-section {
-   display: flex;
-   align-items: center;
-   gap: 1rem;
-}
-
-.badge {
-   background: #2563eb;
-   color: white;
-   padding: 0.25rem 0.75rem;
-   border-radius: 0.375rem;
-   font-size: 0.875rem;
-   font-weight: 500;
-}
-
-.btn-link {
-   background: none;
-   border: none;
-   color: #6b7280;
-   font-size: 0.875rem;
-   cursor: pointer;
-   text-decoration: none;
-}
-
-.btn-link:hover {
-   color: #2563eb;
 }
 
 .main {
@@ -248,7 +194,7 @@ const handleCancel = () => {
 
 .form-row {
    display: grid;
-   grid-template-columns: repeat(4, 1fr);
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
    gap: 1rem;
 }
 
@@ -331,20 +277,5 @@ const handleCancel = () => {
    font-size: 0.875rem;
    border-top: 1px solid #e5e7eb;
    background: white;
-}
-
-@media (max-width: 768px) {
-   .form-row {
-     grid-template-columns: 1fr;
-   }
-
-   .header {
-     flex-direction: column;
-     align-items: flex-start;
-   }
-
-   .nav {
-     width: 100%;
-   }
 }
 </style>
