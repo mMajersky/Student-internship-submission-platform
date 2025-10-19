@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne; // <-- Dôležitý import
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -35,18 +33,14 @@ class User extends Authenticatable
     /**
      * Check if user has a specific role
      */
-    public function student(): HasOne
-    {
-        return $this->hasOne(Student::class, 'user_id');
-    }
-
-    // ... (všetky ostatné vaše metódy ako hasRole, isAdmin atď. zostávajú nezmenené)
-    
     public function hasRole(string $roleName): bool
     {
         return $this->role === $roleName;
     }
 
+    /**
+     * Check if user has any of the given roles
+     */
     public function hasAnyRole(array $roleNames): bool
     {
         return in_array($this->role, $roleNames);

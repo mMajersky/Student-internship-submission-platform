@@ -69,7 +69,7 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
     // Future admin-only routes
 });
 // Routy prístupné iba pre prihláseného študenta
-Route::middleware(['auth:api', 'role:STUDENT'])->group(function () {
+Route::middleware(['auth:api', 'role:student'])->group(function () {
     Route::get('/internships', [InternshipController::class, 'index']);
     Route::post('/internships', [InternshipController::class, 'store']);
 });

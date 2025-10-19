@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; // <-- Dôležitý import
 
 class Student extends Model
 {
@@ -50,14 +49,5 @@ class Student extends Model
     public function getFullNameAttribute()
     {
         return "{$this->name} {$this->surname}";
-    }
-
-    /**
-     * Získa používateľský účet, ktorý vlastní tento študentský profil.
-     * Toto je inverzná relácia k User->student()
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
     }
 }

@@ -94,7 +94,7 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const handleZobrazitPraxe = () => {
-  router.push('/interships')
+  router.push('/internships')
 }
 </script>
 
