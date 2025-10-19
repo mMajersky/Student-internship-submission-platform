@@ -2,90 +2,428 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Internship;
+use App\Models\Student;
 use App\Models\Company;
+use App\Models\Garant;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class InternshipController extends Controller
 {
     /**
-     * GET /api/internships
-     * Zobrazí všetky praxe prihláseného študenta.
-     */
-    public function index(Request $request)
-    {
-        // Získame študentský profil prepojený s prihláseným používateľom
-        $student = Auth::user()->student;
-
-        // Ak používateľ nemá priradený študentský profil, vrátime chybu
-        if (!$student) {
-            return response()->json(['message' => 'Prístup zamietnutý. Používateľ nemá profil študenta.'], 403);
-        }
-
-        // Načítame praxe pre konkrétneho študenta
-        $internships = Internship::with('company')
-            ->where('student_id', $student->id) // <-- Používame ID študenta
-            ->orderByDesc('created_at')
-            ->get();
-
-        // Dáta transformujeme do formátu, ktorý očakáva frontend
-        $mappedInternships = $internships->map(function ($internship) {
-            $startDate = $internship->start_date ? new \DateTime($internship->start_date) : null;
-            $endDate = $internship->end_date ? new \DateTime($internship->end_date) : null;
-
-            return [
-                'id' => $internship->id,
-                'firma' => $internship->company?->name ?? 'Neznáma firma',
-                'rok' => $startDate ? $startDate->format('Y') : 'N/A',
-                'semester' => $startDate ? ($startDate->format('m') < 7 ? 'LS' : 'ZS') : 'N/A',
-                'termin' => $startDate && $endDate ? $startDate->format('d.m.Y') . ' – ' . $endDate->format('d.m.Y') : 'N/A',
-                'stav' => strtoupper($internship->status ?? 'VYTVORENÁ'),
-            ];
-        });
-
-        return response()->json($mappedInternships);
-    }
-
-    /**
-     * POST /api/internships
-     * Vytvorí novú prax pre prihláseného študenta.
+     * Store a newly created internship in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
+        // Validate the incoming request data
         $validated = $request->validate([
-            'firma' => 'required|string|max:255',
-            'rok' => 'required|integer|min:2020',
-            'semester' => ['required', 'string', Rule::in(['LS', 'ZS'])],
-            'datumZaciatku' => 'required|date',
-            'datumKonca' => 'required|date|after_or_equal:datumZaciatku',
+            'student_id' => [
+                'required',
+                'integer',
+                Rule::exists('students', 'id')
+            ],
+            'company_id' => [
+                'required',
+                'integer',
+                Rule::exists('companies', 'id')
+            ],
+            'garant_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('garants', 'id')
+            ],
+            'status' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::in(Internship::getStatuses())
+            ],
+            'academy_year' => [
+                'required',
+                'string',
+                'max:9',
+                'regex:/^\d{4}\/\d{4}$/' // Format: 2024/2025
+            ],
+            'start_date' => [
+                'nullable',
+                'date',
+                'date_format:Y-m-d'
+            ],
+            'end_date' => [
+                'nullable',
+                'date',
+                'date_format:Y-m-d',
+                'after_or_equal:start_date'
+            ],
+            'confirmed_date' => [
+                'nullable',
+                'date',
+                'date_format:Y-m-d'
+            ],
+            'approved_date' => [
+                'nullable',
+                'date',
+                'date_format:Y-m-d'
+            ],
+        ], [
+            // Custom error messages
+            'student_id.required' => 'The student field is required.',
+            'student_id.exists' => 'The selected student does not exist.',
+            'company_id.required' => 'The company field is required.',
+            'company_id.exists' => 'The selected company does not exist.',
+            'garant_id.exists' => 'The selected garant does not exist.',
+            'status.required' => 'The status field is required.',
+            'status.in' => 'The status must be one of: ' . implode(', ', Internship::getStatuses()) . '.',
+            'academy_year.required' => 'The academy year field is required.',
+            'academy_year.regex' => 'The academy year must be in format YYYY/YYYY (e.g., 2024/2025).',
+            'end_date.after_or_equal' => 'The end date must be equal to or after the start date.',
         ]);
 
-        $student = Auth::user()->student;
+        try {
+            // Create the internship
+            $internship = Internship::create($validated);
 
-        if (!$student) {
-            return response()->json(['message' => 'Prístup zamietnutý. Používateľ nemá profil študenta.'], 403);
+            // Load relationships for the response
+            $internship->load(['student', 'company', 'garant']);
+
+            // Return success response with created internship
+            return response()->json([
+                'message' => 'Internship created successfully.',
+                'data' => [
+                    'id' => $internship->id,
+                    'student_id' => $internship->student_id,
+                    'student' => $internship->student ? [
+                        'id' => $internship->student->id,
+                        'name' => $internship->student->name,
+                        'surname' => $internship->student->surname,
+                        'student_email' => $internship->student->student_email,
+                    ] : null,
+                    'company_id' => $internship->company_id,
+                    'company' => $internship->company ? [
+                        'id' => $internship->company->id,
+                        'name' => $internship->company->name,
+                    ] : null,
+                    'garant_id' => $internship->garant_id,
+                    'garant' => $internship->garant ? [
+                        'id' => $internship->garant->id,
+                        'name' => $internship->garant->name ?? null,
+                        'surname' => $internship->garant->surname ?? null,
+                    ] : null,
+                    'status' => $internship->status,
+                    'academy_year' => $internship->academy_year,
+                    'start_date' => $internship->start_date?->format('Y-m-d'),
+                    'end_date' => $internship->end_date?->format('Y-m-d'),
+                    'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                    'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                    'created_at' => $internship->created_at?->toIso8601String(),
+                    'updated_at' => $internship->updated_at?->toIso8601String(),
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error creating internship: ' . $e->getMessage());
+
+            // Return error response
+            return response()->json([
+                'message' => 'An error occurred while creating the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
         }
+    }
 
-        // Nájde firmu podľa mena alebo vytvorí novú, ak neexistuje
-        $company = Company::firstOrCreate(
-            ['name' => $validated['firma']],
-            ['statutary' => 'Nezadaný'] // Môžete doplniť defaultné hodnoty
-        );
+    /**
+     * Display a listing of internships.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        try {
+            $internships = Internship::with(['student', 'company', 'garant'])
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        // Vytvorí novú prax a priradí ju študentovi
-        $internship = Internship::create([
-            'student_id' => $student->id, // <-- Používame ID študenta
-            'company_id' => $company->id,
-            'status' => 'vytvorená', // Odporúčam malé písmená pre konzistenciu v DB
-            'start_date' => $validated['datumZaciatku'],
-            'end_date' => $validated['datumKonca'],
-        ]);
+            return response()->json([
+                'data' => $internships->map(function ($internship) {
+                    return [
+                        'id' => $internship->id,
+                        'student_id' => $internship->student_id,
+                        'student' => $internship->student ? [
+                            'id' => $internship->student->id,
+                            'name' => $internship->student->name,
+                            'surname' => $internship->student->surname,
+                            'student_email' => $internship->student->student_email,
+                        ] : null,
+                        'company_id' => $internship->company_id,
+                        'company' => $internship->company ? [
+                            'id' => $internship->company->id,
+                            'name' => $internship->company->name,
+                        ] : null,
+                        'garant_id' => $internship->garant_id,
+                        'garant' => $internship->garant ? [
+                            'id' => $internship->garant->id,
+                            'name' => $internship->garant->name ?? null,
+                            'surname' => $internship->garant->surname ?? null,
+                        ] : null,
+                        'status' => $internship->status,
+                        'academy_year' => $internship->academy_year,
+                        'start_date' => $internship->start_date?->format('Y-m-d'),
+                        'end_date' => $internship->end_date?->format('Y-m-d'),
+                        'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                        'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                        'created_at' => $internship->created_at?->toIso8601String(),
+                        'updated_at' => $internship->updated_at?->toIso8601String(),
+                    ];
+                })
+            ], 200);
 
-        return response()->json([
-            'message' => 'Prax bola úspešne vytvorená.',
-            'internship' => $internship
-        ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching internships: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching internships.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified internship.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        try {
+            $internship = Internship::with(['student', 'company', 'garant', 'documents'])
+                ->findOrFail($id);
+
+            return response()->json([
+                'data' => [
+                    'id' => $internship->id,
+                    'student_id' => $internship->student_id,
+                    'student' => $internship->student ? [
+                        'id' => $internship->student->id,
+                        'name' => $internship->student->name,
+                        'surname' => $internship->student->surname,
+                        'student_email' => $internship->student->student_email,
+                    ] : null,
+                    'company_id' => $internship->company_id,
+                    'company' => $internship->company ? [
+                        'id' => $internship->company->id,
+                        'name' => $internship->company->name,
+                    ] : null,
+                    'garant_id' => $internship->garant_id,
+                    'garant' => $internship->garant ? [
+                        'id' => $internship->garant->id,
+                        'name' => $internship->garant->name ?? null,
+                        'surname' => $internship->garant->surname ?? null,
+                    ] : null,
+                    'status' => $internship->status,
+                    'academy_year' => $internship->academy_year,
+                    'start_date' => $internship->start_date?->format('Y-m-d'),
+                    'end_date' => $internship->end_date?->format('Y-m-d'),
+                    'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                    'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                    'created_at' => $internship->created_at?->toIso8601String(),
+                    'updated_at' => $internship->updated_at?->toIso8601String(),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Update the specified internship in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $internship = Internship::findOrFail($id);
+
+            // Validate the incoming request data
+            $validated = $request->validate([
+                'student_id' => [
+                    'sometimes',
+                    'required',
+                    'integer',
+                    Rule::exists('students', 'id')
+                ],
+                'company_id' => [
+                    'sometimes',
+                    'required',
+                    'integer',
+                    Rule::exists('companies', 'id')
+                ],
+                'garant_id' => [
+                    'nullable',
+                    'integer',
+                    Rule::exists('garants', 'id')
+                ],
+                'status' => [
+                    'sometimes',
+                    'required',
+                    'string',
+                    'max:50',
+                    Rule::in(Internship::getStatuses())
+                ],
+                'academy_year' => [
+                    'sometimes',
+                    'required',
+                    'string',
+                    'max:9',
+                    'regex:/^\d{4}\/\d{4}$/' // Format: 2024/2025
+                ],
+                'start_date' => [
+                    'nullable',
+                    'date',
+                    'date_format:Y-m-d'
+                ],
+                'end_date' => [
+                    'nullable',
+                    'date',
+                    'date_format:Y-m-d',
+                    'after_or_equal:start_date'
+                ],
+                'confirmed_date' => [
+                    'nullable',
+                    'date',
+                    'date_format:Y-m-d'
+                ],
+                'approved_date' => [
+                    'nullable',
+                    'date',
+                    'date_format:Y-m-d'
+                ],
+            ], [
+                // Custom error messages
+                'student_id.required' => 'The student field is required.',
+                'student_id.exists' => 'The selected student does not exist.',
+                'company_id.required' => 'The company field is required.',
+                'company_id.exists' => 'The selected company does not exist.',
+                'garant_id.exists' => 'The selected garant does not exist.',
+                'status.required' => 'The status field is required.',
+                'status.in' => 'The status must be one of: ' . implode(', ', Internship::getStatuses()) . '.',
+                'academy_year.required' => 'The academy year field is required.',
+                'academy_year.regex' => 'The academy year must be in format YYYY/YYYY (e.g., 2024/2025).',
+                'end_date.after_or_equal' => 'The end date must be equal to or after the start date.',
+            ]);
+
+            // Update the internship
+            $internship->update($validated);
+
+            // Load relationships for the response
+            $internship->load(['student', 'company', 'garant']);
+
+            // Return success response with updated internship
+            return response()->json([
+                'message' => 'Internship updated successfully.',
+                'data' => [
+                    'id' => $internship->id,
+                    'student_id' => $internship->student_id,
+                    'student' => $internship->student ? [
+                        'id' => $internship->student->id,
+                        'name' => $internship->student->name,
+                        'surname' => $internship->student->surname,
+                        'student_email' => $internship->student->student_email,
+                    ] : null,
+                    'company_id' => $internship->company_id,
+                    'company' => $internship->company ? [
+                        'id' => $internship->company->id,
+                        'name' => $internship->company->name,
+                    ] : null,
+                    'garant_id' => $internship->garant_id,
+                    'garant' => $internship->garant ? [
+                        'id' => $internship->garant->id,
+                        'name' => $internship->garant->name ?? null,
+                        'surname' => $internship->garant->surname ?? null,
+                    ] : null,
+                    'status' => $internship->status,
+                    'academy_year' => $internship->academy_year,
+                    'start_date' => $internship->start_date?->format('Y-m-d'),
+                    'end_date' => $internship->end_date?->format('Y-m-d'),
+                    'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                    'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                    'created_at' => $internship->created_at?->toIso8601String(),
+                    'updated_at' => $internship->updated_at?->toIso8601String(),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error updating internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while updating the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified internship from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        try {
+            $internship = Internship::findOrFail($id);
+            
+            // Store internship data before deletion for response
+            $internshipData = [
+                'id' => $internship->id,
+                'student_id' => $internship->student_id,
+                'company_id' => $internship->company_id,
+                'status' => $internship->status,
+                'academy_year' => $internship->academy_year,
+            ];
+
+            // Delete the internship
+            $internship->delete();
+
+            return response()->json([
+                'message' => 'Internship deleted successfully.',
+                'data' => $internshipData
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while deleting the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 }

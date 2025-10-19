@@ -19,7 +19,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id',
+        'role',
     ];
 
     protected $hidden = [
@@ -32,14 +32,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class);
-    }
-
     /**
-     * Získa študentský záznam priradený k používateľovi.
-     * TOTO JE KĽÚČOVÁ METÓDA, KTORÁ CHÝBALA.
+     * Check if user has a specific role
      */
     public function student(): HasOne
     {
@@ -50,16 +44,55 @@ class User extends Authenticatable
     
     public function hasRole(string $roleName): bool
     {
-        return $this->role && $this->role->name === $roleName;
+        return $this->role === $roleName;
     }
 
     public function hasAnyRole(array $roleNames): bool
     {
-        if (!$this->role) {
-            return false;
-        }
-        return in_array($this->role->name, $roleNames);
+        return in_array($this->role, $roleNames);
     }
-    
-    // ... zvyšok vašich metód
+
+    /**
+     * Check if user has a specific permission
+     * (ak nepoužívaš permission systém, môžeš to dočasne vypnúť)
+     */
+    public function hasPermission(string $permission): bool
+    {
+        return false; // alebo podľa potreby
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    public function isGarant(): bool
+    {
+        return $this->hasRole('garant');
+    }
+
+    public function isCompany(): bool
+    {
+        return $this->hasRole('company');
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->hasRole('student');
+    }
+
+    public function canManageAnnouncements(): bool
+    {
+        return $this->hasAnyRole(['admin', 'garant']);
+    }
+
+    public function canManageInternships(): bool
+    {
+        return $this->hasAnyRole(['admin', 'garant']);
+    }
+
+    public function canCreateInternships(): bool
+    {
+        return $this->hasRole('student');
+    }
 }

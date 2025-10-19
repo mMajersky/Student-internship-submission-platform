@@ -23,7 +23,7 @@ Route::get('/add-user', function () {
 
     $user = User::create([
         'role' => 'admin',
-        'pwd' => bcrypt('secret123'),
+        'password' => bcrypt('secret123'),
         'email' => "admin{$random}@example.com"
     ]);
 

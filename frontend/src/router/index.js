@@ -67,6 +67,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/garant-dashboard',
+      name: 'garant-dashboard',
+      component: () => import('../views/GarantDashboardView.vue'),
+      meta: { 
+        requiresAuth: true,
+        roles: ['GARANT']
+      }
+    },
+    {
       path: '/admin-panel',
       name: 'admin-panel',
       component: () => import('../views/AdminPanelView.vue'),
@@ -113,12 +122,17 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  if (requiresAuth && allowedRoles.length > 0) {
-    if (!authStore.hasAnyRole(allowedRoles)) {
-      next({ name: 'unauthorized' })
-      return
-    }
+  // Check role-based access
+if (requiresAuth && allowedRoles.length > 0) {
+  const normalizedRoles = allowedRoles.map(r => r.toLowerCase())
+  const userRole = authStore.userRole?.toLowerCase()
+
+  if (!normalizedRoles.includes(userRole)) {
+    next({ name: 'unauthorized' })
+    return
   }
+}
+
 
   next()
 })

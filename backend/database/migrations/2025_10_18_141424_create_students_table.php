@@ -17,14 +17,19 @@ return new class extends Migration
             $table->string('surname', 100);
             $table->string('student_email', 100);
             $table->string('alternative_email', 100)->nullable();
-            $table->integer('address_id')->nullable()->index('students_address_fk');
             $table->string('phone_number', 20)->nullable();
-            $table->integer('user_id')->nullable()->index('students_user_fk');
+            $table->unsignedBigInteger('user_id')->nullable()->index('students_user_idx');
+            $table->string('study_level', 50);
+            $table->string('state', 100)->nullable();
+            $table->string('region', 100)->nullable();
+            $table->string('city', 100)->nullable();
+            $table->string('postal_code', 20)->nullable();
+            $table->string('street', 100)->nullable();
+            $table->string('house_number', 20)->nullable();
+            $table->dateTime('created_at')->nullable()->useCurrent();
+            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
 
             $table->unique(['student_email', 'alternative_email', 'phone_number'], 'students_unique');
-            
-            $table->foreign(['address_id'], 'students_address_FK')->references(['id'])->on('address')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign(['user_id'], 'students_user_FK')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
