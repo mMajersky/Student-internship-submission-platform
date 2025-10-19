@@ -31,7 +31,7 @@ class StudentSeeder extends Seeder
             'alternative_email' => 'hudec.peter@gmail.com',
             'address_id' => $address->id,
             'phone_number' => '+421 900 123 456',
-            'user_id' => 1, // ak máš už vytvoreného používateľa v `users` tabuľke
+            'user_id' => 3, // ak máš už vytvoreného používateľa v `users` tabuľke
         ]);
     }
 }
