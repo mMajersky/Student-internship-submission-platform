@@ -34,22 +34,31 @@
           <thead>
             <tr>
               <th>Firma</th>
-              <th>Rok / Semester</th>
+              <th>Akademický rok</th>
               <th>Termín</th>
               <th>Stav</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
+            <!-- ZMENY SÚ TU -->
             <tr v-for="prax in praxe" :key="prax.id">
-              <td class="td-firma">{{ prax.firma }}</td>
-              <td>{{ prax.rok }} / {{ prax.semester }}</td>
-              <td>{{ prax.termin }}</td>
+              <!-- Názov firmy je v prax.company.name -->
+              <td class="td-firma">{{ prax.company ? prax.company.name : 'Neznáma firma' }}</td>
+              
+              <!-- Rok je v prax.academy_year -->
+              <td>{{ prax.academy_year }}</td>
+              
+              <!-- Termín poskladáme z dvoch dátumov -->
+              <td>{{ prax.start_date }} - {{ prax.end_date }}</td>
+              
               <td>
-                <span class="status-badge" :class="`status-${prax.stav.toLowerCase()}`">
-                  {{ prax.stav }}
+                <!-- Stav je v prax.status, nie prax.stav -->
+                <span v-if="prax.status" class="status-badge" :class="`status-${prax.status.toLowerCase()}`">
+                  {{ prax.status }}
                 </span>
               </td>
+              
               <td class="td-actions">
                 <button @click="handleDokumenty(prax)" class="btn btn-outline">Dokumenty</button>
               </td>
@@ -65,16 +74,12 @@
   </div>
 </template>
 
-<!-- Celý <template> zostáva rovnaký -->
-
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-// 1. Importujte váš Pinia auth store
 import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
-// 2. Vytvorte inštanciu store
 const authStore = useAuthStore();
 
 const stats = reactive({
@@ -87,12 +92,10 @@ const praxe = ref([]);
 
 const loadPraxe = async () => {
   try {
-    // 3. Získajte token priamo z auth storu, NIE z localStorage
     const token = authStore.token;
 
     if (!token) {
-      console.error('Chýba autentifikačný token. Prosím, prihláste sa.');
-      // router.push('/login'); 
+      console.error('Chýba autentifikačný token.');
       return;
     }
 
@@ -101,7 +104,7 @@ const loadPraxe = async () => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // Použijeme token zo storu
+        'Authorization': `Bearer ${token}`
       },
     });
 
@@ -110,18 +113,21 @@ const loadPraxe = async () => {
       throw new Error(errorData.message || `Chyba servera: ${response.status}`);
     }
 
-    const data = await response.json();
+    const responseData = await response.json();
     
-    praxe.value = data;
+    // Správne priradenie poľa, ktoré je vnútri objektu `data`
+    if (Array.isArray(responseData.data)) {
+        const internships = responseData.data;
+        praxe.value = internships;
 
-    // Aktualizácia štatistík na základe dát z backendu
-    stats.aktivne = data.filter(p => p.stav === 'VYTVORENÁ' || p.stav === 'PREBIEHA').length;
-    stats.schvalene = data.filter(p => p.stav === 'SCHVÁLENÁ').length;
-    stats.obhajene = data.filter(p => p.stav === 'OBHÁJENÁ' || p.stav === 'UKONČENÁ').length;
+        // VÝPOČET ŠTATISTÍK S POUŽITÍM SPRÁVNEHO KĽÚČA 'status'
+        stats.aktivne = internships.filter(p => p.status === 'vytvorena' || p.status === 'prebieha').length;
+        stats.schvalene = internships.filter(p => p.status === 'schvalena').length;
+        stats.obhajene = internships.filter(p => p.status === 'obhajena' || p.status === 'ukoncena').length;
+    }
 
   } catch (error) {
     console.error('Chyba pri načítaní praxí:', error.message);
-    // Tu môžete zobraziť chybu používateľovi, napr. v nejakej notifikácii
   }
 };
 
@@ -134,11 +140,11 @@ const handleNovaPrax = () => {
 };
 
 const handleDokumenty = (prax) => {
-  console.log('Otvoriť dokumenty pre prax:', prax);
+  // Tu môžete navigovať na stránku s dokumentmi pre danú prax
+  // napr. router.push(`/internships/${prax.id}/documents`);
+  console.log('Otvoriť dokumenty pre prax s ID:', prax.id);
 };
 </script>
-
-<!-- Celý <style> zostáva rovnaký -->
 
 <style scoped>
 /* Tu môžeš použiť rovnaký CSS ako predtým */
@@ -293,20 +299,32 @@ const handleDokumenty = (prax) => {
   letter-spacing: 0.025em;
 }
 
-.status-vytvorená {
+/* ZMENY SÚ TU: Názvy tried bez diakritiky, aby zodpovedali .toLowerCase() */
+.status-vytvorena {
   background: #6b7280;
   color: white;
 }
 
-.status-schválená {
+.status-schvalena {
   background: #10b981;
   color: white;
 }
 
-.status-obhájená {
+.status-obhajena {
   background: #3b82f6;
   color: white;
 }
+
+.status-ukoncena {
+    background: #3b82f6; /* rovnaká farba ako obhájená */
+    color: white;
+}
+
+.status-prebieha {
+    background: #f59e0b; /* napr. oranžová */
+    color: white;
+}
+
 
 .footer {
   padding: 1.5rem 2rem;

@@ -3,109 +3,86 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Internship;
 use App\Models\Student;
 use App\Models\Company;
 use App\Models\Garant;
+use App\Models\ContactPerson;
 use Carbon\Carbon;
 
 class InternshipSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
-        // Získame existujúceho študenta a spoločnosť, alebo vytvoríme nové záznamy
-        $student = Student::first();
-        $company = Company::first();
+        // --- PRÍPAD 1: Prax čerstvo vytvorená študentom (bez garanta) ---
+
+        // Získame prvého študenta a firmu. UISTITE SA, ŽE EXISTUJÚ!
+        $student1 = Student::find(1); // Alebo Student::first()
+        $company1 = Company::find(1); // Alebo Company::first()
+
+        if (!$student1 || !$company1) {
+            $this->command->error('Pre vytvorenie prvej praxe musí existovať aspoň jeden študent a firma!');
+            return;
+        }
+
+        $contactPerson1 = ContactPerson::where('company_id', $company1->id)->first();
+        if (!$contactPerson1) {
+            $this->command->error("Pre firmu s ID {$company1->id} neexistuje kontaktná osoba!");
+            return;
+        }
+
+        $internship1 = Internship::create([
+            'student_id' => $student1->id,
+            'company_id' => $company1->id,
+            'garant_id' => null, // Garant ešte nie je priradený
+            'status' => 'vytvorena', // Stav zodpovedá tomu, že prax je len vytvorená
+            'academy_year' => '2025/2026',
+            'start_date' => Carbon::now()->addMonths(2),
+            'end_date' => Carbon::now()->addMonths(5),
+            'confirmed_date' => Carbon::now(), // Dátum potvrdenia študentom
+            'approved_date' => null, // Dátum schválenia je NULL, lebo nebola schválená
+        ]);
+
+        // Priradíme kontaktnú osobu
+        $internship1->contactPersons()->attach($contactPerson1->id);
+        $this->command->info("Vytvorená prax (bez garanta) pre študenta {$student1->name} bola úspešne založená.");
+
+
+        // --- PRÍPAD 2: Prax schválená garantom ---
+
+        // Získame ďalšieho študenta, firmu a garanta. UISTITE SA, ŽE EXISTUJÚ!
+        $student2 = Student::find(2);
+        $company2 = Company::find(2);
         $garant = Garant::first();
 
-        // If no records exist, create them
-        if (!$student) {
-            // Create a test student if none exists
-            $address = \App\Models\Address::create([
-                'state' => 'Slovensko',
-                'region' => 'Nitriansky kraj',
-                'city' => 'Nitra',
-                'postal_code' => '94901',
-                'street' => 'Trieda A. Hlinku',
-                'house_number' => '1',
-            ]);
-
-            $studentUser = \App\Models\User::create([
-                'name' => 'Test Student',
-                'email' => 'student@test.com',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'role_id' => \App\Models\Role::where('name', 'STUDENT')->first()->id,
-            ]);
-
-            $student = Student::create([
-                'name' => 'Peter',
-                'surname' => 'Hudec',
-                'student_email' => 'peter.hudec@ukf.sk',
-                'alternative_email' => 'hudec.peter@gmail.com',
-                'address_id' => $address->id,
-                'phone_number' => '+421 900 123 456',
-                'user_id' => $studentUser->id,
-            ]);
+        if (!$student2 || !$company2 || !$garant) {
+            $this->command->warn('Pre vytvorenie druhej (schválenej) praxe je potrebné mať v DB aspoň 2 študentov, 2 firmy a 1 garanta. Tento krok sa preskakuje.');
+            return;
         }
-
-        if (!$company) {
-            // Create a test company if none exists
-            $address = \App\Models\Address::create([
-                'state' => 'Slovensko',
-                'region' => 'Bratislavský kraj',
-                'city' => 'Bratislava',
-                'postal_code' => '81101',
-                'street' => 'Vazovova',
-                'house_number' => '10',
-            ]);
-
-            $companyUser = \App\Models\User::firstOrCreate(
-                ['email' => 'company-internship@test.com'],
-                [
-                    'name' => 'Test Company Internship',
-                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                    'role_id' => \App\Models\Role::where('name', 'COMPANY')->first()->id,
-                ]
-            );
-
-            $company = Company::create([
-                'name' => 'Test Company s.r.o.',
-                'statutary' => 'Ing. Jozef Mrkvička',
-                'address_id' => $address->id,
-                'user_id' => $companyUser->id,
-            ]);
+        
+        $contactPerson2 = ContactPerson::where('company_id', $company2->id)->first();
+        if (!$contactPerson2) {
+            $this->command->error("Pre firmu s ID {$company2->id} neexistuje kontaktná osoba! Druhá prax nebola vytvorená.");
+            return;
         }
-
-        DB::table('internships')->insert([
-            [
-                'student_id' => $student->id,
-                'company_id' => $company->id,
-                'garant_id' => $garant ? $garant->id : null,
-                'status' => 'prebieha', // napr. 'prebieha', 'ukončená', 'čaká na schválenie'
-                'start_date' => Carbon::now()->subMonth(),
-                'end_date' => Carbon::now()->addMonths(2),
-                'confirmed_date' => Carbon::now()->subWeeks(2),
-                'approved_date' => Carbon::now()->subWeek(),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'student_id' => $student->id,
-                'company_id' => $company->id,
-                'garant_id' => null,
-                'status' => 'ukončená',
-                'start_date' => Carbon::now()->subMonths(6),
-                'end_date' => Carbon::now()->subMonths(3),
-                'confirmed_date' => Carbon::now()->subMonths(5),
-                'approved_date' => Carbon::now()->subMonths(5),
-                'created_at' => Carbon::now()->subMonths(6),
-                'updated_at' => Carbon::now()->subMonths(3),
-            ]
+        
+        $internship2 = Internship::create([
+            'student_id' => $student2->id,
+            'company_id' => $company2->id,
+            'garant_id' => $garant->id, // Garant je priradený
+            'status' => 'schvalena', // Stav je "schvalena"
+            'academy_year' => '2025/2026',
+            'start_date' => Carbon::now()->addMonth(),
+            'end_date' => Carbon::now()->addMonths(4),
+            'confirmed_date' => Carbon::now()->subDays(5), // Potvrdené pred pár dňami
+            'approved_date' => Carbon::now(), // Schválené dnes
         ]);
+
+        // Priradíme kontaktnú osobu
+        $internship2->contactPersons()->attach($contactPerson2->id);
+        $this->command->info("Schválená prax (s garantom) pre študenta {$student2->name} bola úspešne založená.");
     }
 }
