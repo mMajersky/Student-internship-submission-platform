@@ -18,8 +18,9 @@ class InternshipPdfController extends Controller
     public function generate(Internship $internship)
     {
         // 1. EFEKTÍVNE NAČÍTANIE VŠETKÝCH POTREBNÝCH DÁT
-        // Načítame stáž a k nej pripojené modely: študenta, firmu a kontaktné osoby firmy
-        $internship->load('student', 'company.contactPersons');
+        // Načítame stáž a k nej pripojené modely: študenta s jeho adresou,
+        // firmu s jej adresou a zároveň aj kontaktné osoby firmy.
+        $internship->load('student.address', 'company.address', 'company.contactPersons');
 
         // 2. PRÍPRAVA DÁT PRE ŠABLÓNU (všetko je teraz dynamické)
         
@@ -28,21 +29,21 @@ class InternshipPdfController extends Controller
         $company = $internship->company;
         
         // Z firmy vyberieme prvú kontaktnú osobu ako tútora
-        $tutor = $company->contactPersons->first();
+        $tutor = $company->contactPersons->first(); // <-- tu padá, lebo $company je null
 
 
         $data = [
             // --- Dáta o študentovi ---
             'student_name' => $student->name . ' ' . $student->surname,
-            'student_address' => $this->formatAddress($student),
+            'student_address' => $this->formatAddress($student->address),
             'student_contact' => $student->student_email,
             'study_program' => 'Aplikovaná informatika', // Toto môžete neskôr pridať k modelu študenta
 
             // --- Dáta o firme ---
             'company_name' => $company->name,
-            'company_address' => $this->formatAddress($company),
-            'company_contact' => $tutor ? $tutor->name . ' ' . $tutor->surname : '..............................................................', // Use tutor name instead of statutary
-            'company_city' => $company->city ?? '',
+            'company_address' => $this->formatAddress($company->address),
+            'company_contact' => $company->statutary,
+            'company_city' => $company->address->city ?? '',
 
             // --- Dáta o tútorovi z contact_persons ---
             'tutor_name' => $tutor ? $tutor->name . ' ' . $tutor->surname : '.....................................',
@@ -69,20 +70,19 @@ class InternshipPdfController extends Controller
 
     /**
      * Pomocná metóda na sformátovanie adresy do jedného reťazca.
-     * Accepts Student or Company model with address fields directly.
      */
-    private function formatAddress($model)
+    private function formatAddress($address)
     {
-        if (!$model) {
+        if (!$address) {
             return '..............................................................';
         }
         return sprintf(
             '%s %s, %s %s, %s',
-            $model->street ?? '',
-            $model->house_number ?? '',
-            $model->postal_code ?? '',
-            $model->city ?? '',
-            $model->state ?? ''
+            $address->street ?? '',
+            $address->house_number ?? '',
+            $address->postal_code ?? '',
+            $address->city ?? '',
+            $address->state ?? ''
         );
     }
 }

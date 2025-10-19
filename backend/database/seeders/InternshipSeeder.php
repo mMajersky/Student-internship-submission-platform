@@ -26,59 +26,59 @@ class InternshipSeeder extends Seeder
         // If no records exist, create them
         if (!$student) {
             // Create a test student if none exists
-            $studentUser = \App\Models\User::firstOrCreate(
-                ['email' => 'student-internship@test.com'],
-                [
-                    'name' => 'Test',
-                    'surname' => 'Student',
-                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                    'role' => 'student',
-                ]
-            );
+            $address = \App\Models\Address::create([
+                'state' => 'Slovensko',
+                'region' => 'Nitriansky kraj',
+                'city' => 'Nitra',
+                'postal_code' => '94901',
+                'street' => 'Trieda A. Hlinku',
+                'house_number' => '1',
+            ]);
 
-            $student = Student::firstOrCreate(
-                ['student_email' => 'peter.hudec@ukf.sk'],
-                [
-                    'name' => 'Peter',
-                    'surname' => 'Hudec',
-                    'alternative_email' => 'hudec.peter@gmail.com',
-                    'phone_number' => '+421 900 123 456',
-                    'user_id' => $studentUser->id,
-                    'study_level' => 'Bc.',
-                    'state' => 'Slovensko',
-                    'region' => 'Nitriansky kraj',
-                    'city' => 'Nitra',
-                    'postal_code' => '94901',
-                    'street' => 'Trieda A. Hlinku',
-                    'house_number' => '1',
-                ]
-            );
+            $studentUser = \App\Models\User::create([
+                'name' => 'Test Student',
+                'email' => 'student@test.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role_id' => \App\Models\Role::where('name', 'STUDENT')->first()->id,
+            ]);
+
+            $student = Student::create([
+                'name' => 'Peter',
+                'surname' => 'Hudec',
+                'student_email' => 'peter.hudec@ukf.sk',
+                'alternative_email' => 'hudec.peter@gmail.com',
+                'address_id' => $address->id,
+                'phone_number' => '+421 900 123 456',
+                'user_id' => $studentUser->id,
+            ]);
         }
 
         if (!$company) {
             // Create a test company if none exists
+            $address = \App\Models\Address::create([
+                'state' => 'Slovensko',
+                'region' => 'Bratislavský kraj',
+                'city' => 'Bratislava',
+                'postal_code' => '81101',
+                'street' => 'Vazovova',
+                'house_number' => '10',
+            ]);
+
             $companyUser = \App\Models\User::firstOrCreate(
                 ['email' => 'company-internship@test.com'],
                 [
-                    'name' => 'Test Company',
-                    'surname' => 'Internship',
+                    'name' => 'Test Company Internship',
                     'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                    'role' => 'company',
+                    'role_id' => \App\Models\Role::where('name', 'COMPANY')->first()->id,
                 ]
             );
 
-            $company = Company::firstOrCreate(
-                ['name' => 'Test Company s.r.o.'],
-                [
-                    'user_id' => $companyUser->id,
-                    'state' => 'Slovensko',
-                    'region' => 'Bratislavský kraj',
-                    'city' => 'Bratislava',
-                    'postal_code' => '81101',
-                    'street' => 'Vazovova',
-                    'house_number' => '10',
-                ]
-            );
+            $company = Company::create([
+                'name' => 'Test Company s.r.o.',
+                'statutary' => 'Ing. Jozef Mrkvička',
+                'address_id' => $address->id,
+                'user_id' => $companyUser->id,
+            ]);
         }
 
         DB::table('internships')->insert([
@@ -87,7 +87,6 @@ class InternshipSeeder extends Seeder
                 'company_id' => $company->id,
                 'garant_id' => $garant ? $garant->id : null,
                 'status' => 'prebieha', // napr. 'prebieha', 'ukončená', 'čaká na schválenie'
-                'academy_year' => '2024/2025',
                 'start_date' => Carbon::now()->subMonth(),
                 'end_date' => Carbon::now()->addMonths(2),
                 'confirmed_date' => Carbon::now()->subWeeks(2),
@@ -100,7 +99,6 @@ class InternshipSeeder extends Seeder
                 'company_id' => $company->id,
                 'garant_id' => null,
                 'status' => 'ukončená',
-                'academy_year' => '2023/2024',
                 'start_date' => Carbon::now()->subMonths(6),
                 'end_date' => Carbon::now()->subMonths(3),
                 'confirmed_date' => Carbon::now()->subMonths(5),

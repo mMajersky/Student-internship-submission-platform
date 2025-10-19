@@ -25,6 +25,8 @@ class Student extends Model
         'house_number',
     ];
 
+    public $timestamps = true;
+
     /**
      * Študent patrí jednému používateľovi
      */

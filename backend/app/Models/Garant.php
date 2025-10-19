@@ -18,6 +18,8 @@ class Garant extends Model
         'user_id',
     ];
 
+    public $timestamps = true;
+
     /**
      * Garant patrí jednému používateľovi
      */

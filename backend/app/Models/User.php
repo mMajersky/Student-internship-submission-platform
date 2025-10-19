@@ -15,7 +15,6 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'surname',
         'email',
         'password',
         'role',
@@ -49,19 +48,11 @@ class User extends Authenticatable
 
     /**
      * Check if user has a specific permission
-     * Based on role-permission mapping
+     * (ak nepoužívaš permission systém, môžeš to dočasne vypnúť)
      */
     public function hasPermission(string $permission): bool
     {
-        $permissions = [
-            'admin' => ['manage_users', 'manage_internships', 'manage_announcements'],
-            'garant' => ['manage_internships', 'manage_announcements'],
-            'company' => ['review_interns'],
-            'student' => ['create_internships'],
-        ];
-
-        $rolePermissions = $permissions[$this->role] ?? [];
-        return in_array($permission, $rolePermissions);
+        return false; // alebo podľa potreby
     }
 
     public function isAdmin(): bool
@@ -97,37 +88,5 @@ class User extends Authenticatable
     public function canCreateInternships(): bool
     {
         return $this->hasRole('student');
-    }
-
-    /**
-     * Get the student associated with this user
-     */
-    public function student()
-    {
-        return $this->hasOne(Student::class, 'user_id');
-    }
-
-    /**
-     * Get the company associated with this user
-     */
-    public function company()
-    {
-        return $this->hasOne(Company::class, 'user_id');
-    }
-
-    /**
-     * Get the garant associated with this user
-     */
-    public function garant()
-    {
-        return $this->hasOne(Garant::class, 'user_id');
-    }
-
-    /**
-     * Get all notifications for this user
-     */
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class, 'user_id');
     }
 }

@@ -12,14 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('garants', function (Blueprint $table) {
-            $table->increments('id');
+            $table->integer('id', true);
             $table->string('name', 100);
             $table->string('surname', 100);
             $table->string('faculty', 100)->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id')->nullable()->index('garants_user_idx');
+            $table->dateTime('created_at')->nullable()->useCurrent();
+            $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });
     }
 
