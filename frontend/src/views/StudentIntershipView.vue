@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-
     <main class="main">
       <h1 class="title">Prehľad študenta</h1>
 
@@ -41,24 +40,17 @@
             </tr>
           </thead>
           <tbody>
-            <!-- ZMENY SÚ TU -->
             <tr v-for="prax in praxe" :key="prax.id">
-              <!-- Názov firmy je v prax.company.name -->
               <td class="td-firma">{{ prax.company ? prax.company.name : 'Neznáma firma' }}</td>
-              
-              <!-- Rok je v prax.academy_year -->
               <td>{{ prax.academy_year }}</td>
-              
-              <!-- Termín poskladáme z dvoch dátumov -->
               <td>{{ prax.start_date }} - {{ prax.end_date }}</td>
-              
               <td>
-                <!-- Stav je v prax.status, nie prax.stav -->
-                <span v-if="prax.status" class="status-badge" :class="`status-${prax.status.toLowerCase()}`">
-                  {{ prax.status }}
+                <span v-if="prax.status" 
+                      class="status-badge" 
+                      :class="`status-${normalize(prax.status)}`">
+                  {{ formatStatus(prax.status) }}
                 </span>
               </td>
-              
               <td class="td-actions">
                 <button @click="handleDokumenty(prax)" class="btn btn-outline">Dokumenty</button>
               </td>
@@ -90,6 +82,19 @@ const stats = reactive({
 
 const praxe = ref([]);
 
+// Pomocná funkcia na normalizáciu textu (odstráni diakritiku, medzery a prevedie na malé písmená)
+const normalize = (text) =>
+  text
+    ? text.toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    : '';
+
+// Pekné zobrazenie statusu
+const formatStatus = (text) => {
+  if (!text) return '';
+  const t = text.toString().trim().toLowerCase();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
 const loadPraxe = async () => {
   try {
     const token = authStore.token;
@@ -102,9 +107,9 @@ const loadPraxe = async () => {
     const response = await fetch('http://localhost:8000/api/internships', {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -114,18 +119,24 @@ const loadPraxe = async () => {
     }
 
     const responseData = await response.json();
-    
-    // Správne priradenie poľa, ktoré je vnútri objektu `data`
+
     if (Array.isArray(responseData.data)) {
-        const internships = responseData.data;
-        praxe.value = internships;
+      const internships = responseData.data;
+      praxe.value = internships;
 
-        // VÝPOČET ŠTATISTÍK S POUŽITÍM SPRÁVNEHO KĽÚČA 'status'
-        stats.aktivne = internships.filter(p => p.status === 'vytvorena' || p.status === 'prebieha').length;
-        stats.schvalene = internships.filter(p => p.status === 'schvalena').length;
-        stats.obhajene = internships.filter(p => p.status === 'obhajena' || p.status === 'ukoncena').length;
+      // VÝPOČET ŠTATISTÍK – normalizované porovnanie
+      stats.aktivne = internships.filter((p) => {
+        const status = normalize(p.status);
+        return status === 'vytvorena' || status === 'prebieha';
+      }).length;
+
+      stats.schvalene = internships.filter((p) => normalize(p.status) === 'schvalena').length;
+
+      stats.obhajene = internships.filter((p) => {
+        const status = normalize(p.status);
+        return status === 'obhajena' || status === 'ukoncena';
+      }).length;
     }
-
   } catch (error) {
     console.error('Chyba pri načítaní praxí:', error.message);
   }
@@ -140,14 +151,11 @@ const handleNovaPrax = () => {
 };
 
 const handleDokumenty = (prax) => {
-  // Tu môžete navigovať na stránku s dokumentmi pre danú prax
-  // napr. router.push(`/internships/${prax.id}/documents`);
   console.log('Otvoriť dokumenty pre prax s ID:', prax.id);
 };
 </script>
 
 <style scoped>
-/* Tu môžeš použiť rovnaký CSS ako predtým */
 * {
   margin: 0;
   padding: 0;
@@ -299,7 +307,6 @@ const handleDokumenty = (prax) => {
   letter-spacing: 0.025em;
 }
 
-/* ZMENY SÚ TU: Názvy tried bez diakritiky, aby zodpovedali .toLowerCase() */
 .status-vytvorena {
   background: #6b7280;
   color: white;
@@ -310,21 +317,16 @@ const handleDokumenty = (prax) => {
   color: white;
 }
 
-.status-obhajena {
+.status-obhajena,
+.status-ukoncena {
   background: #3b82f6;
   color: white;
 }
 
-.status-ukoncena {
-    background: #3b82f6; /* rovnaká farba ako obhájená */
-    color: white;
-}
-
 .status-prebieha {
-    background: #f59e0b; /* napr. oranžová */
-    color: white;
+  background: #f59e0b;
+  color: white;
 }
-
 
 .footer {
   padding: 1.5rem 2rem;
