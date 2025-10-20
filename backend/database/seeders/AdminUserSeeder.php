@@ -2,100 +2,69 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Role;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
-class AdminUserSeeder extends Seeder
-{
+class AdminUserSeeder extends Seeder{
     /**
      * Run the database seeds.
+     *
+     * @return void
      */
-    public function run(): void
+    public function run()
     {
-        // Get roles
-        $adminRole = Role::getByName(Role::ADMIN);
-        $garantRole = Role::getByName(Role::GARANT);
-        $studentRole = Role::getByName(Role::STUDENT);
-        $companyRole = Role::getByName(Role::COMPANY);
-
-        // Create admin user if it doesn't exist
-        User::firstOrCreate(
-            ['email' => 'admin@test.com'],
+        DB::table('users')->insert([
+            // Admin používateľ
             [
-                'name' => 'Admin User',
-                'password' => Hash::make('password123'),
-                'role_id' => $adminRole->id,
-            ]
-        );
-
-        // Create garant user if it doesn't exist
-        User::firstOrCreate(
-            ['email' => 'garant@test.com'],
+                'name' => 'Admin',
+                'surname' => 'Adminovič',
+                'role' => 'admin',
+                'password' => Hash::make('password'), // Nezabudnite zmeniť heslo na bezpečné
+                'email' => 'admin@example.com',
+                'email_verified_at' => Carbon::now(),
+                'remember_token' => Str::random(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            // Študent používateľ
             [
-                'name' => 'Garant User',
-                'password' => Hash::make('password123'),
-                'role_id' => $garantRole->id,
-            ]
-        );
-
-        // Create student user if it doesn't exist
-        User::firstOrCreate(
-            ['email' => 'student@test.com'],
+                'name' => 'Peter',
+                'surname' => 'Hudec',
+                'role' => 'student',
+                'password' => Hash::make('password'),
+                'email' => 'student@example.com',
+                'email_verified_at' => Carbon::now(),
+                'remember_token' => Str::random(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            // Garant používateľ
             [
-                'name' => 'Student User',
-                'password' => Hash::make('password123'),
-                'role_id' => $studentRole->id,
-            ]
-        );
-
-        // Create company user if it doesn't exist
-        User::firstOrCreate(
-            ['email' => 'company@test.com'],
+                'name' => 'Peter',
+                'surname' => 'Zodpovedný',
+                'role' => 'garant',
+                'password' => Hash::make('password'),
+                'email' => 'garant@example.com',
+                'email_verified_at' => Carbon::now(),
+                'remember_token' => Str::random(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            // Zástupca spoločnosti používateľ
             [
-                'name' => 'Company User',
-                'password' => Hash::make('password123'),
-                'role_id' => $companyRole->id,
-            ]
-        );
-
-        // Create additional test users for comprehensive testing
-        User::firstOrCreate(
-            ['email' => 'admin2@test.com'],
-            [
-                'name' => 'Admin User 2',
-                'password' => Hash::make('password123'),
-                'role_id' => $adminRole->id,
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'garant2@test.com'],
-            [
-                'name' => 'Garant User 2',
-                'password' => Hash::make('password123'),
-                'role_id' => $garantRole->id,
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'company2@test.com'],
-            [
-                'name' => 'Company User 2',
-                'password' => Hash::make('password123'),
-                'role_id' => $companyRole->id,
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'student2@test.com'],
-            [
-                'name' => 'Student User 2',
-                'password' => Hash::make('password123'),
-                'role_id' => $studentRole->id,
-            ]
-        );
+                'name' => 'Eva',
+                'surname' => 'Podnikavá',
+                'role' => 'company_representative',
+                'password' => Hash::make('password'),
+                'email' => 'company@example.com',
+                'email_verified_at' => Carbon::now(),
+                'remember_token' => Str::random(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+        ]);
     }
 }

@@ -12,12 +12,14 @@ use App\Http\Controllers\CompanyController;
 
 // PDF generation routes from feature/Generate_PDF_template
 Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
-Route::get('/vykaz-generate-empty', [InternshipPdfController::class, 'generateEmpty']);
 
 // User retrieval route from develop
 Route::get('/user', function (Request $request) {
     $user = $request->user();
     $user->load('role');
+
+    // <-- ZMENA 1: Prikáž Laravelu, aby načítal aj prepojený študentský profil
+    $user->load('student');
 
     return response()->json([
         'id' => $user->id,
@@ -25,7 +27,9 @@ Route::get('/user', function (Request $request) {
         'email' => $user->email,
         'role' => $user->role ? $user->role->name : null,
         'role_display_name' => $user->role ? $user->role->display_name : null,
-        'permissions' => $user->role ? $user->role->permissions : []
+        'permissions' => $user->role ? $user->role->permissions : [],
+        // <-- ZMENA 2: Pridaj načítaný profil do JSON odpovede
+        'student' => $user->student,
     ]);
 })->middleware('auth:api');
 
@@ -58,7 +62,8 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
 
 // Student routes
 Route::middleware(['auth:api', 'role:student'])->group(function () {
-    // Future student-specific routes
+    Route::get('/companies', [CompanyController::class, 'index']);
+    Route::get('/companies/{id}', [CompanyController::class, 'show']);
 });
 
 // Company routes
@@ -70,4 +75,8 @@ Route::middleware(['auth:api', 'role:company'])->group(function () {
 Route::middleware(['auth:api', 'role:admin'])->group(function () {
     // Future admin-only routes
 });
-
+// Routy prístupné iba pre prihláseného študenta
+Route::middleware(['auth:api', 'role:student'])->group(function () {
+    Route::get('/internships', [InternshipController::class, 'index']);
+    Route::post('/internships', [InternshipController::class, 'store']);
+});

@@ -19,7 +19,7 @@
               Moje praxe
             </h5>
             <p class="card-text">Prehľad vašich praxí a aplikácií</p>
-            <button class="btn btn-primary" disabled>
+            <button @click="handleZobrazitPraxe" class="btn btn-primary">
               <i class="bi bi-eye me-2"></i>
               Zobraziť praxe
             </button>
@@ -88,8 +88,14 @@
 
 <script setup>
 import { useAuthStore } from '../stores/auth'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
+const router = useRouter()
+
+const handleZobrazitPraxe = () => {
+  router.push('/internships')
+}
 </script>
 
 <style scoped>
