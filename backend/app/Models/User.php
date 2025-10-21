@@ -2,47 +2,107 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
+
+// --- PRIDANÝ IMPORT ---
+use App\Models\Student;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'users';
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    // --- TOTO JE NOVÁ METÓDA ---
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Získa študentský profil, ktorý patrí tomuto používateľovi.
      */
-    protected function casts(): array
+    public function student()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        // Definujeme, že jeden User má jeden záznam v tabuľke Student
+        // prepojený cez user_id
+        return $this->hasOne(Student::class, 'user_id', 'id');
+    }
+    // --- KONIEC NOVEJ METÓDY ---
+
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->role === $roleName;
+    }
+
+    /**
+     * Check if user has any of the given roles
+     */
+    public function hasAnyRole(array $roleNames): bool
+    {
+        return in_array($this->role, $roleNames);
+    }
+
+    /**
+     * Check if user has a specific permission
+     * (ak nepoužívaš permission systém, môžeš to dočasne vypnúť)
+     */
+    public function hasPermission(string $permission): bool
+    {
+        return false; // alebo podľa potreby
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    public function isGarant(): bool
+    {
+        return $this->hasRole('garant');
+    }
+
+    public function isCompany(): bool
+    {
+        return $this->hasRole('company');
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->hasRole('student');
+    }
+
+    public function canManageAnnouncements(): bool
+    {
+        return $this->hasAnyRole(['admin', 'garant']);
+    }
+
+    public function canManageInternships(): bool
+    {
+        return $this->hasAnyRole(['admin', 'garant']);
+    }
+
+    public function canCreateInternships(): bool
+    {
+        return $this->hasRole('student');
     }
 }
