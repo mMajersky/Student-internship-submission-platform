@@ -104,7 +104,7 @@ const loadPraxe = async () => {
       return;
     }
 
-    const response = await fetch('http://localhost:8000/api/internships', {
+    const response = await fetch('api/student/internships', {
       method: 'GET',
       headers: {
         Accept: 'application/json',
