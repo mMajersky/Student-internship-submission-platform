@@ -83,7 +83,7 @@ const loadCompanies = async () => {
   if (!token) return
 
   try {
-    const response = await fetch('http://localhost:8000/api/companies', {
+    const response = await fetch('api/student/companies', {
       headers: { Authorization: `Bearer ${token}` }
     })
     if (!response.ok) throw new Error('Nepodarilo sa načítať firmy.')
@@ -127,7 +127,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:8000/api/internships', {
+    const response = await fetch('api/student/internships', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
