@@ -8,6 +8,7 @@ use App\Http\Controllers\InternshipPdfController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CommentController;
 
 
 // PDF generation routes from feature/Generate_PDF_template
@@ -75,6 +76,13 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::put('/internships/{id}', [InternshipController::class, 'update']);
     Route::delete('/internships/{id}', [InternshipController::class, 'destroy']);
     
+    // Comment routes for internships (Garant only can create/update/delete)
+    Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
+    Route::post('/internships/{internship}/comments', [CommentController::class, 'store']);
+    Route::get('/internships/{internship}/comments/{comment}', [CommentController::class, 'show']);
+    Route::put('/internships/{internship}/comments/{comment}', [CommentController::class, 'update']);
+    Route::delete('/internships/{internship}/comments/{comment}', [CommentController::class, 'destroy']);
+    
     // Student routes - for dropdown selection
     Route::get('/students', [StudentController::class, 'index']);
     Route::get('/students/{id}', [StudentController::class, 'show']);
@@ -93,6 +101,10 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     // Internship management for students - view their own and create new
     Route::get('/internships', [InternshipController::class, 'studentIndex']);
     Route::post('/internships', [InternshipController::class, 'studentStore']);
+    
+    // Students can view comments on their internships (read-only)
+    Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
+    Route::get('/internships/{internship}/comments/{comment}', [CommentController::class, 'show']);
 });
 
 // Company routes
