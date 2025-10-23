@@ -96,10 +96,3 @@ watch(() => router.currentRoute.value, () => {
   authStore.initializeAuth()
 })
 </script>
-
-<style>
-#app-wrapper {
-  background-color: #f8f9fa;
-  min-height: 100vh;
-}
-</style>
