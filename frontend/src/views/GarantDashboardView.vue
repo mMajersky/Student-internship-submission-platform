@@ -418,38 +418,3 @@ const getStatusClass = (status) => {
   return statusClasses[status] || 'bg-secondary'
 }
 </script>
-
-<style scoped>
-.card {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.badge {
-  font-size: 0.875rem;
-  padding: 0.375rem 0.75rem;
-}
-
-.nav-tabs .nav-link {
-  color: #6c757d;
-  border: none;
-  border-bottom: 2px solid transparent;
-}
-
-.nav-tabs .nav-link.active {
-  color: #0d6efd;
-  background-color: transparent;
-  border-color: transparent;
-  border-bottom-color: #0d6efd;
-}
-
-.table th {
-  font-weight: 600;
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-}
-</style>

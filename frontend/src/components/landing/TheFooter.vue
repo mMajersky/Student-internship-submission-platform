@@ -26,19 +26,3 @@
 <script setup>
 // No additional logic needed for this static component
 </script>
-
-<style scoped>
-footer a:hover {
-  color: #0d6efd !important;
-}
-
-@media (max-width: 768px) {
-  .col-md-6.text-md-end {
-    text-align: left !important;
-  }
-  
-  .d-flex.justify-content-md-end {
-    justify-content: flex-start !important;
-  }
-}
-</style>
