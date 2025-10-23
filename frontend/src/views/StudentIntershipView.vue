@@ -238,19 +238,3 @@ const closeCommentsModal = () => {
 };
 </script>
 
-<style scoped>
-/* Minimal custom styles - Bootstrap handles most of the styling */
-.modal {
-  padding: 1rem;
-}
-
-.modal-dialog {
-  margin: 1.75rem auto;
-}
-
-@media (max-width: 768px) {
-  .modal {
-    padding: 0.5rem;
-  }
-}
-</style>

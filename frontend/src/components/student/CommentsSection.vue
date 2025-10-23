@@ -187,14 +187,3 @@ defineExpose({
 })
 </script>
 
-<style scoped>
-/* Minimal custom styles - Bootstrap handles most of it */
-.comment-card {
-  background-color: #f8f9fa;
-  transition: box-shadow 0.2s ease;
-}
-
-.comment-card:hover {
-  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.075);
-}
-</style>
