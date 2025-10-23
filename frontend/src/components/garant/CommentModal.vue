@@ -1,105 +1,181 @@
 <template>
-  <div v-if="isVisible" class="modal-overlay" @click.self="handleClose">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="bi bi-chat-left-text me-2"></i>
-          Pridať komentár k praxi
-        </h5>
-        <button type="button" class="btn-close" @click="handleClose" aria-label="Zavrieť">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div v-if="internship" class="internship-info mb-4">
-          <p class="mb-1">
-            <strong>Študent:</strong> 
-            {{ internship.student ? `${internship.student.name} ${internship.student.surname}` : '-' }}
-          </p>
-          <p class="mb-1">
-            <strong>Firma:</strong> 
-            {{ internship.company ? internship.company.name : '-' }}
-          </p>
-          <p class="mb-0">
-            <strong>Aktuálny stav:</strong>
-            <span class="badge ms-2" :class="getStatusClass(internship.status)">
-              {{ internship.status }}
-            </span>
-          </p>
+  <div v-if="isVisible" class="modal fade show" style="display: block;" tabindex="-1" role="dialog" aria-modal="true" @click.self="handleClose">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+      <div class="modal-content">
+        <div class="modal-header px-4 py-3">
+          <h5 class="modal-title d-flex align-items-center mb-0">
+            <i class="bi bi-chat-left-text me-2"></i>
+            Pridať komentár k praxi
+          </h5>
+          <button type="button" class="btn-close" @click="handleClose" aria-label="Zavrieť"></button>
         </div>
 
-        <form @submit.prevent="handleSubmit">
-          <div class="mb-3">
-            <label for="commentType" class="form-label">
-              <i class="bi bi-tag me-1"></i>
-              Typ komentára <span class="text-danger">*</span>
-            </label>
-            <select 
-              id="commentType" 
-              v-model="formData.comment_type" 
-              class="form-select"
-              required
-            >
-              <option value="" disabled>Vyberte typ komentára</option>
-              <option value="approval">Schválenie</option>
-              <option value="rejection">Zamietnutie</option>
-              <option value="correction">Požadovaná oprava</option>
-              <option value="general">Všeobecný komentár</option>
-            </select>
-            <div class="form-text">
-              {{ getCommentTypeDescription(formData.comment_type) }}
+        <div class="modal-body p-4">
+          <div v-if="internship" class="alert alert-info mb-4 border-start border-primary border-top-0 border-end-0 border-bottom-0 rounded-2" style="border-width: 4px !important;">
+            <p class="mb-1">
+              <strong>Študent:</strong> 
+              {{ internship.student ? `${internship.student.name} ${internship.student.surname}` : '-' }}
+            </p>
+            <p class="mb-1">
+              <strong>Firma:</strong> 
+              {{ internship.company ? internship.company.name : '-' }}
+            </p>
+            <p class="mb-0">
+              <strong>Aktuálny stav:</strong>
+              <span class="badge ms-2" :class="getStatusClass(internship.status)">
+                {{ internship.status }}
+              </span>
+            </p>
+          </div>
+
+          <!-- Previous Comments Section -->
+          <div v-if="internship && authToken" class="mb-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 d-flex align-items-center">
+                  <i class="bi bi-chat-dots me-2"></i>
+                  Predchádzajúce komentáre
+                </h6>
+                <span v-if="comments.length > 0" class="badge bg-primary rounded-pill">
+                  {{ comments.length }}
+                </span>
+              </div>
+
+              <div class="card-body">
+                <div v-if="loadingComments" class="text-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Načítavam...</span>
+                  </div>
+                  <p class="text-muted mt-2 mb-0">Načítavam komentáre...</p>
+                </div>
+
+                <div v-else-if="commentsError" class="alert alert-danger" role="alert">
+                  <i class="bi bi-exclamation-triangle me-2"></i>
+                  {{ commentsError }}
+                </div>
+
+                <div v-else-if="comments.length === 0" class="text-center py-5">
+                  <i class="bi bi-chat-left text-muted" style="font-size: 3rem;"></i>
+                  <p class="text-muted mb-0 mt-3">Zatiaľ nie sú žiadne komentáre.</p>
+                </div>
+
+                <div v-else class="d-flex flex-column gap-3">
+                  <div 
+                    v-for="comment in sortedComments" 
+                    :key="comment.id" 
+                    class="card comment-card"
+                    :class="`border-start border-${getCommentTypeColor(comment.comment_type)} border-3`"
+                  >
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                        <div class="d-flex align-items-center">
+                          <i class="bi bi-person-circle me-2 text-secondary" style="font-size: 1.25rem;"></i>
+                          <strong class="text-dark">{{ comment.author?.name || 'Garant' }}</strong>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                          <span class="badge" :class="getCommentTypeBadgeClass(comment.comment_type)">
+                            {{ getCommentTypeLabel(comment.comment_type) }}
+                          </span>
+                          <small class="text-muted d-flex align-items-center">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ formatCommentDate(comment.created_at) }}
+                          </small>
+                        </div>
+                      </div>
+                      <p class="mb-0" style="white-space: pre-wrap; word-wrap: break-word;">
+                        {{ comment.content }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="mb-3">
-            <label for="commentContent" class="form-label">
-              <i class="bi bi-pencil me-1"></i>
-              Komentár <span class="text-danger">*</span>
-            </label>
-            <textarea
-              id="commentContent"
-              v-model="formData.content"
-              class="form-control"
-              rows="6"
-              placeholder="Napíšte váš komentár..."
-              required
-              maxlength="2000"
-            ></textarea>
-            <div class="form-text text-end">
-              {{ formData.content.length }} / 2000 znakov
+          <!-- Add Comment Form -->
+          <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">
+                <i class="bi bi-plus-circle me-2"></i>
+                Nový komentár
+              </h6>
+            </div>
+            <div class="card-body">
+              <form @submit.prevent="handleSubmit">
+            <div class="mb-3">
+              <label for="commentType" class="form-label">
+                <i class="bi bi-tag me-1"></i>
+                Typ komentára <span class="text-danger">*</span>
+              </label>
+              <select 
+                id="commentType" 
+                v-model="formData.comment_type" 
+                class="form-select"
+                required
+              >
+                <option value="" disabled>Vyberte typ komentára</option>
+                <option value="approval">Schválenie</option>
+                <option value="rejection">Zamietnutie</option>
+                <option value="correction">Požadovaná oprava</option>
+                <option value="general">Všeobecný komentár</option>
+              </select>
+              <div class="form-text">
+                {{ getCommentTypeDescription(formData.comment_type) }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="commentContent" class="form-label">
+                <i class="bi bi-pencil me-1"></i>
+                Komentár <span class="text-danger">*</span>
+              </label>
+              <textarea
+                id="commentContent"
+                v-model="formData.content"
+                class="form-control"
+                rows="6"
+                placeholder="Napíšte váš komentár..."
+                required
+                maxlength="2000"
+              ></textarea>
+              <div class="form-text text-end">
+                {{ formData.content.length }} / 2000 znakov
+              </div>
+            </div>
+
+            <div v-if="error" class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              {{ error }}
+            </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                  <button type="button" class="btn btn-secondary" @click="handleClose">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Zrušiť
+                  </button>
+                  <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                    <span v-if="isSubmitting">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Ukladám...
+                    </span>
+                    <span v-else>
+                      <i class="bi bi-check-circle me-2"></i>
+                      Uložiť komentár
+                    </span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-
-          <div v-if="error" class="alert alert-danger" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            {{ error }}
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="handleClose">
-              <i class="bi bi-x-circle me-2"></i>
-              Zrušiť
-            </button>
-            <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-              <span v-if="isSubmitting">
-                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Ukladám...
-              </span>
-              <span v-else>
-                <i class="bi bi-check-circle me-2"></i>
-                Uložiť komentár
-              </span>
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
+  <div v-if="isVisible" class="modal-backdrop fade show"></div>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 
 const props = defineProps({
   isVisible: {
@@ -109,6 +185,10 @@ const props = defineProps({
   internship: {
     type: Object,
     default: null
+  },
+  authToken: {
+    type: String,
+    required: true
   }
 })
 
@@ -122,12 +202,54 @@ const formData = reactive({
 const isSubmitting = ref(false)
 const error = ref('')
 
+// Comments list state
+const comments = ref([])
+const loadingComments = ref(false)
+const commentsError = ref('')
+
+const sortedComments = computed(() => {
+  return [...comments.value].sort((a, b) => {
+    return new Date(b.created_at) - new Date(a.created_at)
+  })
+})
+
+// Fetch comments function
+const fetchComments = async () => {
+  if (!props.internship?.id || !props.authToken) return
+
+  loadingComments.value = true
+  commentsError.value = ''
+
+  try {
+    const response = await fetch(`/api/internships/${props.internship.id}/comments`, {
+      headers: {
+        'Authorization': `Bearer ${props.authToken}`,
+        'Accept': 'application/json',
+      }
+    })
+
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.message || 'Chyba pri načítaní komentárov')
+    }
+
+    const data = await response.json()
+    comments.value = data.data || data || []
+  } catch (err) {
+    console.error('Error fetching comments:', err)
+    commentsError.value = err.message || 'Nepodarilo sa načítať komentáre.'
+  } finally {
+    loadingComments.value = false
+  }
+}
+
 // Reset form when modal opens with new internship
 watch(() => props.internship, (newInternship) => {
   if (newInternship) {
     formData.comment_type = ''
     formData.content = ''
     error.value = ''
+    fetchComments()
   }
 })
 
@@ -137,6 +259,10 @@ watch(() => props.isVisible, (isVisible) => {
     formData.comment_type = ''
     formData.content = ''
     error.value = ''
+    comments.value = []
+    commentsError.value = ''
+  } else if (isVisible && props.internship) {
+    fetchComments()
   }
 })
 
@@ -170,11 +296,72 @@ const handleSubmit = async () => {
     // Reset form after successful submission
     formData.comment_type = ''
     formData.content = ''
+    
+    // Refresh comments list to show the new comment
+    await fetchComments()
   } catch (err) {
     error.value = err.message || 'Chyba pri ukladaní komentára.'
   } finally {
     isSubmitting.value = false
   }
+}
+
+const getCommentTypeLabel = (type) => {
+  const labels = {
+    'approval': 'Schválenie',
+    'rejection': 'Zamietnutie',
+    'correction': 'Požadovaná oprava',
+    'general': 'Všeobecný'
+  }
+  return labels[type] || type
+}
+
+const getCommentTypeBadgeClass = (type) => {
+  const classes = {
+    'approval': 'bg-success',
+    'rejection': 'bg-danger',
+    'correction': 'bg-warning text-dark',
+    'general': 'bg-info'
+  }
+  return classes[type] || 'bg-secondary'
+}
+
+const getCommentTypeColor = (type) => {
+  const colors = {
+    'approval': 'success',
+    'rejection': 'danger',
+    'correction': 'warning',
+    'general': 'info'
+  }
+  return colors[type] || 'secondary'
+}
+
+const formatCommentDate = (dateString) => {
+  if (!dateString) return '-'
+  
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMs = now - date
+  const diffInHours = diffInMs / (1000 * 60 * 60)
+  
+  // If less than 24 hours ago, show relative time
+  if (diffInHours < 24) {
+    if (diffInHours < 1) {
+      const minutes = Math.floor(diffInMs / (1000 * 60))
+      return `pred ${minutes} minútami`
+    }
+    const hours = Math.floor(diffInHours)
+    return `pred ${hours} hodinami`
+  }
+  
+  // Otherwise show full date and time
+  return date.toLocaleString('sk-SK', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 const getCommentTypeDescription = (type) => {
@@ -202,186 +389,31 @@ const getStatusClass = (status) => {
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1050;
+/* Minimal custom styles - Bootstrap handles most of the styling */
+.modal {
   padding: 1rem;
-  overflow-y: auto;
 }
 
-.modal-container {
-  background: white;
-  border-radius: 0.5rem;
-  width: 100%;
-  max-width: 600px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  margin: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #212529;
-}
-
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  color: #6c757d;
-  cursor: pointer;
-  padding: 0.25rem;
-  line-height: 1;
-  transition: color 0.15s ease-in-out;
-}
-
-.btn-close:hover {
-  color: #000;
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.internship-info {
-  background-color: #f8f9fa;
-  border-left: 4px solid #0d6efd;
-  padding: 1rem;
-  border-radius: 0.25rem;
-}
-
-.internship-info p {
-  font-size: 0.9rem;
-  color: #495057;
-}
-
-.form-label {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
-}
-
-.form-select,
-.form-control {
-  border: 1px solid #ced4da;
-  border-radius: 0.375rem;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.9375rem;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.form-select:focus,
-.form-control:focus {
-  border-color: #86b7fe;
-  outline: 0;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-.form-text {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin-top: 0.25rem;
-}
-
-.text-danger {
-  color: #dc3545;
-}
-
-.alert {
-  padding: 0.75rem 1rem;
-  border-radius: 0.375rem;
-  margin-bottom: 1rem;
-}
-
-.alert-danger {
-  color: #842029;
-  background-color: #f8d7da;
-  border: 1px solid #f5c2c7;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  margin-top: 1rem;
-  border-top: 1px solid #dee2e6;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: all 0.15s ease-in-out;
-}
-
-.btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background-color: #0d6efd;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #0b5ed7;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5c636a;
+.modal-dialog {
+  margin: 1.75rem auto;
 }
 
 .badge {
-  font-size: 0.875rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.25rem;
   font-weight: 600;
 }
 
-.spinner-border {
-  width: 1rem;
-  height: 1rem;
-  border-width: 0.15rem;
+.comment-card {
+  background-color: #f8f9fa;
+  transition: box-shadow 0.2s ease;
 }
 
-@media (max-width: 576px) {
-  .modal-container {
-    margin: 0;
-    max-height: 100vh;
-  }
-  
-  .modal-overlay {
-    padding: 0;
-    align-items: flex-start;
+.comment-card:hover {
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.075);
+}
+
+@media (max-width: 768px) {
+  .modal {
+    padding: 0.5rem;
   }
 }
 </style>

@@ -222,6 +222,7 @@
     <CommentModal
       :is-visible="showCommentModal"
       :internship="selectedInternshipForComment"
+      :auth-token="authStore.token"
       @close="handleCloseCommentModal"
       @submit="handleSubmitComment"
     />

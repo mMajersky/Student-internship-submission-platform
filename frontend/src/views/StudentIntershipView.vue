@@ -65,36 +65,37 @@
     </main>
 
     <!-- Comments Modal -->
-    <div v-if="showCommentsModal" class="modal-overlay" @click.self="closeCommentsModal">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h5 class="modal-title">
-            <i class="bi bi-chat-left-text me-2"></i>
-            Komentáre k praxi
-          </h5>
-          <button type="button" class="btn-close" @click="closeCommentsModal">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div v-if="selectedPraxForComments" class="internship-info mb-4">
-            <p class="mb-1">
-              <strong>Firma:</strong> 
-              {{ selectedPraxForComments.company ? selectedPraxForComments.company.name : '-' }}
-            </p>
-            <p class="mb-0">
-              <strong>Akademický rok:</strong> 
-              {{ selectedPraxForComments.academy_year }}
-            </p>
+    <div v-if="showCommentsModal" class="modal fade show" style="display: block;" tabindex="-1" role="dialog" aria-modal="true" @click.self="closeCommentsModal">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+          <div class="modal-header px-4 py-3">
+            <h5 class="modal-title d-flex align-items-center mb-0">
+              <i class="bi bi-chat-left-text me-2"></i>
+              Komentáre k praxi
+            </h5>
+            <button type="button" class="btn-close" aria-label="Zavrieť" @click="closeCommentsModal"></button>
           </div>
-          <CommentsSection 
-            v-if="selectedPraxForComments"
-            :internship-id="selectedPraxForComments.id"
-            :auth-token="authStore.token"
-          />
+          <div class="modal-body p-4">
+            <div v-if="selectedPraxForComments" class="alert alert-info mb-4 border-start border-primary border-top-0 border-end-0 border-bottom-0 rounded-2" style="border-width: 4px !important;">
+              <p class="mb-1">
+                <strong>Firma:</strong> 
+                {{ selectedPraxForComments.company ? selectedPraxForComments.company.name : '-' }}
+              </p>
+              <p class="mb-0">
+                <strong>Akademický rok:</strong> 
+                {{ selectedPraxForComments.academy_year }}
+              </p>
+            </div>
+            <CommentsSection 
+              v-if="selectedPraxForComments"
+              :internship-id="selectedPraxForComments.id"
+              :auth-token="authStore.token"
+            />
+          </div>
         </div>
       </div>
     </div>
+    <div v-if="showCommentsModal" class="modal-backdrop fade show"></div>
 
     <footer class="footer">
       © 2025 Odborná prax CRM
@@ -388,82 +389,13 @@ const closeCommentsModal = () => {
   background: white;
 }
 
-/* Modal styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1050;
+/* Minimal custom styles for modal - Bootstrap handles most of it */
+.modal {
   padding: 1rem;
-  overflow-y: auto;
 }
 
-.modal-container {
-  background: white;
-  border-radius: 0.5rem;
-  width: 100%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 10;
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  display: flex;
-  align-items: center;
-}
-
-.btn-close {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 0.25rem;
-  line-height: 1;
-  transition: color 0.15s ease-in-out;
-}
-
-.btn-close:hover {
-  color: #1f2937;
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.internship-info {
-  background-color: #f9fafb;
-  border-left: 4px solid #2563eb;
-  padding: 1rem;
-  border-radius: 0.25rem;
-}
-
-.internship-info p {
-  font-size: 0.9rem;
-  color: #374151;
+.modal-dialog {
+  margin: 1.75rem auto;
 }
 
 @media (max-width: 768px) {
@@ -478,12 +410,8 @@ const closeCommentsModal = () => {
   .table-container {
     overflow-x: auto;
   }
-  .modal-container {
-    max-height: 100vh;
-    border-radius: 0;
-  }
-  .modal-overlay {
-    padding: 0;
+  .modal {
+    padding: 0.5rem;
   }
 }
 </style>
