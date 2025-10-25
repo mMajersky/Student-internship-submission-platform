@@ -101,4 +101,20 @@ class Internship extends Model
             'contact_person_id'
         );
     }
+
+    /**
+     * Stáž má viac komentárov od garantov
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'internship_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get latest comment for this internship
+     */
+    public function latestComment()
+    {
+        return $this->hasOne(Comment::class, 'internship_id')->latestOfMany();
+    }
 }

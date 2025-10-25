@@ -196,6 +196,9 @@
                       </span>
                     </td>
                     <td>
+                      <button class="btn btn-sm btn-outline-success me-1" title="Pridať komentár" @click="handleAddComment(internship)">
+                        <i class="bi bi-chat-left-text"></i>
+                      </button>
                       <button class="btn btn-sm btn-outline-primary me-1" title="Upraviť" @click="handleEditInternship(internship)">
                         <i class="bi bi-pencil"></i>
                       </button>
@@ -214,6 +217,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Comment Modal -->
+    <CommentModal
+      :is-visible="showCommentModal"
+      :internship="selectedInternshipForComment"
+      :auth-token="authStore.token"
+      @close="handleCloseCommentModal"
+      @submit="handleSubmitComment"
+    />
   </div>
 </template>
 
@@ -221,6 +233,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
+import CommentModal from '@/components/garant/CommentModal.vue'
 
 const authStore = useAuthStore()
 
@@ -228,6 +241,10 @@ const activeTab = ref('overview')
 
 // Editing state
 const editingInternship = ref(null)
+
+// Comment modal state
+const showCommentModal = ref(false)
+const selectedInternshipForComment = ref(null)
 
 // Statistics
 const stats = ref({
@@ -416,5 +433,54 @@ const getStatusClass = (status) => {
     'cancelled': 'bg-danger'
   }
   return statusClasses[status] || 'bg-secondary'
+}
+
+// Comment handling
+const handleAddComment = (internship) => {
+  selectedInternshipForComment.value = internship
+  showCommentModal.value = true
+}
+
+const handleCloseCommentModal = () => {
+  showCommentModal.value = false
+  selectedInternshipForComment.value = null
+}
+
+const handleSubmitComment = async (commentData) => {
+  try {
+    // Extract internship_id from commentData and prepare the payload
+    const { internship_id, comment_type, content } = commentData
+    
+    const response = await fetch(`/api/internships/${internship_id}/comments`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        comment_type,
+        content
+      })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || 'Chyba pri ukladaní komentára')
+    }
+
+    // Show success message
+    alert('Komentár bol úspešne pridaný!')
+    
+    // Close modal
+    handleCloseCommentModal()
+    
+    // Optionally refresh internships list to show updated comment count
+    await fetchInternships()
+  } catch (error) {
+    console.error('Error submitting comment:', error)
+    throw error // Re-throw to let modal handle the error display
+  }
 }
 </script>
