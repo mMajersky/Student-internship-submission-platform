@@ -156,19 +156,36 @@ const getCommentTypeColor = (type) => {
 const formatDate = (dateString) => {
   if (!dateString) return '-'
   
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInMs = now - date
-  const diffInHours = diffInMs / (1000 * 60 * 60)
+  // Ensure the date string is treated as UTC if it doesn't have timezone info
+  let date
+  if (dateString.includes('T') || dateString.includes('Z') || dateString.includes('+')) {
+    // Already has timezone info
+    date = new Date(dateString)
+  } else {
+    // No timezone info, treat as UTC by appending 'Z'
+    date = new Date(dateString.replace(' ', 'T') + 'Z')
+  }
   
-  // If less than 24 hours ago, show relative time
+  const now = new Date()
+  
+  // Calculate difference in milliseconds
+  const diffInMs = now - date
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+  
+  // If less than 1 minute
+  if (diffInMinutes < 1) {
+    return 'práve teraz'
+  }
+  
+  // If less than 1 hour
+  if (diffInMinutes < 60) {
+    return `pred ${diffInMinutes} minútami`
+  }
+  
+  // If less than 24 hours
   if (diffInHours < 24) {
-    if (diffInHours < 1) {
-      const minutes = Math.floor(diffInMs / (1000 * 60))
-      return `pred ${minutes} minútami`
-    }
-    const hours = Math.floor(diffInHours)
-    return `pred ${hours} hodinami`
+    return `pred ${diffInHours} hodinami`
   }
   
   // Otherwise show full date and time
