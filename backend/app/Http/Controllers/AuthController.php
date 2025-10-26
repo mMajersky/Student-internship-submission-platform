@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -43,16 +41,69 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validated = $request->validate([
+        // Base validation rules
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'role' => 'required|in:student,company',
-        ]);
+        ];
 
-        // Generovanie aktivačného tokenu (len infraštruktúra, neukladá sa do DB)
-        $activationToken = Str::random(60);
-        Log::info("Generated activation token for {$validated['email']}: {$activationToken}");
+        // Additional validation rules for students
+        if ($request->input('role') === 'student') {
+            $allowedDomains = config('services.university.allowed_email_domains', []);
+            $domainPattern = implode('|', array_map('preg_quote', $allowedDomains));
+            
+            $rules = array_merge($rules, [
+                'surname' => 'required|string|max:100',
+                'email' => [
+                    'required',
+                    'email',
+                    'unique:users,email',
+                    'regex:/^[a-zA-Z0-9._%+-]+@(' . $domainPattern . ')$/i'
+                ],
+                'alternative_email' => 'nullable|email|different:email|max:100',
+                'phone_number' => 'nullable|string|max:20',
+                'study_level' => 'required|string|max:50',
+                'study_field' => 'required|string|max:100',
+                'state' => 'required|string|max:100',
+                'region' => 'required|string|max:100',
+                'city' => 'required|string|max:100',
+                'postal_code' => 'required|string|max:20',
+                'street' => 'required|string|max:100',
+                'house_number' => 'required|string|max:20',
+            ]);
+        }
+
+        // Additional validation rules for companies
+        if ($request->input('role') === 'company') {
+            $rules = array_merge($rules, [
+                'company_name' => 'required|string|max:255',
+                'state' => 'required|string|max:100',
+                'region' => 'required|string|max:100',
+                'city' => 'required|string|max:100',
+                'postal_code' => 'required|string|max:20',
+                'street' => 'required|string|max:100',
+                'house_number' => 'required|string|max:20',
+            ]);
+        }
+
+        // Custom error messages
+        $messages = [
+            'email.regex' => 'Email musí byť univerzitný email (@student.ukf.sk)',
+            'surname.required' => 'Priezvisko je povinné',
+            'study_level.required' => 'Stupeň štúdia je povinný',
+            'study_field.required' => 'Študijný odbor je povinný',
+            'alternative_email.different' => 'Alternatívny email musí byť odlišný od univerzitného emailu',
+            'state.required' => 'Štát je povinný',
+            'region.required' => 'Región je povinný',
+            'city.required' => 'Mesto je povinné',
+            'postal_code.required' => 'PSČ je povinné',
+            'street.required' => 'Ulica je povinná',
+            'house_number.required' => 'Číslo domu je povinné',
+        ];
+
+        $validated = $request->validate($rules, $messages);
 
         $user = User::create([
             'name' => $validated['name'],
@@ -71,6 +122,7 @@ class AuthController extends Controller
                 'alternative_email' => $request->input('alternative_email'),
                 'phone_number' => $request->input('phone_number'),
                 'study_level' => $request->input('study_level'),
+                'study_field' => $request->input('study_field'),
                 'state' => $request->input('state'),
                 'region' => $request->input('region'),
                 'city' => $request->input('city'),
@@ -93,13 +145,10 @@ class AuthController extends Controller
                 'house_number' => $request->input('house_number'),
             ]);
         }
-        // Príprava pre budúci email systém (napr. aktivácia účtu)
-        // Mail::to($user->email)->send(new ActivationMail($activationToken));
+
         return response()->json([
-            'message' => 'Registrácia prebehla úspešne. Email aktivačný systém bude pridaný neskôr.',
+            'message' => 'Registrácia prebehla úspešne.',
             'user' => $user,
-            // Len pre testovanie v local režime – zobrazí token, ktorý by sa odosielal mailom
-            'debug_activation_token' => config('app.env') === 'local' ? $activationToken : null,
         ], 201);
     }
 

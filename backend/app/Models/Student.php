@@ -17,6 +17,7 @@ class Student extends Model
         'phone_number',
         'user_id',
         'study_level',
+        'study_field',
         'state',
         'region',
         'city',
