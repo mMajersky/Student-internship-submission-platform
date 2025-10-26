@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
 use App\Models\User;
+use App\Http\Controllers\EmailController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,4 +30,8 @@ Route::get('/add-user', function () {
 
     return 'Používateľ pridaný s ID: ' . $user->id . "\n email: " . $user->email;
 });
+
+
+
+Route::get('/test-mail', [EmailController::class, 'test']);
 
