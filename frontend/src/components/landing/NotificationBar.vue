@@ -58,20 +58,3 @@ onMounted(() => {
     <!-- Error is logged to console but not displayed to users -->
   </div>
 </template>
-
-<style scoped>
-.announcement-content { font-size: 0.9rem; line-height: 1.4; }
-.announcement-content :deep(h1),
-.announcement-content :deep(h2),
-.announcement-content :deep(h3),
-.announcement-content :deep(h4),
-.announcement-content :deep(h5),
-.announcement-content :deep(h6) { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
-.announcement-content :deep(p) { margin-bottom: 0.25rem; }
-.announcement-content :deep(p:last-child) { margin-bottom: 0; }
-.announcement-content :deep(ul),
-.announcement-content :deep(ol) { margin-bottom: 0.25rem; padding-left: 1rem; }
-.announcement-content :deep(li) { margin-bottom: 0.1rem; }
-</style>
-
-

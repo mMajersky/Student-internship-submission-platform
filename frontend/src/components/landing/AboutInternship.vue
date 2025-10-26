@@ -18,10 +18,3 @@
     </div>
   </section>
 </template>
-
-<style scoped>
-p {
-  font-size: 1.05rem;
-  line-height: 1.6;
-}
-</style>

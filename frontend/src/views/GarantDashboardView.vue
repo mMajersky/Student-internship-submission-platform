@@ -196,6 +196,9 @@
                       </span>
                     </td>
                     <td>
+                      <button class="btn btn-sm btn-outline-success me-1" title="Pridať komentár" @click="handleAddComment(internship)">
+                        <i class="bi bi-chat-left-text"></i>
+                      </button>
                       <button class="btn btn-sm btn-outline-primary me-1" title="Upraviť" @click="handleEditInternship(internship)">
                         <i class="bi bi-pencil"></i>
                       </button>
@@ -214,6 +217,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Comment Modal -->
+    <CommentModal
+      :is-visible="showCommentModal"
+      :internship="selectedInternshipForComment"
+      :auth-token="authStore.token"
+      @close="handleCloseCommentModal"
+      @submit="handleSubmitComment"
+    />
   </div>
 </template>
 
@@ -221,6 +233,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
+import CommentModal from '@/components/garant/CommentModal.vue'
 
 const authStore = useAuthStore()
 
@@ -228,6 +241,10 @@ const activeTab = ref('overview')
 
 // Editing state
 const editingInternship = ref(null)
+
+// Comment modal state
+const showCommentModal = ref(false)
+const selectedInternshipForComment = ref(null)
 
 // Statistics
 const stats = ref({
@@ -417,39 +434,53 @@ const getStatusClass = (status) => {
   }
   return statusClasses[status] || 'bg-secondary'
 }
+
+// Comment handling
+const handleAddComment = (internship) => {
+  selectedInternshipForComment.value = internship
+  showCommentModal.value = true
+}
+
+const handleCloseCommentModal = () => {
+  showCommentModal.value = false
+  selectedInternshipForComment.value = null
+}
+
+const handleSubmitComment = async (commentData) => {
+  try {
+    // Extract internship_id from commentData and prepare the payload
+    const { internship_id, comment_type, content } = commentData
+    
+    const response = await fetch(`/api/internships/${internship_id}/comments`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        comment_type,
+        content
+      })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || 'Chyba pri ukladaní komentára')
+    }
+
+    // Show success message
+    alert('Komentár bol úspešne pridaný!')
+    
+    // Close modal
+    handleCloseCommentModal()
+    
+    // Optionally refresh internships list to show updated comment count
+    await fetchInternships()
+  } catch (error) {
+    console.error('Error submitting comment:', error)
+    throw error // Re-throw to let modal handle the error display
+  }
+}
 </script>
-
-<style scoped>
-.card {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.badge {
-  font-size: 0.875rem;
-  padding: 0.375rem 0.75rem;
-}
-
-.nav-tabs .nav-link {
-  color: #6c757d;
-  border: none;
-  border-bottom: 2px solid transparent;
-}
-
-.nav-tabs .nav-link.active {
-  color: #0d6efd;
-  background-color: transparent;
-  border-color: transparent;
-  border-bottom-color: #0d6efd;
-}
-
-.table th {
-  font-weight: 600;
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-}
-</style>
