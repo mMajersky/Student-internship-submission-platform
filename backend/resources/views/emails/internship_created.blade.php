@@ -66,7 +66,7 @@
         <li><strong>Academic Year:</strong> {{ $academyYear ?? 'N/A' }}</li>
         <li><strong>Start Date:</strong> {{ $startDate ?? 'N/A' }}</li>
         <li><strong>End Date:</strong> {{ $endDate ?? 'N/A' }}</li>
-        <li><strong>Status:</strong> {{ $status ?? 'N/A' }}</li>
+        <li><strong>Status:</strong> @if($status == 'vytvorená') Created @elseif($status == 'potvrdená') Confirmed @elseif($status == 'schválená') Approved @elseif($status == 'zamietnutá') Rejected @elseif($status == 'obhájená') Defended @elseif($status == 'neobhájená') Not defended @else {{ $status ?? 'N/A' }} @endif</li>
     </ul>
 
     <p>Please review the application and make a decision:</p>

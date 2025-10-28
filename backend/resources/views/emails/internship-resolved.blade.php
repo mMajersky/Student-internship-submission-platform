@@ -145,7 +145,7 @@
                 <p><strong>Academic Year:</strong> {{ $internship->academy_year }}</p>
                 <p><strong>Current Status:</strong>
                     <span class="status-badge status-{{ strtolower($internship->status) }}">
-                        {{ ucfirst($internship->status) }}
+                        @if($internship->status == 'vytvorená') Created @elseif($internship->status == 'potvrdená') Confirmed @elseif($internship->status == 'schválená') Approved @elseif($internship->status == 'zamietnutá') Rejected @elseif($internship->status == 'obhájená') Defended @elseif($internship->status == 'neobhájená') Not defended @else {{ ucfirst($internship->status) }} @endif
                     </span>
                 </p>
             </div>

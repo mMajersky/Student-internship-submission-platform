@@ -158,7 +158,7 @@
                     <p><strong>Student:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
                     <p><strong>Company:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
                     <p><strong>Academic Year:</strong> {{ $internship->academy_year }}</p>
-                    <p><strong>Status:</strong> {{ ucfirst($internship->status) }}</p>
+                    <p><strong>Status:</strong> @if($internship->status == 'vytvorená') Created @elseif($internship->status == 'potvrdená') Confirmed @elseif($internship->status == 'schválená') Approved @elseif($internship->status == 'zamietnutá') Rejected @elseif($internship->status == 'obhájená') Defended @elseif($internship->status == 'neobhájená') Not defended @else {{ ucfirst($internship->status) }} @endif</p>
                     <p><strong>Action:</strong> {{ ucfirst($action) }}</p>
                 </div>
             @endif
