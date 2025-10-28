@@ -3,7 +3,7 @@
 @section('content')
     <h3>Hello {{ $studentName ?? 'User' }},</h3>
 
-    <p>This is a test email from <strong>SISP Platform</strong>.</p>
+    <p>This is a test email from <strong>SISP</strong>.</p>
 
     <p>Your internship <strong>{{ $internshipTitle ?? 'Example Internship' }}</strong> has been approved!</p>
 

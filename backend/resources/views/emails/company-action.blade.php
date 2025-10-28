@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Výsledok akcie stáže - Platforma SISP</title>
+    <title>Výsledok akcie stáže - SISP</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,15 +91,16 @@
     </style>
 </head>
 <body>
+    <p style="font-size: 12px; color: #666; text-align: center; margin-bottom: 20px;">English version can be found below the Slovak version.</p>
     <div class="container">
         <div class="header">
-            <h1>Platforma SISP</h1>
+            <h1>SISP</h1>
             <p>Systém riadenia stáží</p>
         </div>
 
         @if($success ?? false)
             <div class="success">
-                <h3>✅ Akcia bola úspešne dokončená!</h3>
+                <h3>Akcia bola úspešne dokončená!</h3>
                 <p>{{ $message }}</p>
             </div>
 
@@ -120,7 +121,7 @@
 
         @else
             <div class="error">
-                <h3>❌ Chyba pri spracovaní akcie</h3>
+                <h3>Chyba pri spracovaní akcie</h3>
                 <p>{{ $error ?? 'Nastala neznáma chyba.' }}</p>
             </div>
 
@@ -135,6 +136,54 @@
         <div class="footer">
             <p>Platforma SISP - Platforma na podávanie žiadostí o stáže študentov</p>
             <p>Toto je automatická správa zo systému.</p>
+        </div>
+    </div>
+
+    <!-- ENGLISH VERSION -->
+    <div class="container" style="margin-top: 40px;">
+        <div class="header">
+            <h1>SISP Platform</h1>
+            <p>Internship Management System</p>
+        </div>
+
+        @if($success ?? false)
+            <div class="success">
+                <h3>The action has been completed successfully!</h3>
+                <p>{{ $message }}</p>
+            </div>
+
+            @if(isset($internship))
+                <div class="internship-details">
+                    <h4>Internship Details:</h4>
+                    <p><strong>Student:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
+                    <p><strong>Company:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
+                    <p><strong>Academic Year:</strong> {{ $internship->academy_year }}</p>
+                    <p><strong>Status:</strong> {{ ucfirst($internship->status) }}</p>
+                    <p><strong>Action:</strong> {{ ucfirst($action) }}</p>
+                </div>
+            @endif
+
+            <div class="info">
+                <p>You can now close this window. The internship has been {{ $action === 'confirm' ? 'approved' : 'rejected' }} and the student will be notified.</p>
+            </div>
+
+        @else
+            <div class="error">
+                <h3>Error processing the action</h3>
+                <p>{{ $error ?? 'An unknown error occurred.' }}</p>
+            </div>
+
+            <div class="info">
+                <p>If you think this is a mistake, contact your supervisor or try using the link from your email again.</p>
+                @if(isset($internship) && $internship->garant)
+                <p><strong>Contact Supervisor:</strong> {{ $internship->garant->user->email ?? 'supervisor@school.sk' }}</p>
+                @endif
+            </div>
+        @endif
+
+        <div class="footer">
+            <p>SISP Platform - Student Internship Application Platform</p>
+            <p>This is an automated message from the system.</p>
         </div>
     </div>
 </body>

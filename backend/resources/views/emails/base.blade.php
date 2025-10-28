@@ -8,7 +8,7 @@
 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; padding: 30px;">
 
     <header style="border-bottom: 1px solid #eaeaea; margin-bottom: 20px;">
-        <h2 style="color: #007BFF;">SISP Platform</h2>
+        <h2 style="color: #007BFF;">SISP</h2>
     </header>
 
     <main>
@@ -16,9 +16,12 @@
     </main>
 
     <footer style="border-top: 1px solid #eaeaea; margin-top: 30px; padding-top: 10px; font-size: 12px; color: #888;">
-        <p>© {{ date('Y') }} SISP Platform – Automated Notification</p>
+        <p>© {{ date('Y') }} SISP – Automated Notification</p>
         <p style="margin: 5px 0 0 0; font-size: 11px; color: #999;">
-            This is an automated message. Please do not reply to this email.
+            ENG: This is an automated message. Please do not reply to this email.
+        </p>
+        <p style="margin: 5px 0 0 0; font-size: 11px; color: #999;">
+            SK: Toto je automatická správa zo systému. Prosím, neodpovedajte na tento e-mail.
         </p>
     </footer>
 
