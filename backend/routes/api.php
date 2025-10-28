@@ -75,6 +75,9 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::get('/internships/{id}', [InternshipController::class, 'show']);
     Route::put('/internships/{id}', [InternshipController::class, 'update']);
     Route::delete('/internships/{id}', [InternshipController::class, 'destroy']);
+
+    // Internship email management
+    Route::post('/internships/{id}/resend-approval-email', [InternshipController::class, 'resendApprovalEmail']);
     
     // Comment routes for internships (Garant only can create/update/delete)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
@@ -111,6 +114,9 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
 Route::middleware(['auth:api', 'role:company'])->group(function () {
     // Future company-specific routes
 });
+
+// Company action routes for internship confirmation/rejection (public for email links)
+Route::get('/internships/company-action', [InternshipController::class, 'companyAction']);
 
 // Admin-only routes
 Route::middleware(['auth:api', 'role:admin'])->group(function () {

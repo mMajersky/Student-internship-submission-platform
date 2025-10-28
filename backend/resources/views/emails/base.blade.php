@@ -17,6 +17,9 @@
 
     <footer style="border-top: 1px solid #eaeaea; margin-top: 30px; padding-top: 10px; font-size: 12px; color: #888;">
         <p>© {{ date('Y') }} SISP Platform – Automated Notification</p>
+        <p style="margin: 5px 0 0 0; font-size: 11px; color: #999;">
+            This is an automated message. Please do not reply to this email.
+        </p>
     </footer>
 
 </div>
