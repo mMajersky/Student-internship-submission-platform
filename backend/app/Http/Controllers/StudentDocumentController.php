@@ -29,8 +29,11 @@ class StudentDocumentController extends Controller
             ->where('type', 'agreement_signed')
             ->first();
 
+        // Vrátime 200 aj keď dokument neexistuje - toto je normálne
         if (!$document) {
-            return response()->json(['message' => 'Not Found'], 404);
+            return response()->json([
+                'document' => null
+            ], 200);
         }
 
         return response()->json([
@@ -146,7 +149,7 @@ class StudentDocumentController extends Controller
         }
 
         $controller = app(InternshipPdfController::class);
-        return $controller->generate($internship->id);
+        return $controller->generate($internship);
     }
 }
 

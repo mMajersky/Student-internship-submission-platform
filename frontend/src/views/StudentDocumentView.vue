@@ -109,15 +109,25 @@ const signedAgreement = ref(null);
 
 const loadSignedMeta = async () => {
   if (!internshipId.value || !authStore.token) return;
+  
   try {
-    const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed/meta`, {
+    const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-signed/meta`, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     });
-    if (resp.status === 404) { signedAgreement.value = null; return; }
+    
+    if (!resp.ok) {
+      console.error(`Chyba ${resp.status} pri načítaní metadát dokumentu`);
+      signedAgreement.value = null;
+      return;
+    }
+    
     const data = await resp.json();
-    if (!resp.ok) throw new Error(data.message || 'Chyba pri načítaní meta');
+    // Backend teraz vracia 200 aj keď dokument neexistuje (document: null)
     signedAgreement.value = data.document;
-  } catch (e) { console.error(e); }
+  } catch (e) { 
+    console.error('Chyba pri načítaní metadát dokumentu:', e);
+    signedAgreement.value = null;
+  }
 };
 onMounted(loadSignedMeta);
 
@@ -155,7 +165,7 @@ async function uploadFile(type) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
+    const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authStore.token}`
@@ -175,34 +185,18 @@ async function uploadFile(type) {
   }
 }
 
-async function downloadSignedAgreement() {
-  if (!internshipId.value || !authStore.token) return;
-  const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
-    headers: { 'Authorization': `Bearer ${authStore.token}` }
-  });
-  if (!resp.ok) {
-    const data = await resp.json().catch(() => ({}));
-    alert(data.message || `Chyba: ${resp.status}`);
-    return;
-  }
-  const blob = await resp.blob();
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = signedAgreement.value?.name || 'agreement_signed.pdf';
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
-
 async function downloadGeneratedAgreement() {
-  if (!internshipId.value) {
-    alert('Chýba ID praxe.');
+  if (!internshipId.value || !authStore.token) {
+    alert('Chýba ID praxe alebo nie ste prihlásený.');
     return;
   }
   try {
-    const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
+    const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-generated`, {
       method: 'GET',
-      headers: { 'Accept': 'application/pdf', 'Authorization': `Bearer ${authStore.token}` }
+      headers: { 
+        'Accept': 'application/pdf', 
+        'Authorization': `Bearer ${authStore.token}` 
+      }
     });
     if (!resp.ok) {
       const data = await resp.json().catch(() => ({}));
@@ -212,7 +206,7 @@ async function downloadGeneratedAgreement() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = signedAgreement.value?.name || 'agreement_signed.pdf';
+    a.download = `Dohoda_o_odbornej_praxi_${internshipId.value}.pdf`;
     a.click();
     window.URL.revokeObjectURL(url);
   } catch (e) {
