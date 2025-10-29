@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import StudentDocumentView from '../views/StudentDocumentView.vue'
 // Importy sú v poriadku, môžeme ich nechať
 const LandingView = () => import('../views/LandingView.vue')
 
@@ -63,6 +64,17 @@ const router = createRouter({
         roles: ['STUDENT']
       }
     },
+
+    {
+      path: '/upload-documents',
+      name: 'upload-documents',
+      component: StudentDocumentView,
+      meta: { 
+        requiresAuth: true,
+        roles: ['STUDENT']
+      }
+    },
+
     {
       path: '/company-dashboard',
       name: 'company-dashboard',
