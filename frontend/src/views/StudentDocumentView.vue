@@ -61,6 +61,14 @@
               <button class="btn btn-primary btn-sm" @click="uploadFile('zmluva')">
                 Nahrať
               </button>
+
+              <div class="mt-3" v-if="signedAgreement">
+                <div class="alert alert-success py-2 px-3 mb-2">
+                  <i class="bi bi-check-circle me-2"></i>
+                  Nahrané: <strong>{{ signedAgreement.name }}</strong>
+                  <small class="text-muted ms-2">({{ new Date(signedAgreement.created_at).toLocaleString() }})</small>
+                </div>
+              </div>
             </div>
 
             <div class="border rounded p-4 bg-white">
@@ -88,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 
@@ -97,6 +105,21 @@ const vykazFile = ref(null);
 const route = useRoute();
 const authStore = useAuthStore();
 const internshipId = ref(route.params.id || route.query.internshipId || null);
+const signedAgreement = ref(null);
+
+const loadSignedMeta = async () => {
+  if (!internshipId.value || !authStore.token) return;
+  try {
+    const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed/meta`, {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    });
+    if (resp.status === 404) { signedAgreement.value = null; return; }
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.message || 'Chyba pri načítaní meta');
+    signedAgreement.value = data.document;
+  } catch (e) { console.error(e); }
+};
+onMounted(loadSignedMeta);
 
 function handleFileUpload(event, type) {
   const file = event.target.files[0];
@@ -146,9 +169,29 @@ async function uploadFile(type) {
     }
 
     alert('Podpísaná dohoda bola nahraná.');
+    await loadSignedMeta();
   } catch (e) {
     alert(e.message);
   }
+}
+
+async function downloadSignedAgreement() {
+  if (!internshipId.value || !authStore.token) return;
+  const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
+    headers: { 'Authorization': `Bearer ${authStore.token}` }
+  });
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => ({}));
+    alert(data.message || `Chyba: ${resp.status}`);
+    return;
+  }
+  const blob = await resp.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = signedAgreement.value?.name || 'agreement_signed.pdf';
+  a.click();
+  window.URL.revokeObjectURL(url);
 }
 
 async function downloadGeneratedAgreement() {
@@ -157,9 +200,9 @@ async function downloadGeneratedAgreement() {
     return;
   }
   try {
-    const resp = await fetch(`http://localhost:8000/api/vykaz-generate/${internshipId.value}`, {
+    const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
       method: 'GET',
-      headers: { 'Accept': 'application/pdf' }
+      headers: { 'Accept': 'application/pdf', 'Authorization': `Bearer ${authStore.token}` }
     });
     if (!resp.ok) {
       const data = await resp.json().catch(() => ({}));
@@ -169,7 +212,7 @@ async function downloadGeneratedAgreement() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'dohoda.pdf';
+    a.download = signedAgreement.value?.name || 'agreement_signed.pdf';
     a.click();
     window.URL.revokeObjectURL(url);
   } catch (e) {

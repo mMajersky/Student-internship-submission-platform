@@ -111,9 +111,11 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
     Route::get('/internships/{internship}/comments/{comment}', [CommentController::class, 'show']);
 
-    // Documents: upload/download signed agreement
+    // Documents: upload/download signed agreement, metadata, and generated agreement download
     Route::post('/internships/{internship}/documents/agreement-signed', [StudentDocumentController::class, 'uploadSignedAgreement']);
     Route::get('/internships/{internship}/documents/agreement-signed', [StudentDocumentController::class, 'downloadSignedAgreement']);
+    Route::get('/internships/{internship}/documents/agreement-signed/meta', [StudentDocumentController::class, 'getSignedAgreementMeta']);
+    Route::get('/internships/{internship}/documents/agreement-generated', [StudentDocumentController::class, 'downloadGeneratedAgreement']);
 });
 
 // Company routes

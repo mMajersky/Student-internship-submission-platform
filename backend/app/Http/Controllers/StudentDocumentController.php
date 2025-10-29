@@ -7,9 +7,42 @@ use App\Models\Internship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\InternshipPdfController;
 
 class StudentDocumentController extends Controller
 {
+    public function getSignedAgreementMeta(Request $request, $internshipId)
+    {
+        $user = Auth::user();
+
+        $internship = Internship::with('student')->findOrFail($internshipId);
+
+        if (!$user || !$user->isStudent()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        if (!$user->student || $internship->student_id !== $user->student->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $document = Document::where('internship_id', $internship->id)
+            ->where('type', 'agreement_signed')
+            ->first();
+
+        if (!$document) {
+            return response()->json(['message' => 'Not Found'], 404);
+        }
+
+        return response()->json([
+            'document' => [
+                'id' => $document->id,
+                'name' => $document->name,
+                'status' => $document->status,
+                'type' => $document->type,
+                'created_at' => $document->created_at,
+            ]
+        ]);
+    }
     public function uploadSignedAgreement(Request $request, $internshipId)
     {
         $user = Auth::user();
@@ -96,6 +129,24 @@ class StudentDocumentController extends Controller
         $fullPath = Storage::disk('public')->path($document->file_path);
 
         return response()->download($fullPath, $filename);
+    }
+
+    public function downloadGeneratedAgreement(Request $request, $internshipId)
+    {
+        $user = Auth::user();
+
+        $internship = Internship::with('student')->findOrFail($internshipId);
+
+        if (!$user || !$user->isStudent()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        if (!$user->student || $internship->student_id !== $user->student->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $controller = app(InternshipPdfController::class);
+        return $controller->generate($internship->id);
     }
 }
 
