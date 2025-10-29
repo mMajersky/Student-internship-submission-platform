@@ -1,190 +1,179 @@
-<!DOCTYPE html>
-<html lang="sk">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="sk" xml:lang="sk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Výsledok akcie stáže - SISP</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e9ecef;
-        }
-        .header h1 {
-            color: #2c3e50;
-            margin: 0;
-            font-size: 24px;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #c3e6cb;
-            margin: 20px 0;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #f5c6cb;
-            margin: 20px 0;
-        }
-        .info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #bee5eb;
-            margin: 20px 0;
-        }
-        .internship-details {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #007bff;
-            margin: 20px 0;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-            color: #6c757d;
-            font-size: 14px;
-        }
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 10px 5px;
-        }
-        .button:hover {
-            background-color: #0056b3;
-        }
-        .button.secondary {
-            background-color: #6c757d;
-        }
-        .button.secondary:hover {
-            background-color: #545b62;
-        }
-    </style>
 </head>
-<body>
-    <p style="font-size: 12px; color: #666; text-align: center; margin-bottom: 20px;">English version can be found below the Slovak version.</p>
-    <div class="container">
-        <div class="header">
-            <h1>SISP</h1>
-            <p>Systém riadenia stáží</p>
-        </div>
+<body style="margin: 0 !important; padding: 0 !important; -webkit-text-size-adjust: none; -ms-text-size-adjust: none; background: #f6f6f6; font-family: Arial, sans-serif;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#f6f6f6" style="margin: 0; padding: 20px;">
+    <tr>
+        <td>
+            <table width="600" border="0" cellpadding="0" cellspacing="0" align="center" bgcolor="#ffffff" style="border-radius: 8px;">
+                <tr>
+                    <td style="padding: 30px;">
+                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e9ecef;">
+                                    <h1 style="color: #007BFF; margin: 0; font-size: 24px; font-family: Arial, sans-serif;">SISP</h1>
+                                    <p style="color: #666; font-family: Arial, sans-serif;">Systém riadenia stáží</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    @if($success ?? false)
+                                        <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#d4edda" style="border: 1px solid #c3e6cb; border-radius: 4px; margin: 20px 0;">
+                                            <tr>
+                                                <td style="color: #155724;">
+                                                    <h3 style="margin: 0 0 10px 0;">Akcia bola úspešne dokončená!</h3>
+                                                    <p style="margin: 0; font-size: 14px;">Stáž bola úspešne {{ $action === 'confirm' ? 'schválená' : 'zamietnutá' }}.</p>
+                                                </td>
+                                            </tr>
+                                        </table>
 
-        @if($success ?? false)
-            <div class="success">
-                <h3>Akcia bola úspešne dokončená!</h3>
-                <p>{{ $message }}</p>
-            </div>
+                                        @if(isset($internship))
+                                            <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#f8f9fa" style="border-radius: 4px; border-left: 4px solid #007bff; margin: 20px 0;">
+                                                <tr>
+                                                    <td>
+                                                        <h4 style="margin: 0 0 10px 0; color: #333;">Podrobnosti o stáži:</h4>
+                                                        <p style="margin: 5px 0;"><strong>Študent:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
+                                                        <p style="margin: 5px 0;"><strong>Spoločnosť:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
+                                                        <p style="margin: 5px 0;"><strong>Akademický rok:</strong> {{ $internship->academy_year }}</p>
+                                                        <p style="margin: 5px 0;"><strong>Stav:</strong> {{ ucfirst($internship->status) }}</p>
+                                                        <p style="margin: 5px 0;"><strong>Akcia:</strong> {{ ucfirst($action) }}</p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        @endif
 
-            @if(isset($internship))
-                <div class="internship-details">
-                    <h4>Podrobnosti o stáži:</h4>
-                    <p><strong>Študent:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
-                    <p><strong>Spoločnosť:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
-                    <p><strong>Akademický rok:</strong> {{ $internship->academy_year }}</p>
-                    <p><strong>Stav:</strong> {{ ucfirst($internship->status) }}</p>
-                    <p><strong>Akcia:</strong> {{ ucfirst($action) }}</p>
-                </div>
-            @endif
+                                        <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#d1ecf1" style="border: 1px solid #bee5eb; border-radius: 4px; margin: 20px 0;">
+                                            <tr>
+                                                <td style="color: #0c5460;">
+                                                    <p style="margin: 0; font-size: 14px;">Môžete teraz zatvoriť toto okno. Stáž bola {{ $action === 'confirm' ? 'schválená' : 'zamietnutá' }} a študent bude informovaný.</p>
+                                                </td>
+                                            </tr>
+                                        </table>
 
-            <div class="info">
-                <p>Môžete teraz zatvoriť toto okno. Stáž bola {{ $action === 'confirm' ? 'schválená' : 'zamietnutá' }} a študent bude informovaný.</p>
-            </div>
+                                    @else
+                                        <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#f8d7da" style="border: 1px solid #f5c6cb; border-radius: 4px; margin: 20px 0;">
+                                            <tr>
+                                                <td style="color: #721c24;">
+                                                    <h3 style="margin: 0 0 10px 0;">Chyba pri spracovaní akcie</h3>
+                                                    <p style="margin: 0; font-size: 14px;">{{ $error ?? 'Nastala neznáma chyba.' }}</p>
+                                                </td>
+                                            </tr>
+                                        </table>
 
-        @else
-            <div class="error">
-                <h3>Chyba pri spracovaní akcie</h3>
-                <p>{{ $error ?? 'Nastala neznáma chyba.' }}</p>
-            </div>
+                                        <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#d1ecf1" style="border: 1px solid #bee5eb; border-radius: 4px; margin: 20px 0;">
+                                            <tr>
+                                                <td style="color: #0c5460;">
+                                                    <p style="margin: 0 0 5px 0; font-size: 14px;">Ak si myslíte, že ide o chybu, kontaktujte svojho garanta alebo skúste použiť odkaz z vášho emailu znovu.</p>
+                                                    @if(isset($internship) && $internship->garant)
+                                                        <p style="margin: 0; font-size: 14px;"><strong>Kontakt na garanta:</strong> {{ $internship->garant->user->email ?? 'garant@school.sk' }}</p>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    @endif
 
-            <div class="info">
-                <p>Ak si myslíte, že ide o chybu, kontaktujte svojho garanta alebo skúste použiť odkaz z vášho emailu znovu.</p>
-                @if(isset($internship) && $internship->garant)
-                <p><strong>Kontakt na garanta:</strong> {{ $internship->garant->user->email ?? 'garant@school.sk' }}</p>
-                @endif
-            </div>
-        @endif
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e9ecef; margin-top: 30px; padding-top: 10px;">
+                                        <tr>
+                                            <td style="text-align: center; color: #6c757d; font-size: 14px; font-family: Arial, sans-serif;">
+                                                <p style="margin: 0;">© {{ date('Y') }} SISP – Automated Notification</p>
+                                                <p style="margin: 5px 0 0 0; font-size: 12px;">ENG: This is an automated message. Please do not reply to this email.</p>
+                                                <p style="margin: 5px 0 0 0; font-size: 12px;">SK: Toto je automatická správa zo systému. Prosím, neodpovedajte na tento e-mail.</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 40px;">
+                                    <!-- ENGLISH VERSION -->
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e9ecef;">
+                                                <h1 style="color: #007BFF; margin: 0; font-size: 24px; font-family: Arial, sans-serif;">SISP Platform</h1>
+                                                <p style="color: #666; font-family: Arial, sans-serif;">Internship Management System</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @if($success ?? false)
+                                                    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#d4edda" style="border: 1px solid #c3e6cb; border-radius: 4px; margin: 20px 0;">
+                                                        <tr>
+                                                            <td style="color: #155724;">
+                                                                <h3 style="margin: 0 0 10px 0;">The action has been completed successfully!</h3>
+                                                                <p style="margin: 0; font-size: 14px;">{{ $message }}</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
 
-        <div class="footer">
-            <p>Platforma SISP - Platforma na podávanie žiadostí o stáže študentov</p>
-            <p>Toto je automatická správa zo systému.</p>
-        </div>
-    </div>
+                                                    @if(isset($internship))
+                                                        <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#f8f9fa" style="border-radius: 4px; border-left: 4px solid #007bff; margin: 20px 0;">
+                                                            <tr>
+                                                                <td>
+                                                                    <h4 style="margin: 0 0 10px 0; color: #333;">Internship Details:</h4>
+                                                                    <p style="margin: 5px 0;"><strong>Student:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
+                                                                    <p style="margin: 5px 0;"><strong>Company:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
+                                                                    <p style="margin: 5px 0;"><strong>Academic Year:</strong> {{ $internship->academy_year }}</p>
+                                                                    <p style="margin: 5px 0;"><strong>Status:</strong> @if($internship->status == 'vytvorená') Created @elseif($internship->status == 'potvrdená') Confirmed @elseif($internship->status == 'schválená') Approved @elseif($internship->status == 'zamietnutá') Rejected @elseif($internship->status == 'obhájená') Defended @elseif($internship->status == 'neobhájená') Not defended @else {{ ucfirst($internship->status) }} @endif</p>
+                                                                    <p style="margin: 5px 0;"><strong>Action:</strong> {{ ucfirst($action) }}</p>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    @endif
 
-    <!-- ENGLISH VERSION -->
-    <div class="container" style="margin-top: 40px;">
-        <div class="header">
-            <h1>SISP Platform</h1>
-            <p>Internship Management System</p>
-        </div>
+                                                    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#d1ecf1" style="border: 1px solid #bee5eb; border-radius: 4px; margin: 20px 0;">
+                                                        <tr>
+                                                            <td style="color: #0c5460;">
+                                                                <p style="margin: 0; font-size: 14px;">You can now close this window. The internship has been {{ $action === 'confirm' ? 'approved' : 'rejected' }} and the student will be notified.</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
 
-        @if($success ?? false)
-            <div class="success">
-                <h3>The action has been completed successfully!</h3>
-                <p>{{ $message }}</p>
-            </div>
+                                                @else
+                                                    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#f8d7da" style="border: 1px solid #f5c6cb; border-radius: 4px; margin: 20px 0;">
+                                                        <tr>
+                                                            <td style="color: #721c24;">
+                                                                <h3 style="margin: 0 0 10px 0;">Error processing the action</h3>
+                                                                <p style="margin: 0; font-size: 14px;">{{ $error ?? 'An unknown error occurred.' }}</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
 
-            @if(isset($internship))
-                <div class="internship-details">
-                    <h4>Internship Details:</h4>
-                    <p><strong>Student:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
-                    <p><strong>Company:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
-                    <p><strong>Academic Year:</strong> {{ $internship->academy_year }}</p>
-                    <p><strong>Status:</strong> @if($internship->status == 'vytvorená') Created @elseif($internship->status == 'potvrdená') Confirmed @elseif($internship->status == 'schválená') Approved @elseif($internship->status == 'zamietnutá') Rejected @elseif($internship->status == 'obhájená') Defended @elseif($internship->status == 'neobhájená') Not defended @else {{ ucfirst($internship->status) }} @endif</p>
-                    <p><strong>Action:</strong> {{ ucfirst($action) }}</p>
-                </div>
-            @endif
+                                                    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#d1ecf1" style="border: 1px solid #bee5eb; border-radius: 4px; margin: 20px 0;">
+                                                        <tr>
+                                                            <td style="color: #0c5460;">
+                                                                <p style="margin: 0 0 5px 0; font-size: 14px;">If you think this is a mistake, contact your supervisor or try using the link from your email again.</p>
+                                                                @if(isset($internship) && $internship->garant)
+                                                                    <p style="margin: 0; font-size: 14px;"><strong>Contact the Student's Supervisor:</strong> {{ $internship->garant->user->email ?? 'supervisor@school.sk' }}</p>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                @endif
 
-            <div class="info">
-                <p>You can now close this window. The internship has been {{ $action === 'confirm' ? 'approved' : 'rejected' }} and the student will be notified.</p>
-            </div>
-
-        @else
-            <div class="error">
-                <h3>Error processing the action</h3>
-                <p>{{ $error ?? 'An unknown error occurred.' }}</p>
-            </div>
-
-            <div class="info">
-                <p>If you think this is a mistake, contact your supervisor or try using the link from your email again.</p>
-                @if(isset($internship) && $internship->garant)
-                <p><strong>Contact Supervisor:</strong> {{ $internship->garant->user->email ?? 'supervisor@school.sk' }}</p>
-                @endif
-            </div>
-        @endif
-
-        <div class="footer">
-            <p>SISP Platform - Student Internship Application Platform</p>
-            <p>This is an automated message from the system.</p>
-        </div>
-    </div>
+                                                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e9ecef; margin-top: 30px; padding-top: 10px;">
+                                                    <tr>
+                                                        <td style="text-align: center; color: #6c757d; font-size: 14px; font-family: Arial, sans-serif;">
+                                                            <p style="margin: 0;">© {{ date('Y') }} SISP – Automated Notification</p>
+                                                            <p style="margin: 5px 0 0 0; font-size: 12px;">ENG: This is an automated message. Please do not reply to this email.</p>
+                                                            <p style="margin: 5px 0 0 0; font-size: 12px;">SK: Toto je automatická správa zo systému. Prosím, neodpovedajte na tento e-mail.</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>

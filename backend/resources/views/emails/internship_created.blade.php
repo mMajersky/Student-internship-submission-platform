@@ -37,14 +37,22 @@
         </a>
     </div>
 
-    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0; font-size: 12px; color: #666;">
-        <p><strong>Bezpečnostné upozornenie:</strong> Tieto odkazy sú zabezpečené a vyprší ich platnosť o 30 dní.</p>
-    </div>
+    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#f8f9fa" style="border-radius: 4px; margin: 20px 0;">
+        <tr>
+            <td style="font-size: 12px; color: #666;">
+                <strong>Bezpečnostné upozornenie:</strong> Tieto odkazy sú zabezpečené a vyprší ich platnosť o 30 dní.
+            </td>
+        </tr>
+    </table>
 
-    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0; font-size: 14px;">
-        <p style="margin: 0;"><strong>Technické problémy alebo expirovaný odkaz:</strong><br>
-        V prípade technických problémov alebo expirácie odkazov, kontaktujte svojho garanta: <strong>{{ $internship->garant->user->email ?? 'garant@school.sk' }}</strong></p>
-    </div>
+    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#fff3cd" style="border: 1px solid #ffeaa7; border-radius: 4px; margin: 20px 0; font-size: 14px; color: #856404;">
+        <tr>
+            <td style="border: 1px solid #ffeaa7;">
+                <strong>Technické problémy alebo expirovaný odkaz:</strong><br>
+                V prípade technických problémov alebo expirácie odkazov, kontaktujte svojho garanta: <strong>{{ $internship->garant->user->email ?? 'garant@school.sk' }}</strong>
+            </td>
+        </tr>
+    </table>
 
     <p style="margin-top: 30px;">S pozdravom,<br>Tím SISP</p>
 
@@ -82,14 +90,22 @@
         </a>
     </div>
 
-    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0; font-size: 12px; color: #666;">
-        <p><strong>Security Notice:</strong> These links are secure and will expire in 30 days.</p>
-    </div>
+    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#f8f9fa" style="border-radius: 4px; margin: 20px 0;">
+        <tr>
+            <td style="font-size: 12px; color: #666;">
+                <strong>Security Notice:</strong> These links are secure and will expire in 30 days.
+            </td>
+        </tr>
+    </table>
 
-    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0; font-size: 14px;">
-        <p style="margin: 0;"><strong>Technical issues or expired link:</strong><br>
-        For technical issues or expired links, contact your supervisor: <strong>{{ $internship->garant->user->email ?? 'supervisor@school.sk' }}</strong></p>
-    </div>
+    <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#fff3cd" style="border: 1px solid #ffeaa7; border-radius: 4px; margin: 20px 0; font-size: 14px; color: #856404;">
+        <tr>
+            <td style="border: 1px solid #ffeaa7;">
+                <strong>Technical issues or expired link:</strong><br>
+                For technical issues or expired links, contact the student's supervisor: <strong>{{ $internship->garant->user->email ?? 'supervisor@school.sk' }}</strong>
+            </td>
+        </tr>
+    </table>
 
     <p style="margin-top: 30px;">Regards,<br>SISP Team</p>
 @endsection

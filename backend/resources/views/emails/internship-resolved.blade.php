@@ -155,7 +155,7 @@
             <p>The company has already taken action regarding this internship application. The links in the email are no longer valid.</p>
             <p>If you think this is a mistake or need to make changes, contact your garant.</p>
             @if(isset($internship) && $internship->garant)
-            <p><strong>Contact Garant:</strong> {{ $internship->garant->user->email ?? 'garant@school.sk' }}</p>
+            <p><strong>Contact the Student's Supervisor:</strong> {{ $internship->garant->user->email ?? 'supervisor@school.sk' }}</p>
             @endif
         </div>
 
