@@ -145,8 +145,9 @@ class InternshipController extends Controller
     public function index()
     {
         try {
-            // Get all internships for admin/garant
+            // Get all internships for admin/garant with document count
             $internships = Internship::with(['student', 'company', 'garant'])
+                ->withCount('documents')
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -178,6 +179,7 @@ class InternshipController extends Controller
                         'end_date' => $internship->end_date?->format('Y-m-d'),
                         'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
                         'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                        'documents_count' => $internship->documents_count,
                         'created_at' => $internship->created_at?->toIso8601String(),
                         'updated_at' => $internship->updated_at?->toIso8601String(),
                     ];

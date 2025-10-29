@@ -28,7 +28,7 @@
               <p class="text-muted small mb-3">
                 Generované systémom po vytvorení praxe.
               </p>
-              <button class="btn btn-primary btn-sm">
+              <button class="btn btn-primary btn-sm" @click="downloadGeneratedAgreement">
                 <i class="bi bi-download me-1"></i> Stiahnuť dohodu
               </button>
 
@@ -89,9 +89,14 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRoute } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
 const zmluvaFile = ref(null);
 const vykazFile = ref(null);
+const route = useRoute();
+const authStore = useAuthStore();
+const internshipId = ref(route.params.id || route.query.internshipId || null);
 
 function handleFileUpload(event, type) {
   const file = event.target.files[0];
@@ -99,12 +104,76 @@ function handleFileUpload(event, type) {
   else vykazFile.value = file;
 }
 
-function uploadFile(type) {
+async function uploadFile(type) {
   const file = type === "zmluva" ? zmluvaFile.value : vykazFile.value;
-  if (file) {
-    alert(`Súbor ${file.name} bol úspešne nahraný.`);
-  } else {
+
+  if (!internshipId.value) {
+    alert('Chýba ID praxe.');
+    return;
+  }
+
+  if (!file) {
     alert("Vyber súbor pred nahraním.");
+    return;
+  }
+
+  if (!authStore.token) {
+    alert('Nie ste prihlásený.');
+    return;
+  }
+
+  // Zatiaľ implementujeme iba upload podpísanej dohody
+  if (type !== 'zmluva') {
+    alert('Upload výkazu nie je ešte implementovaný.');
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const resp = await fetch(`http://localhost:8000/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: formData,
+    });
+
+    const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error(data.message || 'Nepodarilo sa nahrať súbor.');
+    }
+
+    alert('Podpísaná dohoda bola nahraná.');
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function downloadGeneratedAgreement() {
+  if (!internshipId.value) {
+    alert('Chýba ID praxe.');
+    return;
+  }
+  try {
+    const resp = await fetch(`http://localhost:8000/api/vykaz-generate/${internshipId.value}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/pdf' }
+    });
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      throw new Error(data.message || `Chyba servera: ${resp.status}`);
+    }
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dohoda.pdf';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (e) {
+    alert(e.message);
   }
 }
 </script>

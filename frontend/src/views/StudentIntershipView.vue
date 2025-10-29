@@ -225,6 +225,10 @@ const handleNovaPrax = () => {
 
 const handleDokumenty = (prax) => {
   console.log('Otvoriť dokumenty pre prax s ID:', prax.id);
+  router.push({
+    name: 'upload-documents',
+    query: { internshipId: prax.id }
+  });
 };
 
 const handleZobrazitKomentare = (prax) => {
