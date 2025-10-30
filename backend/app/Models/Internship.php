@@ -117,4 +117,6 @@ class Internship extends Model
     {
         return $this->hasOne(Comment::class, 'internship_id')->latestOfMany();
     }
+
+
 }

@@ -281,6 +281,16 @@
 }
 
 /* ===============================================
+   COMPANY APPROVAL INFO BOX STYLES
+   =============================================== */
+
+.company-approval-info .info-box {
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.02) 100%);
+  border: 1px solid var(--info-border, #b3d9ff);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ===============================================
    FOOTER STYLES
    =============================================== */
 
