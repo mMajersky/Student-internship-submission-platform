@@ -80,6 +80,9 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     // Documents for garants
     Route::get('/internships/{internship}/documents', [InternshipDocumentController::class, 'index']);
     Route::get('/internships/{internship}/documents/{document}', [InternshipDocumentController::class, 'download']);
+
+    // Internship email management
+    Route::post('/internships/{id}/resend-approval-email', [InternshipController::class, 'resendApprovalEmail']);
     
     // Comment routes for internships (Garant only can create/update/delete)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
@@ -123,6 +126,9 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
 Route::middleware(['auth:api', 'role:company'])->group(function () {
     // Future company-specific routes
 });
+
+// Company action routes for internship confirmation/rejection (public for email links)
+Route::get('/internships/company-action', [InternshipController::class, 'companyAction']);
 
 // Admin-only routes
 Route::middleware(['auth:api', 'role:admin'])->group(function () {

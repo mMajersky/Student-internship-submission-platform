@@ -6,9 +6,13 @@ use App\Models\Internship;
 use App\Models\Student;
 use App\Models\Company;
 use App\Models\Garant;
+use App\Mail\InternshipCreatedNotification;
+use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class InternshipController extends Controller
 {
@@ -89,7 +93,31 @@ class InternshipController extends Controller
             $internship = Internship::create($validated);
 
             // Load relationships for the response
-            $internship->load(['student', 'company', 'garant']);
+            $internship->load(['student', 'company.user', 'garant']);
+
+            // Send email notification to company if created with "potvrdená" status
+            if ($validated['status'] === Internship::STATUS_POTVRDENA && $internship->company && $internship->company->user && $internship->company->user->email) {
+                // Generate secure tokens for email actions
+                $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
+                $rejectToken = $this->generateSecureToken($internship->id, 'reject');
+
+                $data = [
+                    'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                    'studentEmail' => $internship->student->student_email,
+                    'studentPhone' => $internship->student->phone_number ?? 'N/A',
+                    'companyName' => $internship->company->name,
+                    'academyYear' => $internship->academy_year,
+                    'startDate' => $internship->start_date?->format('Y-m-d'),
+                    'endDate' => $internship->end_date?->format('Y-m-d'),
+                    'status' => $internship->status,
+                    'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                    'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                ];
+
+                EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $data);
+            }
+
+
 
             // Return success response with created internship
             return response()->json([
@@ -334,11 +362,37 @@ class InternshipController extends Controller
                 'end_date.after_or_equal' => 'The end date must be equal to or after the start date.',
             ]);
 
+            // Check if status is being changed to "potvrdená"
+            $oldStatus = $internship->status;
+            $statusChangedToPotvrdena = $oldStatus !== $validated['status'] && $validated['status'] === Internship::STATUS_POTVRDENA;
+
             // Update the internship
             $internship->update($validated);
 
             // Load relationships for the response
-            $internship->load(['student', 'company', 'garant']);
+            $internship->load(['student', 'company.user', 'garant']);
+
+            // Send email notification to company if status changed to "potvrdená"
+            if ($statusChangedToPotvrdena && $internship->company && $internship->company->user && $internship->company->user->email) {
+                // Generate secure tokens for email actions
+                $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
+                $rejectToken = $this->generateSecureToken($internship->id, 'reject');
+
+                $data = [
+                    'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                    'studentEmail' => $internship->student->student_email,
+                    'studentPhone' => $internship->student->phone_number ?? 'N/A',
+                    'companyName' => $internship->company->name,
+                    'academyYear' => $internship->academy_year,
+                    'startDate' => $internship->start_date?->format('Y-m-d'),
+                    'endDate' => $internship->end_date?->format('Y-m-d'),
+                    'status' => $internship->status,
+                    'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                    'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                ];
+
+                EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $data);
+            }
 
             // Return success response with updated internship
             return response()->json([
@@ -498,6 +552,78 @@ class InternshipController extends Controller
     }
 
     /**
+     * Confirm internship by company (public route for email links).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyConfirm($id)
+    {
+        try {
+            $internship = Internship::findOrFail($id);
+
+            // Update status to confirmed
+            $internship->update(['status' => Internship::STATUS_POTVRDENA]);
+
+            return response()->json([
+                'message' => 'Internship confirmed successfully.',
+                'data' => [
+                    'id' => $internship->id,
+                    'status' => $internship->status,
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error confirming internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while confirming the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject internship by company (public route for email links).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyReject($id)
+    {
+        try {
+            $internship = Internship::findOrFail($id);
+
+            // Update status to rejected
+            $internship->update(['status' => Internship::STATUS_ZAMIETNUTA]);
+
+            return response()->json([
+                'message' => 'Internship rejected successfully.',
+                'data' => [
+                    'id' => $internship->id,
+                    'status' => $internship->status,
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error rejecting internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while rejecting the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
      * Store a newly created internship for the authenticated student (student-specific method).
      *
      * @param  \Illuminate\Http\Request  $request
@@ -575,12 +701,14 @@ class InternshipController extends Controller
         try {
             // Add the authenticated student's ID to the validated data
             $validated['student_id'] = $user->student->id;
-            
+
             // Create the internship
             $internship = Internship::create($validated);
 
             // Load relationships for the response
-            $internship->load(['student', 'company', 'garant']);
+            $internship->load(['student', 'company.user', 'garant']);
+
+
 
             // Return success response with created internship
             return response()->json([
@@ -625,6 +753,196 @@ class InternshipController extends Controller
                 'message' => 'An error occurred while creating the internship.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
+        }
+    }
+
+    /**
+     * Handle company actions (confirm/reject) via secure token (public route for email links).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyAction(Request $request)
+    {
+        try {
+            $token = $request->query('token');
+
+            if (!$token) {
+                return response()->json([
+                    'message' => 'Token is required.'
+                ], 400);
+            }
+
+            // Decrypt and validate the token
+            $tokenData = $this->validateSecureToken($token);
+
+            if (!$tokenData) {
+                return response()->json([
+                    'message' => 'Invalid or expired token.'
+                ], 400);
+            }
+
+            $internship = Internship::findOrFail($tokenData['internship_id']);
+
+            // Check if internship is still in "Potvrdená" status
+            if ($internship->status !== Internship::STATUS_POTVRDENA) {
+                return response()->json([
+                    'message' => 'This internship has already been processed and is no longer available for action.',
+                    'current_status' => $internship->status,
+                    'error' => 'already_resolved'
+                ], 400);
+            }
+
+            // Update status based on action
+            $newStatus = $tokenData['action'] === 'confirm'
+                ? Internship::STATUS_SCHVALENA // Company confirmed/approved
+                : Internship::STATUS_ZAMIETNUTA; // Company rejected
+
+            $internship->update(['status' => $newStatus]);
+
+            return response()->json([
+                'message' => 'Internship ' . ($tokenData['action'] === 'confirm' ? 'confirmed' : 'rejected') . ' successfully.',
+                'data' => [
+                    'id' => $internship->id,
+                    'status' => $internship->status,
+                    'action' => $tokenData['action']
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error processing company action: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while processing the action.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate a secure token for company actions.
+     *
+     * @param  int  $internshipId
+     * @param  string  $action
+     * @return string
+     */
+    private function generateSecureToken($internshipId, $action)
+    {
+        $data = [
+            'internship_id' => $internshipId,
+            'action' => $action,
+            'timestamp' => Carbon::now()->timestamp,
+            'expires_at' => Carbon::now()->addDays(30)->timestamp // Token expires in 30 days for companies to have ample time
+        ];
+
+        return Crypt::encrypt($data);
+    }
+
+    /**
+     * Resend internship approval email to company (garant only).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resendApprovalEmail($id)
+    {
+        try {
+            $internship = Internship::with(['company.user', 'student', 'garant'])->findOrFail($id);
+
+            // Check if internship is in "potvrdená" status (awaiting company approval)
+            if ($internship->status !== Internship::STATUS_POTVRDENA) {
+                return response()->json([
+                    'message' => 'Email can only be resent for internships awaiting company approval.',
+                    'current_status' => $internship->status
+                ], 400);
+            }
+
+            // Check if company exists and has a user with email
+            if (!$internship->company || !$internship->company->user || !$internship->company->user->email) {
+                return response()->json([
+                    'message' => 'Company email not found.'
+                ], 400);
+            }
+
+            // Generate secure tokens for email actions
+            $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
+            $rejectToken = $this->generateSecureToken($internship->id, 'reject');
+
+            $data = [
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'studentEmail' => $internship->student->student_email,
+                'studentPhone' => $internship->student->phone_number ?? 'N/A',
+                'companyName' => $internship->company->name,
+                'academyYear' => $internship->academy_year,
+                'startDate' => $internship->start_date?->format('Y-m-d'),
+                'endDate' => $internship->end_date?->format('Y-m-d'),
+                'status' => $internship->status,
+                'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+            ];
+
+            $emailSent = EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $data);
+
+            if ($emailSent) {
+                return response()->json([
+                    'message' => 'Approval email resent successfully to ' . $internship->company->user->email,
+                    'email' => $internship->company->user->email
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Failed to send email. Please try again or contact system administrator.'
+                ], 500);
+            }
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error resending approval email: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while resending the email.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Validate and decrypt a secure token.
+     *
+     * @param  string  $token
+     * @return array|null
+     */
+    private function validateSecureToken($token)
+    {
+        try {
+            $data = Crypt::decrypt($token);
+
+            // Check if token has expired
+            if (isset($data['expires_at']) && Carbon::now()->timestamp > $data['expires_at']) {
+                return null;
+            }
+
+            // Validate required fields
+            if (!isset($data['internship_id'], $data['action'], $data['timestamp'])) {
+                return null;
+            }
+
+            // Validate action
+            if (!in_array($data['action'], ['confirm', 'reject'])) {
+                return null;
+            }
+
+            return $data;
+
+        } catch (\Exception $e) {
+            \Log::warning('Failed to decrypt token: ' . $e->getMessage());
+            return null;
         }
     }
 }
