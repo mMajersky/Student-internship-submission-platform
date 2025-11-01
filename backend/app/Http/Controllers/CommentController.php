@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Internship;
 use App\Models\Garant;
+use App\Models\Notification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -93,8 +95,8 @@ class CommentController extends Controller
                 'comment_type.in' => 'The comment type must be one of: ' . implode(', ', Comment::getTypes()) . '.',
             ]);
 
-            // Find the internship
-            $internship = Internship::findOrFail($internshipId);
+            // Find the internship with student relationship
+            $internship = Internship::with('student.user')->findOrFail($internshipId);
 
             // Get the current user and their garant profile
             $user = Auth::user();
@@ -132,6 +134,17 @@ class CommentController extends Controller
                 'comment_type' => $comment->comment_type,
                 'content_preview' => substr($comment->content, 0, 100),
             ]);
+
+            // Notify student about new comment
+            if ($internship->student && $internship->student->user) {
+                NotificationService::create(
+                    $internship->student->user->id,
+                    Notification::TYPE_COMMENT_ADDED,
+                    'Nový komentár k praxi',
+                    'Garant ' . $garant->full_name . ' pridal komentár k vašej praxi.',
+                    ['internship_id' => $internshipId, 'comment_id' => $comment->id]
+                );
+            }
 
             // Return success response with created comment
             return response()->json([

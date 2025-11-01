@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Document;
 use App\Models\Internship;
+use App\Models\Notification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -82,6 +84,9 @@ class StudentDocumentController extends Controller
                 ]
             ]);
 
+            // Load garant relationship
+            $internship->load('garant.user');
+
             $file = $request->file('file');
             
             // Generate unique filename
@@ -121,6 +126,17 @@ class StudentDocumentController extends Controller
                     'file_path' => $path,
                     'name' => $file->getClientOriginalName(),
                 ]);
+            }
+
+            // Create notification for garant about uploaded document
+            if ($internship->garant && $internship->garant->user) {
+                NotificationService::create(
+                    $internship->garant->user->id,
+                    Notification::TYPE_DOCUMENT_UPLOADED,
+                    'Študent nahral dokument',
+                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' nahral podpísanú dohodu k praxi.',
+                    ['internship_id' => $internshipId, 'document_id' => $signedDoc->id]
+                );
             }
 
             return response()->json([
