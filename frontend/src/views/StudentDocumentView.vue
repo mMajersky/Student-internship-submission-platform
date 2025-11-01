@@ -33,7 +33,13 @@
               </button>
 
               <div class="alert alert-info mt-4" role="alert">
-                Miesto pre zobrazenie random upozornenia.
+                <h6 class="alert-heading"><i class="bi bi-shield-lock me-2"></i>Bezpečnosť dokumentov</h6>
+                <p class="mb-0 small">
+                  <strong>Kde sa ukladajú dokumenty?</strong><br>
+                  Všetky nahraté dokumenty (najmä podpísané PDF) sú uložené v <strong>zabezpečenom súkromnom úložisku</strong> na serveri 
+                  (<code>storage/app/private/documents/</code>). Dokumenty <strong>NIE SÚ verejne prístupné</strong> - prístup k nim majú 
+                  len autorizovaní používatelia cez API s kontrolou oprávnení.
+                </p>
               </div>
             </div>
           </div>
@@ -67,6 +73,14 @@
                   <i class="bi bi-check-circle me-2"></i>
                   Nahrané: <strong>{{ signedAgreement.name }}</strong>
                   <small class="text-muted ms-2">({{ new Date(signedAgreement.created_at).toLocaleString() }})</small>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-success btn-sm" @click="downloadSignedAgreement">
+                    <i class="bi bi-download me-1"></i> Stiahnuť
+                  </button>
+                  <button class="btn btn-danger btn-sm" @click="deleteSignedAgreement">
+                    <i class="bi bi-trash me-1"></i> Odstrániť
+                  </button>
                 </div>
               </div>
             </div>
@@ -209,6 +223,66 @@ async function downloadGeneratedAgreement() {
     a.download = `Dohoda_o_odbornej_praxi_${internshipId.value}.pdf`;
     a.click();
     window.URL.revokeObjectURL(url);
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function downloadSignedAgreement() {
+  if (!internshipId.value || !authStore.token) {
+    alert('Chýba ID praxe alebo nie ste prihlásený.');
+    return;
+  }
+  try {
+    const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${authStore.token}` 
+      }
+    });
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      throw new Error(data.message || `Chyba servera: ${resp.status}`);
+    }
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = signedAgreement.value?.name || 'Podpisana_dohoda.pdf';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function deleteSignedAgreement() {
+  if (!confirm('Naozaj chcete odstrániť tento dokument? Táto akcia sa nedá vrátiť späť.')) {
+    return;
+  }
+
+  if (!internshipId.value || !authStore.token) {
+    alert('Chýba ID praxe alebo nie ste prihlásený.');
+    return;
+  }
+
+  try {
+    const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
+      method: 'DELETE',
+      headers: { 
+        'Authorization': `Bearer ${authStore.token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    const data = await resp.json();
+    
+    if (!resp.ok) {
+      throw new Error(data.message || `Chyba servera: ${resp.status}`);
+    }
+
+    alert('Dokument bol úspešne odstránený.');
+    signedAgreement.value = null;
   } catch (e) {
     alert(e.message);
   }

@@ -119,6 +119,7 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     Route::get('/internships/{internshipId}/documents/agreement-signed/meta', [StudentDocumentController::class, 'getSignedAgreementMeta']);
     Route::post('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'uploadSignedAgreement']);
     Route::get('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'downloadSignedAgreement']);
+    Route::delete('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'deleteSignedAgreement']);
     Route::get('/internships/{internshipId}/documents/agreement-generated', [StudentDocumentController::class, 'downloadGeneratedAgreement']);
 });
 
