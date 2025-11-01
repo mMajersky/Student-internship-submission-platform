@@ -8,6 +8,8 @@ use App\Http\Controllers\InternshipPdfController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\StudentDocumentController;
+use App\Http\Controllers\InternshipDocumentController;
 use App\Http\Controllers\CommentController;
 
 
@@ -75,6 +77,9 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::get('/internships/{id}', [InternshipController::class, 'show']);
     Route::put('/internships/{id}', [InternshipController::class, 'update']);
     Route::delete('/internships/{id}', [InternshipController::class, 'destroy']);
+    // Documents for garants
+    Route::get('/internships/{internship}/documents', [InternshipDocumentController::class, 'index']);
+    Route::get('/internships/{internship}/documents/{document}', [InternshipDocumentController::class, 'download']);
 
     // Internship email management
     Route::post('/internships/{id}/resend-approval-email', [InternshipController::class, 'resendApprovalEmail']);
@@ -108,6 +113,14 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     // Students can view comments on their internships (read-only)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
     Route::get('/internships/{internship}/comments/{comment}', [CommentController::class, 'show']);
+
+    // Documents: upload/download signed agreement, metadata, and generated agreement download
+    // Špecifickejšie routes musia byť pred všeobecnejšími!
+    Route::get('/internships/{internshipId}/documents/agreement-signed/meta', [StudentDocumentController::class, 'getSignedAgreementMeta']);
+    Route::post('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'uploadSignedAgreement']);
+    Route::get('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'downloadSignedAgreement']);
+    Route::delete('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'deleteSignedAgreement']);
+    Route::get('/internships/{internshipId}/documents/agreement-generated', [StudentDocumentController::class, 'downloadGeneratedAgreement']);
 });
 
 // Company routes

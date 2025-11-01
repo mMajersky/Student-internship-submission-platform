@@ -44,6 +44,17 @@
           Všetky praxe
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          :class="{ active: activeTab === 'documents' }"
+          @click="activeTab = 'documents'"
+          type="button"
+        >
+          <i class="bi bi-folder me-2"></i>
+          Dokumenty
+        </button>
+      </li>
     </ul>
 
     <!-- Tab Content -->
@@ -91,7 +102,7 @@
                   Dokumenty
                 </h5>
                 <p class="card-text">Správa dokumentov a dohôd</p>
-                <button class="btn btn-success" disabled>
+                <button class="btn btn-success" @click="activeTab = 'documents'">
                   <i class="bi bi-folder me-2"></i>
                   Zobraziť dokumenty
                 </button>
@@ -202,11 +213,63 @@
                       <button class="btn btn-sm btn-outline-primary me-1" title="Upraviť" @click="handleEditInternship(internship)">
                         <i class="bi bi-pencil"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-secondary me-1" title="Stiahnuť PDF">
-                        <i class="bi bi-file-pdf"></i>
+                      <button class="btn btn-sm btn-outline-secondary me-1" title="Zobraziť dokumenty" @click="openDocuments(internship)">
+                        <i class="bi bi-folder"></i>
                       </button>
                       <button class="btn btn-sm btn-outline-danger" title="Vymazať" @click="handleDeleteInternship(internship.id)">
                         <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents Tab -->
+      <div v-if="activeTab === 'documents'" class="tab-pane fade show active">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-4">Dokumenty všetkých praxí</h5>
+            
+            <div v-if="internships.length === 0" class="text-center py-5">
+              <i class="bi bi-inbox fs-1 text-muted"></i>
+              <p class="text-muted mt-3">Zatiaľ neboli vytvorené žiadne praxe.</p>
+            </div>
+
+            <div v-else class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Študent</th>
+                    <th>Firma</th>
+                    <th>Rok</th>
+                    <th>Semester</th>
+                    <th>Stav</th>
+                    <th>Počet dokumentov</th>
+                    <th>Akcie</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="internship in internships" :key="internship.id">
+                    <td>{{ getStudentFullName(internship) }}</td>
+                    <td>{{ internship.company?.name || '-' }}</td>
+                    <td>{{ getYear(internship.start_date) }}</td>
+                    <td><span class="badge bg-secondary">{{ getSemester(internship.start_date) }}</span></td>
+                    <td>
+                      <span class="badge" :class="getStatusClass(internship.status)">
+                        {{ internship.status }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge bg-info">{{ internship.documents_count || 0 }}</span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-primary" title="Zobraziť dokumenty" @click="openDocuments(internship)">
+                        <i class="bi bi-folder-open me-1"></i>
+                        Dokumenty
                       </button>
                     </td>
                   </tr>
@@ -231,11 +294,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const activeTab = ref('overview')
 
@@ -482,5 +547,9 @@ const handleSubmitComment = async (commentData) => {
     console.error('Error submitting comment:', error)
     throw error // Re-throw to let modal handle the error display
   }
+}
+
+const openDocuments = (internship) => {
+  router.push({ name: 'garant-internship-documents', params: { id: internship.id } })
 }
 </script>

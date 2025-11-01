@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import StudentDocumentView from '../views/StudentDocumentView.vue'
+const GarantDocumentsView = () => import('../views/GarantDocumentsView.vue')
 // Importy sú v poriadku, môžeme ich nechať
 const LandingView = () => import('../views/LandingView.vue')
 
@@ -61,6 +63,26 @@ const router = createRouter({
       meta: { 
         requiresAuth: true,
         roles: ['STUDENT']
+      }
+    },
+
+    {
+      path: '/upload-documents',
+      name: 'upload-documents',
+      component: StudentDocumentView,
+      meta: { 
+        requiresAuth: true,
+        roles: ['STUDENT']
+      }
+    },
+
+    {
+      path: '/garant/internships/:id/documents',
+      name: 'garant-internship-documents',
+      component: GarantDocumentsView,
+      meta: {
+        requiresAuth: true,
+        roles: ['GARANT']
       }
     },
     {
