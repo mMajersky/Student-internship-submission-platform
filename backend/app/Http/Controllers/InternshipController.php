@@ -737,9 +737,33 @@ class InternshipController extends Controller
             $internship = Internship::create($validated);
 
             // Load relationships for the response
-            $internship->load(['student', 'company.user', 'garant']);
+            $internship->load(['student.user', 'company.user', 'garant.user']);
 
-
+            // Notify garant(s) about new internship created by student
+            if ($internship->garant && $internship->garant->user) {
+                // If garant is already assigned, notify only them
+                NotificationService::create(
+                    $internship->garant->user->id,
+                    Notification::TYPE_INTERNSHIP_CREATED,
+                    'Študent vytvoril novú prax',
+                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax vo firme ' . $internship->company->name . '.',
+                    ['internship_id' => $internship->id]
+                );
+            } else {
+                // If no garant assigned, notify ALL garants about new internship
+                $allGarants = Garant::with('user')->whereNotNull('user_id')->get();
+                foreach ($allGarants as $garant) {
+                    if ($garant->user) {
+                        NotificationService::create(
+                            $garant->user->id,
+                            Notification::TYPE_INTERNSHIP_CREATED,
+                            'Nová prax čaká na priradenie',
+                            'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax. Prax ešte nemá priradeného garanta.',
+                            ['internship_id' => $internship->id]
+                        );
+                    }
+                }
+            }
 
             // Return success response with created internship
             return response()->json([
