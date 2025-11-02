@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'email_notifications',
     ];
 
     protected $hidden = [
@@ -31,6 +32,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'email_notifications' => 'boolean',
     ];
 
     // --- TOTO JE NOVÁ METÓDA ---
@@ -42,6 +44,14 @@ class User extends Authenticatable
         // Definujeme, že jeden User má jeden záznam v tabuľke Student
         // prepojený cez user_id
         return $this->hasOne(Student::class, 'user_id', 'id');
+    }
+
+    /**
+     * User has many notifications
+     */
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\Notification::class, 'user_id');
     }
     // --- KONIEC NOVEJ METÓDY ---
 

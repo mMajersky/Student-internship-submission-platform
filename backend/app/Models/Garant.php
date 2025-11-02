@@ -41,4 +41,12 @@ class Garant extends Model
         return "{$this->name} {$this->surname}";
     }
 
+    /**
+     * Garant má viac komentárov na stážach
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'garant_id');
+    }
+
 }

@@ -44,6 +44,17 @@
           Všetky praxe
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          :class="{ active: activeTab === 'documents' }"
+          @click="activeTab = 'documents'"
+          type="button"
+        >
+          <i class="bi bi-folder me-2"></i>
+          Dokumenty
+        </button>
+      </li>
     </ul>
 
     <!-- Tab Content -->
@@ -91,7 +102,7 @@
                   Dokumenty
                 </h5>
                 <p class="card-text">Správa dokumentov a dohôd</p>
-                <button class="btn btn-success" disabled>
+                <button class="btn btn-success" @click="activeTab = 'documents'">
                   <i class="bi bi-folder me-2"></i>
                   Zobraziť dokumenty
                 </button>
@@ -196,11 +207,14 @@
                       </span>
                     </td>
                     <td>
+                      <button class="btn btn-sm btn-outline-success me-1" title="Pridať komentár" @click="handleAddComment(internship)">
+                        <i class="bi bi-chat-left-text"></i>
+                      </button>
                       <button class="btn btn-sm btn-outline-primary me-1" title="Upraviť" @click="handleEditInternship(internship)">
                         <i class="bi bi-pencil"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-secondary me-1" title="Stiahnuť PDF">
-                        <i class="bi bi-file-pdf"></i>
+                      <button class="btn btn-sm btn-outline-secondary me-1" title="Zobraziť dokumenty" @click="openDocuments(internship)">
+                        <i class="bi bi-folder"></i>
                       </button>
                       <button class="btn btn-sm btn-outline-danger" title="Vymazať" @click="handleDeleteInternship(internship.id)">
                         <i class="bi bi-trash"></i>
@@ -213,21 +227,89 @@
           </div>
         </div>
       </div>
+
+      <!-- Documents Tab -->
+      <div v-if="activeTab === 'documents'" class="tab-pane fade show active">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-4">Dokumenty všetkých praxí</h5>
+            
+            <div v-if="internships.length === 0" class="text-center py-5">
+              <i class="bi bi-inbox fs-1 text-muted"></i>
+              <p class="text-muted mt-3">Zatiaľ neboli vytvorené žiadne praxe.</p>
+            </div>
+
+            <div v-else class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Študent</th>
+                    <th>Firma</th>
+                    <th>Rok</th>
+                    <th>Semester</th>
+                    <th>Stav</th>
+                    <th>Počet dokumentov</th>
+                    <th>Akcie</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="internship in internships" :key="internship.id">
+                    <td>{{ getStudentFullName(internship) }}</td>
+                    <td>{{ internship.company?.name || '-' }}</td>
+                    <td>{{ getYear(internship.start_date) }}</td>
+                    <td><span class="badge bg-secondary">{{ getSemester(internship.start_date) }}</span></td>
+                    <td>
+                      <span class="badge" :class="getStatusClass(internship.status)">
+                        {{ internship.status }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge bg-info">{{ internship.documents_count || 0 }}</span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-primary" title="Zobraziť dokumenty" @click="openDocuments(internship)">
+                        <i class="bi bi-folder-open me-1"></i>
+                        Dokumenty
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Comment Modal -->
+    <CommentModal
+      :is-visible="showCommentModal"
+      :internship="selectedInternshipForComment"
+      :auth-token="authStore.token"
+      @close="handleCloseCommentModal"
+      @submit="handleSubmitComment"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
+import CommentModal from '@/components/garant/CommentModal.vue'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const activeTab = ref('overview')
 
 // Editing state
 const editingInternship = ref(null)
+
+// Comment modal state
+const showCommentModal = ref(false)
+const selectedInternshipForComment = ref(null)
 
 // Statistics
 const stats = ref({
@@ -416,5 +498,58 @@ const getStatusClass = (status) => {
     'cancelled': 'bg-danger'
   }
   return statusClasses[status] || 'bg-secondary'
+}
+
+// Comment handling
+const handleAddComment = (internship) => {
+  selectedInternshipForComment.value = internship
+  showCommentModal.value = true
+}
+
+const handleCloseCommentModal = () => {
+  showCommentModal.value = false
+  selectedInternshipForComment.value = null
+}
+
+const handleSubmitComment = async (commentData) => {
+  try {
+    // Extract internship_id from commentData and prepare the payload
+    const { internship_id, comment_type, content } = commentData
+    
+    const response = await fetch(`/api/internships/${internship_id}/comments`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        comment_type,
+        content
+      })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || 'Chyba pri ukladaní komentára')
+    }
+
+    // Show success message
+    alert('Komentár bol úspešne pridaný!')
+    
+    // Close modal
+    handleCloseCommentModal()
+    
+    // Optionally refresh internships list to show updated comment count
+    await fetchInternships()
+  } catch (error) {
+    console.error('Error submitting comment:', error)
+    throw error // Re-throw to let modal handle the error display
+  }
+}
+
+const openDocuments = (internship) => {
+  router.push({ name: 'garant-internship-documents', params: { id: internship.id } })
 }
 </script>

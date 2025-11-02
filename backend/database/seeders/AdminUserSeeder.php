@@ -57,7 +57,7 @@ class AdminUserSeeder extends Seeder{
             [
                 'name' => 'Eva',
                 'surname' => 'Podnikavá',
-                'role' => 'company_representative',
+                'role' => 'company',
                 'password' => Hash::make('password'),
                 'email' => 'company@example.com',
                 'email_verified_at' => Carbon::now(),
