@@ -83,7 +83,9 @@ Route::get('/debug-auth', function (Request $request) {
 });
 
 // Public announcements endpoint from develop
-//Route::get('/announcements/published', [AnnouncementController::class, 'published']); //dava error 500, table announcements sa pouzivat pravdepodbne nebude
+Route::get('/announcements/published', function() {
+    return response()->json(['message' => 'No announcements available']);
+});
 
 // Protected routes for Admin/Garant
 Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
