@@ -36,8 +36,7 @@
                 <h6 class="alert-heading"><i class="bi bi-shield-lock me-2"></i>Bezpečnosť dokumentov</h6>
                 <p class="mb-0 small">
                   <strong>Kde sa ukladajú dokumenty?</strong><br>
-                  Všetky nahraté dokumenty (najmä podpísané PDF) sú uložené v <strong>zabezpečenom súkromnom úložisku</strong> na serveri 
-                  (<code>storage/app/private/documents/</code>). Dokumenty <strong>NIE SÚ verejne prístupné</strong> - prístup k nim majú 
+                  Všetky nahraté dokumenty (najmä podpísané PDF) sú uložené v <strong>zabezpečenom súkromnom úložisku</strong> Dokumenty <strong>NIE SÚ verejne prístupné</strong> - prístup k nim majú 
                   len autorizovaní používatelia cez API s kontrolou oprávnení.
                 </p>
               </div>
