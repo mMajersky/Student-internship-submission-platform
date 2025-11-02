@@ -8,6 +8,7 @@ use App\Http\Controllers\InternshipPdfController;
 use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\GarantController;
 
 
 // PDF generation routes from feature/Generate_PDF_template
@@ -82,6 +83,13 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     // Company routes - for dropdown selection
     Route::get('/companies', [CompanyController::class, 'index']);
     Route::get('/companies/{id}', [CompanyController::class, 'show']);
+    
+    // Garant management routes
+    Route::get('/garants', [GarantController::class, 'index']);
+    Route::post('/garants', [GarantController::class, 'store']);
+    Route::get('/garants/{id}', [GarantController::class, 'show']);
+    Route::put('/garants/{id}', [GarantController::class, 'update']);
+    Route::delete('/garants/{id}', [GarantController::class, 'destroy']);
 });
 
 // Student routes - accessible by students
