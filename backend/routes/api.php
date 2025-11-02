@@ -11,6 +11,8 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\StudentDocumentController;
 use App\Http\Controllers\InternshipDocumentController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UserProfileController;
 
 
 // PDF generation routes from feature/Generate_PDF_template
@@ -32,8 +34,24 @@ Route::get('/user', function (Request $request) {
         'permissions' => [], // No permission system yet
         // <-- ZMENA 2: Pridaj načítaný profil do JSON odpovede
         'student' => $user->student,
+        'email_notifications' => $user->email_notifications ?? true,
     ]);
 })->middleware('auth:api');
+
+// User profile and settings routes (all authenticated users)
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('/user/settings', [UserProfileController::class, 'getSettings']);
+    Route::put('/user/settings/email-notifications', [UserProfileController::class, 'updateEmailNotifications']);
+    Route::put('/user/profile', [UserProfileController::class, 'updateProfile']);
+    Route::put('/user/password', [UserProfileController::class, 'changePassword']);
+    
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+});
 
 // Auth routes from develop
 Route::post('/auth/login', [AuthController::class, 'login']);

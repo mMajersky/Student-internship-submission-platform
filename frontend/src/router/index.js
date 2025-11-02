@@ -116,6 +116,22 @@ const router = createRouter({
       path: '/unauthorized',
       name: 'unauthorized',
       component: () => import('../views/UnauthorizedView.vue')
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/UserSettingsView.vue'),
+      meta: { 
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/notifications',
+      name: 'notifications',
+      component: () => import('../views/UserSettingsView.vue'), // Can create separate NotificationsView later
+      meta: { 
+        requiresAuth: true
+      }
     }
   ]
 })
