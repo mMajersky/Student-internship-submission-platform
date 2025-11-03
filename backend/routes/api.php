@@ -26,13 +26,22 @@ Route::get('/user', function (Request $request) {
     // <-- ZMENA 1: Prikáž Laravelu, aby načítal aj prepojený študentský profil
     $user->load('student');
 
+    // Get permissions for user role (same logic as in AuthController)
+    $permissions = [
+        'admin' => ['manage_users', 'manage_internships', 'manage_announcements'],
+        'garant' => ['manage_internships', 'manage_announcements'],
+        'company' => ['review_interns'],
+        'student' => ['create_internships'],
+    ];
+    $userPermissions = $permissions[$user->role] ?? [];
+
     return response()->json([
         'id' => $user->id,
         'name' => $user->name,
         'email' => $user->email,
         'role' => $user->role, // This is a string, not a relationship
         'role_display_name' => ucfirst($user->role ?? 'unknown'),
-        'permissions' => [], // No permission system yet
+        'permissions' => $userPermissions, // Return actual permissions based on role
         // <-- ZMENA 2: Pridaj načítaný profil do JSON odpovede
         'student' => $user->student,
         'email_notifications' => $user->email_notifications ?? true,
@@ -57,6 +66,8 @@ Route::middleware(['auth:api'])->group(function () {
 // Auth routes from develop
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+Route::middleware('auth:api')->post('/auth/refresh', [AuthController::class, 'refresh']);
+Route::middleware('auth:api')->post('/auth/logout', [AuthController::class, 'logout']);
 
 // DEBUG: Check authentication status
 Route::get('/debug-auth', function (Request $request) {
@@ -83,10 +94,8 @@ Route::get('/debug-auth', function (Request $request) {
     }
 });
 
-// Public announcements endpoint from develop
-Route::get('/announcements/published', function() {
-    return response()->json(['message' => 'No announcements available']);
-});
+// Public announcements endpoint - accessible to everyone
+Route::get('/announcements/published', [AnnouncementController::class, 'published']);
 
 // Protected routes for Admin/Garant
 Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {

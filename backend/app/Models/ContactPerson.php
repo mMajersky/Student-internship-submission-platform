@@ -20,6 +20,12 @@ class ContactPerson extends Model
         'company_id',
     ];
 
+    protected $casts = [
+        'company_id' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     /**
      * Kontakt patrí jednej firme
      */
@@ -35,7 +41,7 @@ class ContactPerson extends Model
     {
         return $this->belongsToMany(
             Internship::class,
-            'contact_person_internships', // názov pivot tabuľky
+            'internship_contact_person', // názov pivot tabuľky
             'contact_person_id',          // FK na contact_persons
             'internship_id'               // FK na internships
         );

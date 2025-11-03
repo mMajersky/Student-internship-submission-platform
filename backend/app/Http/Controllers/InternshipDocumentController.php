@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\Internship;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class InternshipDocumentController extends Controller
@@ -32,7 +33,7 @@ class InternshipDocumentController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error fetching documents: ' . $e->getMessage());
+            Log::error('Error fetching documents: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while fetching documents.',
@@ -65,7 +66,7 @@ class InternshipDocumentController extends Controller
             );
 
         } catch (\Exception $e) {
-            \Log::error('Error downloading document: ' . $e->getMessage());
+            Log::error('Error downloading document: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while downloading the document.',

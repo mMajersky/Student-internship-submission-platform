@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
-use App\Models\Role;
 use App\Models\Announcement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -16,26 +15,19 @@ class AnnouncementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Seed roles
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        
-        // Create test users
-        $adminRole = Role::getByName(Role::ADMIN);
-        $garantRole = Role::getByName(Role::GARANT);
-        
+
         $this->adminUser = User::create([
             'name' => 'Admin User',
             'email' => 'admin@test.com',
             'password' => Hash::make('password123'),
-            'role_id' => $adminRole->id,
+            'role' => 'admin',
         ]);
-        
+
         $this->garantUser = User::create([
             'name' => 'Garant User',
             'email' => 'garant@test.com',
             'password' => Hash::make('password123'),
-            'role_id' => $garantRole->id,
+            'role' => 'garant',
         ]);
     }
 
@@ -139,12 +131,11 @@ class AnnouncementTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function student_cannot_access_single_announcement_endpoint()
     {
-        $studentRole = Role::getByName(Role::STUDENT);
         $studentUser = User::create([
             'name' => 'Student User',
             'email' => 'student@test.com',
             'password' => Hash::make('password123'),
-            'role_id' => $studentRole->id,
+            'role' => 'student',
         ]);
 
         $response = $this->actingAs($studentUser, 'api')
@@ -156,12 +147,11 @@ class AnnouncementTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function company_cannot_access_single_announcement_endpoint()
     {
-        $companyRole = Role::getByName(Role::COMPANY);
         $companyUser = User::create([
             'name' => 'Company User',
             'email' => 'company@test.com',
             'password' => Hash::make('password123'),
-            'role_id' => $companyRole->id,
+            'role' => 'company',
         ]);
 
         $response = $this->actingAs($companyUser, 'api')
