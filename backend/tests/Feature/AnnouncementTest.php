@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Announcement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,8 @@ class AnnouncementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
+        
+        // Create test users
         $this->adminUser = User::create([
             'name' => 'Admin User',
             'email' => 'admin@test.com',
