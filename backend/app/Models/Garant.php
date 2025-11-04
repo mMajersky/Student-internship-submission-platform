@@ -20,6 +20,12 @@ class Garant extends Model
 
     public $timestamps = true;
 
+    protected $casts = [
+        'user_id' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     /**
      * Garant patrí jednému používateľovi
      */
@@ -39,6 +45,14 @@ class Garant extends Model
     public function getFullNameAttribute()
     {
         return "{$this->name} {$this->surname}";
+    }
+
+    /**
+     * Garant má viac komentárov na stážach
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'garant_id');
     }
 
 }

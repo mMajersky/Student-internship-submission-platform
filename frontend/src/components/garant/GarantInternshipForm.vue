@@ -139,11 +139,42 @@
         </div>
       </div>
 
-      <!-- Info message -->
+      <!-- Info message for new internships -->
       <div class="alert alert-info mb-4" v-if="!isEditMode">
         <i class="bi bi-info-circle me-2"></i>
-        Po vytvorení praxe systém vygeneruje PDF „Dohoda o odbornej praxi". Stav bude 
+        Po vytvorení praxe systém vygeneruje PDF „Dohoda o odbornej praxi". Stav bude
         <strong>Vytvorená</strong>.
+      </div>
+
+      <!-- Company approval info box -->
+      <div class="company-approval-info mb-4" v-if="isEditMode && props.internship && props.internship.status === 'potvrdená'">
+        <div class="info-box p-3 rounded">
+          <div class="d-flex align-items-start">
+            <i class="bi bi-envelope-check text-primary me-3 fs-4"></i>
+            <div class="flex-grow-1">
+              <h5 class="mb-2 text-primary">Čaká sa na schválenie od spoločnosti</h5>
+              <p class="mb-3 text-muted">
+                Táto stáž bola zaradená do frontu na schválenie spoločnosti. Spoločnosť obdržala email s pokynmi na potvrdenie alebo zamietnutie stáže.
+              </p>
+              <div class="d-flex align-items-center">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary me-3"
+                  @click="resendApprovalEmail"
+                  :disabled="isResendingEmail"
+                >
+                  <span v-if="isResendingEmail" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <i class="bi bi-envelope me-1"></i>
+                  {{ isResendingEmail ? 'Odosiela sa...' : 'Preposlať potvrdzovací email' }}
+                </button>
+                <small class="text-muted">
+                  <i class="bi bi-question-circle me-1"></i>
+                  V prípade, že spoločnosť nedostala email alebo potrebuje nové odkazy
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Action buttons -->
@@ -207,6 +238,7 @@ const formData = ref({
 
 const isSubmitting = ref(false)
 const isLoadingData = ref(false)
+const isResendingEmail = ref(false)
 
 // Students data from API
 const students = ref(props.initialStudents.length > 0 ? props.initialStudents : [])
@@ -331,58 +363,34 @@ const resetForm = () => {
     end_date: ''
   }
 }
+
+const resendApprovalEmail = async () => {
+  if (!props.internship || !props.internship.id) return
+
+  isResendingEmail.value = true
+
+  try {
+    const response = await fetch(`/api/internships/${props.internship.id}/resend-approval-email`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      alert(`Potvrdzovací email bol úspešne preposlaný na adresu: ${data.email}`)
+    } else {
+      alert(`Chyba pri preposielaní emailu: ${data.message || 'Neznáma chyba'}`)
+    }
+  } catch (error) {
+    console.error('Error resending email:', error)
+    alert('Chyba pri preposielaní emailu. Skúste znovu.')
+  } finally {
+    isResendingEmail.value = false
+  }
+}
 </script>
-
-<style scoped>
-.create-internship-form {
-  max-width: 1200px;
-}
-
-.form-label {
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.text-danger {
-  color: #dc3545;
-}
-
-.alert-info {
-  background-color: #e7f3ff;
-  border-color: #b3d9ff;
-  color: #004085;
-}
-
-.btn-primary {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
-}
-
-.btn-primary:hover {
-  background-color: #0b5ed7;
-  border-color: #0a58ca;
-}
-
-.btn-outline-secondary {
-  color: #6c757d;
-  border-color: #6c757d;
-}
-
-.btn-outline-secondary:hover {
-  background-color: #6c757d;
-  color: white;
-}
-
-.form-select {
-  cursor: pointer;
-}
-
-.form-select:focus {
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-.form-select option {
-  padding: 0.5rem;
-}
-</style>

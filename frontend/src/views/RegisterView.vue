@@ -66,7 +66,7 @@
 
               <div class="mb-3">
                 <label for="email" class="form-label">
-                  Email <span class="text-danger">*</span>
+                  {{ formData.role === 'student' ? 'Univerzitný email' : 'Email' }} <span class="text-danger">*</span>
                 </label>
                 <input
                   type="email"
@@ -74,8 +74,11 @@
                   id="email"
                   v-model="formData.email"
                   required
-                  placeholder="meno@priklad.sk"
+                  :placeholder="formData.role === 'student' ? 'meno@student.ukf.sk' : 'meno@priklad.sk'"
                 />
+                <small v-if="formData.role === 'student'" class="form-text text-muted">
+                  Použite váš univerzitný email (@student.ukf.sk)
+                </small>
               </div>
 
               <div class="mb-3">
@@ -103,6 +106,9 @@
                     v-model="formData.alternative_email"
                     placeholder="napr. osobny@mail.sk"
                   />
+                  <small class="form-text text-muted">
+                    Musí byť odlišný od univerzitného emailu
+                  </small>
                 </div>
 
                 <div class="mb-3">
@@ -116,87 +122,222 @@
                   />
                 </div>
 
-                <div class="mb-3">
-                  <label for="study_level" class="form-label">Stupeň štúdia</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="study_level"
-                    v-model="formData.study_level"
-                    placeholder="Bc., Mgr., Ing. ..."
-                  />
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="study_level" class="form-label">
+                      Stupeň štúdia <span class="text-danger">*</span>
+                    </label>
+                    <select
+                      class="form-control"
+                      id="study_level"
+                      v-model="formData.study_level"
+                      required
+                    >
+                      <option value="">-- Vyberte --</option>
+                      <option value="Bc.">Bc. (Bakalárske)</option>
+                      <option value="Mgr.">Mgr. (Magisterské)</option>
+                      <option value="Ing.">Ing. (Inžinierske)</option>
+                      <option value="PhD.">PhD. (Doktorandské)</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="study_field" class="form-label">
+                      Študijný odbor <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="study_field"
+                      v-model="formData.study_field"
+                      required
+                      placeholder="napr. Informatika"
+                    />
+                  </div>
                 </div>
               </template>
 
-              <!-- Address fields (common for both) -->
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="state" class="form-label">Štát</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="state"
-                    v-model="formData.state"
-                    placeholder="Slovensko"
-                  />
+              <!-- Address fields (for students - required) -->
+              <template v-if="formData.role === 'student'">
+                <h5 class="mt-4 mb-3">Adresa</h5>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="state" class="form-label">
+                      Štát <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="state"
+                      v-model="formData.state"
+                      required
+                      placeholder="Slovensko"
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="region" class="form-label">
+                      Región <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="region"
+                      v-model="formData.region"
+                      required
+                      placeholder="Nitriansky kraj"
+                    />
+                  </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label for="region" class="form-label">Región</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="region"
-                    v-model="formData.region"
-                    placeholder="Nitriansky kraj"
-                  />
-                </div>
-              </div>
 
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="city" class="form-label">Mesto</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="city"
-                    v-model="formData.city"
-                    placeholder="Nitra"
-                  />
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="city" class="form-label">
+                      Mesto <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="city"
+                      v-model="formData.city"
+                      required
+                      placeholder="Nitra"
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="postal_code" class="form-label">
+                      PSČ <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="postal_code"
+                      v-model="formData.postal_code"
+                      required
+                      placeholder="94901"
+                    />
+                  </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label for="postal_code" class="form-label">PSČ</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="postal_code"
-                    v-model="formData.postal_code"
-                    placeholder="94901"
-                  />
-                </div>
-              </div>
 
-              <div class="row">
-                <div class="col-md-8 mb-3">
-                  <label for="street" class="form-label">Ulica</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="street"
-                    v-model="formData.street"
-                    placeholder="Štefánikova"
-                  />
+                <div class="row">
+                  <div class="col-md-8 mb-3">
+                    <label for="street" class="form-label">
+                      Ulica <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="street"
+                      v-model="formData.street"
+                      required
+                      placeholder="Štefánikova"
+                    />
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="house_number" class="form-label">
+                      Číslo domu <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="house_number"
+                      v-model="formData.house_number"
+                      required
+                      placeholder="12/A"
+                    />
+                  </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                  <label for="house_number" class="form-label">Číslo domu</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="house_number"
-                    v-model="formData.house_number"
-                    placeholder="12/A"
-                  />
+              </template>
+
+              <!-- Address fields (for companies - required) -->
+              <template v-if="formData.role === 'company'">
+                <h5 class="mt-4 mb-3">Adresa</h5>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="state" class="form-label">
+                      Štát <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="state"
+                      v-model="formData.state"
+                      required
+                      placeholder="Slovensko"
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="region" class="form-label">
+                      Región <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="region"
+                      v-model="formData.region"
+                      required
+                      placeholder="Nitriansky kraj"
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="city" class="form-label">
+                      Mesto <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="city"
+                      v-model="formData.city"
+                      required
+                      placeholder="Nitra"
+                    />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="postal_code" class="form-label">
+                      PSČ <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="postal_code"
+                      v-model="formData.postal_code"
+                      required
+                      placeholder="94901"
+                    />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-8 mb-3">
+                    <label for="street" class="form-label">
+                      Ulica <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="street"
+                      v-model="formData.street"
+                      required
+                      placeholder="Štefánikova"
+                    />
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="house_number" class="form-label">
+                      Číslo domu <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="house_number"
+                      v-model="formData.house_number"
+                      required
+                      placeholder="12/A"
+                    />
+                  </div>
+                </div>
+              </template>
 
               <!-- Submit -->
               <div class="d-grid mt-3">
@@ -245,6 +386,7 @@ const formData = reactive({
   alternative_email: '',
   phone_number: '',
   study_level: '',
+  study_field: '',
   state: '',
   region: '',
   city: '',
@@ -259,9 +401,35 @@ const isLoading = computed(() => authStore.isLoading)
 const errorMessage = ref(null)
 
 const handleRegister = async () => {
+  // Basic client-side validation
   if (!formData.name || !formData.email || !formData.password) {
     errorMessage.value = 'Meno, email a heslo sú povinné.'
     return
+  }
+
+  if (formData.role === 'student') {
+    if (!formData.surname) {
+      errorMessage.value = 'Priezvisko je povinné.'
+      return
+    }
+    if (!formData.study_level) {
+      errorMessage.value = 'Stupeň štúdia je povinný.'
+      return
+    }
+    if (!formData.study_field) {
+      errorMessage.value = 'Študijný odbor je povinný.'
+      return
+    }
+    if (!formData.state || !formData.city || !formData.postal_code || !formData.street || !formData.house_number) {
+      errorMessage.value = 'Všetky polia adresy sú povinné.'
+      return
+    }
+    // Validate university email
+    const emailDomain = formData.email.split('@')[1]?.toLowerCase()
+    if (!emailDomain || emailDomain !== 'student.ukf.sk') {
+      errorMessage.value = 'Použite univerzitný email (@student.ukf.sk).'
+      return
+    }
   }
 
   try {
@@ -282,7 +450,14 @@ const handleRegister = async () => {
 
     if (!response.ok) {
       console.error('Register error:', data)
-      errorMessage.value = data?.message || 'Registrácia zlyhala.'
+      
+      // Handle validation errors from Laravel
+      if (data?.errors) {
+        const firstError = Object.values(data.errors)[0]
+        errorMessage.value = Array.isArray(firstError) ? firstError[0] : firstError
+      } else {
+        errorMessage.value = data?.message || 'Registrácia zlyhala.'
+      }
       return
     }
 

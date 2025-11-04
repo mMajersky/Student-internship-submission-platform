@@ -66,17 +66,3 @@
 <script setup>
 // No additional logic needed for this static component
 </script>
-
-<style scoped>
-.card {
-  transition: transform 0.2s ease-in-out;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-}
-
-.btn {
-  transition: all 0.2s ease-in-out;
-}
-</style>

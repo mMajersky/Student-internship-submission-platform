@@ -23,6 +23,12 @@
             Úprava oznámenia
           </button>
         </li>
+        <li class="nav-item" role="presentation" v-if="canManageAnnouncements">
+          <button class="nav-link" :class="{ active: activeTab === 'manage-garants' }" @click="activeTab = 'manage-garants'" type="button">
+            <i class="bi bi-people me-2"></i>
+            Správa garantov
+          </button>
+        </li>
       </ul>
 
       <div class="tab-content">
@@ -39,6 +45,10 @@
         <div v-if="activeTab === 'edit-announcement'" class="tab-pane fade show active">
           <EditAnnouncement />
         </div>
+
+        <div v-if="activeTab === 'manage-garants'" class="tab-pane fade show active">
+          <ManageGarants />
+        </div>
       </div>
     </div>
   </div>
@@ -49,6 +59,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import EditAnnouncement from '@/components/admin/EditAnnouncement.vue'
+import ManageGarants from '@/components/garant/ManageGarants.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
