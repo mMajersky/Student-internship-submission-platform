@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {
@@ -31,7 +32,7 @@ class NotificationController extends Controller
             return response()->json($notifications, 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error fetching notifications: ' . $e->getMessage());
+            Log::error('Error fetching notifications: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while fetching notifications.',
@@ -57,7 +58,7 @@ class NotificationController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error getting unread count: ' . $e->getMessage());
+            Log::error('Error getting unread count: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred.',
@@ -90,7 +91,7 @@ class NotificationController extends Controller
                 'message' => 'Notification not found.'
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error marking notification as read: ' . $e->getMessage());
+            Log::error('Error marking notification as read: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred.',
@@ -120,7 +121,7 @@ class NotificationController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error marking all notifications as read: ' . $e->getMessage());
+            Log::error('Error marking all notifications as read: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred.',
@@ -152,7 +153,7 @@ class NotificationController extends Controller
                 'message' => 'Notification not found.'
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error deleting notification: ' . $e->getMessage());
+            Log::error('Error deleting notification: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred.',

@@ -96,7 +96,7 @@ class Internship extends Model
     {
         return $this->belongsToMany(
             ContactPerson::class,
-            'contact_person_internships',
+            'internship_contact_person',
             'internship_id',
             'contact_person_id'
         );

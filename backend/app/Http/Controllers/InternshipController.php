@@ -13,10 +13,11 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
-class InternshipController extends Controller
+class InternshipController extends BaseApiController
 {
     /**
      * Store a newly created internship in storage (admin/garant only).
@@ -166,7 +167,7 @@ class InternshipController extends Controller
 
         } catch (\Exception $e) {
             // Log the error for debugging
-            \Log::error('Error creating internship: ' . $e->getMessage());
+            Log::error('Error creating internship: ' . $e->getMessage());
 
             // Return error response
             return response()->json([
@@ -183,56 +184,46 @@ class InternshipController extends Controller
      */
     public function index()
     {
-        try {
+        return $this->executeWithExceptionHandling(function () {
             // Get all internships for admin/garant with document count
             $internships = Internship::with(['student', 'company', 'garant'])
                 ->withCount('documents')
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return response()->json([
-                'data' => $internships->map(function ($internship) {
-                    return [
-                        'id' => $internship->id,
-                        'student_id' => $internship->student_id,
-                        'student' => $internship->student ? [
-                            'id' => $internship->student->id,
-                            'name' => $internship->student->name,
-                            'surname' => $internship->student->surname,
-                            'student_email' => $internship->student->student_email,
-                        ] : null,
-                        'company_id' => $internship->company_id,
-                        'company' => $internship->company ? [
-                            'id' => $internship->company->id,
-                            'name' => $internship->company->name,
-                        ] : null,
-                        'garant_id' => $internship->garant_id,
-                        'garant' => $internship->garant ? [
-                            'id' => $internship->garant->id,
-                            'name' => $internship->garant->name ?? null,
-                            'surname' => $internship->garant->surname ?? null,
-                        ] : null,
-                        'status' => $internship->status,
-                        'academy_year' => $internship->academy_year,
-                        'start_date' => $internship->start_date?->format('Y-m-d'),
-                        'end_date' => $internship->end_date?->format('Y-m-d'),
-                        'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
-                        'approved_date' => $internship->approved_date?->format('Y-m-d'),
-                        'documents_count' => $internship->documents_count,
-                        'created_at' => $internship->created_at?->toIso8601String(),
-                        'updated_at' => $internship->updated_at?->toIso8601String(),
-                    ];
-                })
-            ], 200);
-
-        } catch (\Exception $e) {
-            \Log::error('Error fetching internships: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'An error occurred while fetching internships.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
-        }
+            return $this->respondWithCollection($internships, function ($internship) {
+                return [
+                    'id' => $internship->id,
+                    'student_id' => $internship->student_id,
+                    'student' => $internship->student ? [
+                        'id' => $internship->student->id,
+                        'name' => $internship->student->name,
+                        'surname' => $internship->student->surname,
+                        'student_email' => $internship->student->student_email,
+                    ] : null,
+                    'company_id' => $internship->company_id,
+                    'company' => $internship->company ? [
+                        'id' => $internship->company->id,
+                        'name' => $internship->company->name,
+                    ] : null,
+                    'garant_id' => $internship->garant_id,
+                    'garant' => $internship->garant ? [
+                        'id' => $internship->garant->id,
+                        'name' => $internship->garant->name ?? null,
+                        'surname' => $internship->garant->surname ?? null,
+                    ] : null,
+                    'status' => $internship->status,
+                    'academy_year' => $internship->academy_year,
+                    'start_date' => $internship->start_date?->format('Y-m-d'),
+                    'end_date' => $internship->end_date?->format('Y-m-d'),
+                    'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                    'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                    'documents_count' => $internship->documents_count,
+                    'created_at' => $internship->created_at?->toIso8601String(),
+                    'updated_at' => $internship->updated_at?->toIso8601String(),
+                ];
+            });
+        }, 'fetching internships');
     }
 
     /**
@@ -243,12 +234,12 @@ class InternshipController extends Controller
      */
     public function show($id)
     {
-        try {
+        return $this->executeWithExceptionHandling(function () use ($id) {
             $internship = Internship::with(['student', 'company', 'garant', 'documents'])
                 ->findOrFail($id);
 
-            return response()->json([
-                'data' => [
+            return $this->respondWithResource($internship, function ($internship) {
+                return [
                     'id' => $internship->id,
                     'student_id' => $internship->student_id,
                     'student' => $internship->student ? [
@@ -276,21 +267,9 @@ class InternshipController extends Controller
                     'approved_date' => $internship->approved_date?->format('Y-m-d'),
                     'created_at' => $internship->created_at?->toIso8601String(),
                     'updated_at' => $internship->updated_at?->toIso8601String(),
-                ]
-            ], 200);
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Internship not found.'
-            ], 404);
-        } catch (\Exception $e) {
-            \Log::error('Error fetching internship: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'An error occurred while fetching the internship.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
-        }
+                ];
+            });
+        }, 'fetching internship');
     }
 
     /**
@@ -464,7 +443,7 @@ class InternshipController extends Controller
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error updating internship: ' . $e->getMessage());
+            Log::error('Error updating internship: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while updating the internship.',
@@ -481,9 +460,9 @@ class InternshipController extends Controller
      */
     public function destroy($id)
     {
-        try {
+        return $this->executeWithExceptionHandling(function () use ($id) {
             $internship = Internship::findOrFail($id);
-            
+
             // Store internship data before deletion for response
             $internshipData = [
                 'id' => $internship->id,
@@ -496,23 +475,8 @@ class InternshipController extends Controller
             // Delete the internship
             $internship->delete();
 
-            return response()->json([
-                'message' => 'Internship deleted successfully.',
-                'data' => $internshipData
-            ], 200);
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Internship not found.'
-            ], 404);
-        } catch (\Exception $e) {
-            \Log::error('Error deleting internship: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'An error occurred while deleting the internship.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-            ], 500);
-        }
+            return $this->successResponse($internshipData, 'Internship deleted successfully.');
+        }, 'deleting internship');
     }
 
     /**
@@ -573,7 +537,7 @@ class InternshipController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error fetching student internships: ' . $e->getMessage());
+            Log::error('Error fetching student internships: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while fetching internships.',
@@ -609,7 +573,7 @@ class InternshipController extends Controller
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error confirming internship: ' . $e->getMessage());
+            Log::error('Error confirming internship: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while confirming the internship.',
@@ -645,7 +609,7 @@ class InternshipController extends Controller
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error rejecting internship: ' . $e->getMessage());
+            Log::error('Error rejecting internship: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while rejecting the internship.',
@@ -801,7 +765,7 @@ class InternshipController extends Controller
 
         } catch (\Exception $e) {
             // Log the error for debugging
-            \Log::error('Error creating student internship: ' . $e->getMessage());
+            Log::error('Error creating student internship: ' . $e->getMessage());
 
             // Return error response
             return response()->json([
@@ -869,7 +833,7 @@ class InternshipController extends Controller
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error processing company action: ' . $e->getMessage());
+            Log::error('Error processing company action: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while processing the action.',
@@ -958,7 +922,7 @@ class InternshipController extends Controller
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            \Log::error('Error resending approval email: ' . $e->getMessage());
+            Log::error('Error resending approval email: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while resending the email.',

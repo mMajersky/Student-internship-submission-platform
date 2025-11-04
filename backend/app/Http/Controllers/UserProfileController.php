@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 
 class UserProfileController extends Controller
@@ -25,7 +26,7 @@ class UserProfileController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error fetching user settings: ' . $e->getMessage());
+            Log::error('Error fetching user settings: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while fetching settings.',
@@ -56,7 +57,7 @@ class UserProfileController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error updating email notifications: ' . $e->getMessage());
+            Log::error('Error updating email notifications: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while updating settings.',
@@ -89,7 +90,7 @@ class UserProfileController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error updating profile: ' . $e->getMessage());
+            Log::error('Error updating profile: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while updating profile.',
@@ -127,7 +128,7 @@ class UserProfileController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error changing password: ' . $e->getMessage());
+            Log::error('Error changing password: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while changing password.',

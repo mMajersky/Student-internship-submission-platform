@@ -29,6 +29,11 @@ class Company extends Model
         'house_number',
     ];
 
+    protected $casts = [
+        'user_id' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     /**
      * Vzťah: firma patrí používateľovi

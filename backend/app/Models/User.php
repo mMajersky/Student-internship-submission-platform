@@ -7,9 +7,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
-// --- PRIDANÝ IMPORT ---
-use App\Models\Student;
-
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
@@ -35,15 +32,28 @@ class User extends Authenticatable
         'email_notifications' => 'boolean',
     ];
 
-    // --- TOTO JE NOVÁ METÓDA ---
     /**
      * Získa študentský profil, ktorý patrí tomuto používateľovi.
      */
     public function student()
     {
-        // Definujeme, že jeden User má jeden záznam v tabuľke Student
-        // prepojený cez user_id
         return $this->hasOne(Student::class, 'user_id', 'id');
+    }
+
+    /**
+     * Získa garant profil, ktorý patrí tomuto používateľovi.
+     */
+    public function garant()
+    {
+        return $this->hasOne(Garant::class, 'user_id', 'id');
+    }
+
+    /**
+     * Získa company profil, ktorý patrí tomuto používateľovi.
+     */
+    public function company()
+    {
+        return $this->hasOne(Company::class, 'user_id', 'id');
     }
 
     /**
@@ -51,9 +61,8 @@ class User extends Authenticatable
      */
     public function notifications()
     {
-        return $this->hasMany(\App\Models\Notification::class, 'user_id');
+        return $this->hasMany(Notification::class, 'user_id');
     }
-    // --- KONIEC NOVEJ METÓDY ---
 
 
     /**
