@@ -97,15 +97,3 @@ const handleZobrazitPraxe = () => {
   router.push('/internships')
 }
 </script>
-
-<style scoped>
-.card {
-  border: none;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.card:hover {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  transition: box-shadow 0.15s ease-in-out;
-}
-</style>

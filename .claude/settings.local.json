@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan test:*)",
+      "Bash(docker exec:*)",
+      "Bash(composer require:*)",
+      "Bash(php artisan:*)",
+      "Bash(php artisan cache:clear:*)",
+      "Bash(del /F /Q packages.php services.php config.php)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

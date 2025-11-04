@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'university' => [
+        'allowed_email_domains' => array_filter(
+            explode(',', env('UNIVERSITY_EMAIL_DOMAINS', 'student.ukf.sk'))
+        ),
+    ],
+
 ];

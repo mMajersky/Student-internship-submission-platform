@@ -35,6 +35,7 @@ class StudentSeeder extends Seeder
                 'phone_number' => '+421 900 123 456',
                 'user_id' => $studentUser->id, // <-- TU JE KĽÚČOVÁ ZMENA!
                 'study_level' => 'Bc.',
+                'study_field' => 'Informatika',
                 'state' => 'Slovensko',
                 'region' => 'Nitriansky kraj',
                 'city' => 'Nitra',

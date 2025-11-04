@@ -31,6 +31,12 @@
             <li class="nav-item" v-if="!authStore.isAuthenticated">
               <router-link to="/login" class="nav-link">Prihlásiť sa</router-link>
             </li>
+            
+            <!-- Notification Bell (only for authenticated users) -->
+            <li class="nav-item" v-if="authStore.isAuthenticated">
+              <NotificationBell />
+            </li>
+            
             <li class="nav-item dropdown" v-if="authStore.isAuthenticated">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle me-1"></i>
@@ -41,6 +47,12 @@
                   <router-link to="/dashboard" class="dropdown-item">
                     <i class="bi bi-speedometer2 me-2"></i>
                     Dashboard
+                  </router-link>
+                </li>
+                <li>
+                  <router-link to="/settings" class="dropdown-item">
+                    <i class="bi bi-gear me-2"></i>
+                    Nastavenia
                   </router-link>
                 </li>
                 <li><hr class="dropdown-divider"></li>
@@ -67,6 +79,7 @@
 import { onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import NotificationBell from './components/NotificationBell.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -96,10 +109,3 @@ watch(() => router.currentRoute.value, () => {
   authStore.initializeAuth()
 })
 </script>
-
-<style>
-#app-wrapper {
-  background-color: #f8f9fa;
-  min-height: 100vh;
-}
-</style>

@@ -205,9 +205,3 @@ onMounted(() => {
   loadCurrentAnnouncement()
 })
 </script>
-
-<style scoped>
-.quill-editor-container {
-  height: 300px;
-}
-</style>

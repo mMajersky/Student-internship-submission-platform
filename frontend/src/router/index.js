@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import StudentDocumentView from '../views/StudentDocumentView.vue'
+import CompanyDashboardView from '../views/CompanyDashboardView.vue'
+const GarantDocumentsView = () => import('../views/GarantDocumentsView.vue')
 // Importy sú v poriadku, môžeme ich nechať
 const LandingView = () => import('../views/LandingView.vue')
 
@@ -63,10 +66,30 @@ const router = createRouter({
         roles: ['STUDENT']
       }
     },
+
+    {
+      path: '/upload-documents',
+      name: 'upload-documents',
+      component: StudentDocumentView,
+      meta: { 
+        requiresAuth: true,
+        roles: ['STUDENT']
+      }
+    },
+
+    {
+      path: '/garant/internships/:id/documents',
+      name: 'garant-internship-documents',
+      component: GarantDocumentsView,
+      meta: {
+        requiresAuth: true,
+        roles: ['GARANT']
+      }
+    },
     {
       path: '/company-dashboard',
       name: 'company-dashboard',
-      component: () => import('../views/CompanyDashboardView.vue'),
+      component: CompanyDashboardView,
       meta: { 
         requiresAuth: true,
         roles: ['COMPANY']
@@ -94,6 +117,22 @@ const router = createRouter({
       path: '/unauthorized',
       name: 'unauthorized',
       component: () => import('../views/UnauthorizedView.vue')
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/UserSettingsView.vue'),
+      meta: { 
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/notifications',
+      name: 'notifications',
+      component: () => import('../views/UserSettingsView.vue'), // Can create separate NotificationsView later
+      meta: { 
+        requiresAuth: true
+      }
     }
   ]
 })
