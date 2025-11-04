@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
 use App\Models\User;
+use App\Models\Student;
+use App\Models\Company;
+use Laravel\Passport\Passport;
 
 class AuthController extends Controller
 {
@@ -15,28 +18,110 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+            'remember_me' => 'sometimes|boolean', // Optional remember me flag
+        ]);
 
-        if (Auth::attempt($credentials)) {
-            /** @var User $user */
-            $user = Auth::user();
+        // Find user by email
+        $user = User::where('email', $credentials['email'])->first();
 
-            $token = $user->createToken('authToken')->accessToken;
-
-            return response()->json([
-                'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role, // priamo string z DB
-                    'role_display_name' => ucfirst($user->role), // napr. 'Admin'
-                    'permissions' => $this->getPermissionsForRole($user->role)
-                ]
-            ]);
+        // Check if user exists and password matches
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
+        // Determine token expiration based on remember_me
+        // If remember_me is true, use personal access token with longer expiration (6 months)
+        // Otherwise, use regular token (1 hour) - can be refreshed via refresh endpoint
+        $rememberMe = $request->input('remember_me', false);
+        
+        // Create token - Passport will use the expiration time from AppServiceProvider
+        // Personal access tokens always use personalAccessTokensExpireIn setting
+        $tokenResult = $user->createToken('authToken');
+        $token = $tokenResult->accessToken;
+        
+        // Calculate expiration time
+        $expiresIn = $rememberMe 
+            ? 60 * 60 * 24 * 180  // 6 months in seconds (for remember me)
+            : 60 * 60;              // 1 hour in seconds (regular session)
+
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_in' => $expiresIn,
+            'remember_me' => $rememberMe,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role, // priamo string z DB
+                'role_display_name' => ucfirst($user->role), // napr. 'Admin'
+                'permissions' => $this->getPermissionsForRole($user->role)
+            ]
+        ]);
+    }
+
+    /**
+     * Refresh access token
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        // Revoke old token
+        $oldToken = $user->token();
+        if ($oldToken) {
+            $oldToken->revoke();
+        }
+
+        // Create new token
+        $tokenResult = $user->createToken('authToken');
+        $newToken = $tokenResult->accessToken;
+
+        return response()->json([
+            'token' => $newToken,
+            'token_type' => 'Bearer',
+            'expires_in' => 60 * 60, // 1 hour
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'role_display_name' => ucfirst($user->role),
+                'permissions' => $this->getPermissionsForRole($user->role)
+            ]
+        ]);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        if ($user) {
+            $token = $user->token();
+            
+            if ($token) {
+                // Revoke associated refresh tokens using Passport abstraction
+                Passport::refreshToken()
+                    ->newQuery()
+                    ->where('access_token_id', $token->id)
+                    ->update(['revoked' => true]);
+                
+                // Revoke the access token (marks as revoked in database)
+                // This ensures Passport will reject the token on future requests
+                $token->revoke();
+            }
+        }
+
+        return response()->json([
+            'message' => 'Logged out successfully.',
+        ]);
     }
 
     public function register(Request $request)
@@ -114,7 +199,7 @@ class AuthController extends Controller
 
         // Ak ide o študenta
         if ($user->role === 'student') {
-            \App\Models\Student::create([
+            Student::create([
                 'user_id' => $user->id,
                 'name' => $request->input('name'),
                 'surname' => $request->input('surname'),
@@ -134,7 +219,7 @@ class AuthController extends Controller
 
         // Ak ide o firmu
         if ($user->role === 'company') {
-            \App\Models\Company::create([
+            Company::create([
                 'user_id' => $user->id,
                 'name' => $request->input('company_name'),
                 'state' => $request->input('state'),
@@ -153,7 +238,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Optionálne – jednoduché mapovanie rolí na povolenia
+     * Optional – jednoduché mapovanie rolí na povolenia
      */
     private function getPermissionsForRole(string $role): array
     {
