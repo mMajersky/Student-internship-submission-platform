@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('jwt_token'))
   const isLoading = ref(false)
   const error = ref(null)
+  const errorType = ref(null)
 
   // Getters
   const isAuthenticated = computed(() => !!token.value && !!user.value)
@@ -41,7 +42,8 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     token.value = null
     error.value = null
-    
+    errorType.value = null
+
     // Clear localStorage
     localStorage.removeItem('jwt_token')
     localStorage.removeItem('user_data')
@@ -50,6 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (credentials) => {
     isLoading.value = true
     error.value = null
+    errorType.value = null
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -64,20 +67,41 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
+        // Store both error message and error type
+        error.value = data.error || 'Prihlásenie zlyhalo'
+        errorType.value = data.error_type || null
+        throw new Error(data.error || 'Prihlásenie zlyhalo')
       }
 
       setAuthData(data)
       return data
     } catch (err) {
-      error.value = err.message
+      if (!error.value) {
+        error.value = err.message
+      }
       throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    // Call backend to revoke token if we have one
+    if (token.value) {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token.value}`,
+            'Accept': 'application/json',
+          }
+        })
+      } catch (err) {
+        console.error('Logout request failed:', err)
+        // Continue with local logout even if backend call fails
+      }
+    }
+
     clearAuthData()
   }
 
@@ -150,6 +174,7 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     isLoading,
     error,
+    errorType,
 
     // Getters
     isAuthenticated,

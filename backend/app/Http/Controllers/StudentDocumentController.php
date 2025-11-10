@@ -22,6 +22,14 @@ class StudentDocumentController extends Controller
     {
         try {
             $user = Auth::user();
+
+            // Check if user has student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'User does not have a student profile.'
+                ], 403);
+            }
+
             $internship = Internship::with('student')->findOrFail($internshipId);
 
             // Check authorization
@@ -67,6 +75,14 @@ class StudentDocumentController extends Controller
     {
         try {
             $user = Auth::user();
+
+            // Check if user has student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'User does not have a student profile.'
+                ], 403);
+            }
+
             $internship = Internship::with('student')->findOrFail($internshipId);
 
             // Check authorization
@@ -166,6 +182,14 @@ class StudentDocumentController extends Controller
     {
         try {
             $user = Auth::user();
+
+            // Check if user has student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'User does not have a student profile.'
+                ], 403);
+            }
+
             $internship = Internship::with('student')->findOrFail($internshipId);
 
             // Check authorization
@@ -215,6 +239,14 @@ class StudentDocumentController extends Controller
     {
         try {
             $user = Auth::user();
+
+            // Check if user has student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'User does not have a student profile.'
+                ], 403);
+            }
+
             $internship = Internship::with(['student', 'company.contactPersons'])->findOrFail($internshipId);
 
             // Check authorization
@@ -249,7 +281,10 @@ class StudentDocumentController extends Controller
 
             $pdf = Pdf::loadView('pdf.internship_agreement', $data);
             $pdf->setPaper('A4', 'portrait');
-            $pdf->setOption('isHtml5ParserEnabled', true);
+            // Use setOptions for DomPDF to avoid undefined method errors
+            if (method_exists($pdf, 'setOptions')) {
+                $pdf->setOptions(['isHtml5ParserEnabled' => true]);
+            }
 
             return $pdf->download('Dohoda_o_odbornej_praxi_' . $student->surname . '.pdf');
 
@@ -270,6 +305,14 @@ class StudentDocumentController extends Controller
     {
         try {
             $user = Auth::user();
+
+            // Check if user has student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'User does not have a student profile.'
+                ], 403);
+            }
+
             $internship = Internship::with('student')->findOrFail($internshipId);
 
             // Check authorization

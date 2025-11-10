@@ -29,6 +29,8 @@ class RoleBasedAccessControlTest extends TestCase
             'password' => Hash::make('password123'),
             'role' => 'admin',
         ]);
+        $this->adminUser->email_verified_at = now();
+        $this->adminUser->save();
 
         $this->garantUser = User::create([
             'name' => 'Garant User',
@@ -36,6 +38,8 @@ class RoleBasedAccessControlTest extends TestCase
             'password' => Hash::make('password123'),
             'role' => 'garant',
         ]);
+        $this->garantUser->email_verified_at = now();
+        $this->garantUser->save();
 
         $this->companyUser = User::create([
             'name' => 'Company User',
@@ -43,6 +47,8 @@ class RoleBasedAccessControlTest extends TestCase
             'password' => Hash::make('password123'),
             'role' => 'company',
         ]);
+        $this->companyUser->email_verified_at = now();
+        $this->companyUser->save();
 
         $this->studentUser = User::create([
             'name' => 'Student User',
@@ -50,6 +56,8 @@ class RoleBasedAccessControlTest extends TestCase
             'password' => Hash::make('password123'),
             'role' => 'student',
         ]);
+        $this->studentUser->email_verified_at = now();
+        $this->studentUser->save();
 
         Announcement::create([
             'content' => '<p>Initial announcement</p>',

@@ -13,10 +13,10 @@
               <p class="card-text text-muted">
                 Vytvorte novú prax, vyberte firmu, doplňte termíny a sledujte stav. Nahrajte zmluvu a výkaz.
               </p>
-              <button class="btn btn-outline-primary">
+              <router-link :to="{ name: 'register', state: { role: 'student' } }" class="btn btn-outline-primary">
                 <i class="bi bi-play-circle me-2"></i>
                 Začať
-              </button>
+              </router-link>
             </div>
           </div>
         </div>
@@ -32,10 +32,10 @@
               <p class="card-text text-muted">
                 Potvrďte alebo zamietnite praxe v stave „Vytvorená". Spravujte dokumenty a komunikáciu.
               </p>
-              <button class="btn btn-outline-primary">
+              <router-link :to="{ name: 'register', state: { role: 'company' } }" class="btn btn-outline-primary">
                 <i class="bi bi-building-add me-2"></i>
                 Registrovať firmu
-              </button>
+              </router-link>
             </div>
           </div>
         </div>
@@ -51,10 +51,10 @@
               <p class="card-text text-muted">
                 Filtrujte, upravujte atribúty praxí a exportujte dáta do CSV pre reporty a štatistiky.
               </p>
-              <button class="btn btn-outline-primary">
+              <router-link to="/login" class="btn btn-outline-primary">
                 <i class="bi bi-box-arrow-in-right me-2"></i>
                 Prihlásiť sa
-              </button>
+              </router-link>
             </div>
           </div>
         </div>

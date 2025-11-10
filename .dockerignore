@@ -20,14 +20,20 @@ frontend/dist
 frontend/.env.local
 frontend/.env.*.local
 
-# IDE
+# IDE and Editor files
 .vscode
 .idea
+.claude
 *.swp
 *.swo
 *.swn
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 .DS_Store
 Thumbs.db
+*.code-workspace
 
 # Docs
 *.md

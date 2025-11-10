@@ -41,6 +41,47 @@ docker compose build && docker compose up -d
 - 📧 **Email queue** - asynchrónne posielanie emailov
 - 🎨 **Moderné UI** - Bootstrap 5, responsive design
 
+## Auth Setup (Required)
+
+Po prvom štarte aplikácie je potrebné nastaviť Passport a spustiť seed. Vyberte si buď lokálne príkazy, alebo Docker variant podľa toho, ako aplikáciu spúšťate.
+
+- Lokálne:
+  - `php artisan migrate:fresh --seed`
+  - `php artisan passport:keys --force`
+  - `php artisan passport:client --personal --name="Laravel Personal Access Client"`
+
+- Docker:
+  - `docker compose exec app php artisan migrate:fresh --seed`
+  - `docker compose exec app php artisan passport:keys --force`
+  - `docker compose exec app php artisan passport:client --personal --name="Laravel Personal Access Client"`
+
+Poznámka: Ak migrácie zlyhávajú kvôli odlišným timestampom, upravte kolidujúce timestamps v súboroch migrácií manuálne (alebo sa dohodnite v tíme na jednotných timestampoch).
+
+## Default Admin
+
+- Email: `admin@test.com`
+- Heslo: `password123`
+
+## Frontend .env (Vite)
+
+Každý dev má iné URL na backend. Nastavte proxy cieľ vo `frontend/.env`:
+
+- Pre Docker: `VITE_PROXY_TARGET=http://localhost:XXXX` (v závislosti od individuálneho configu)
+- Pre lokálny backend: `VITE_API_URL=http://localhost:XXXX` (v závislosti od individuálneho configu)
+
+Vite proxy presmeruje požiadavky z frontendu na backend (`/api -> VITE_*`).
+
+## Rýchly Prehľad Príkazov
+
+- Re-run seed + Passport lokálne: 
+`php artisan migrate:fresh --seed`
+`php artisan passport:keys --force && php artisan passport:client --personal --name="Laravel Personal Access Client"`
+
+- Re-run seed + Passport v Dockeri: 
+`docker compose exec app php artisan migrate:fresh --seed` 
+`docker compose exec app php artisan passport:keys --force`
+`docker compose exec app php artisan passport:client --personal --name="Laravel Personal Access Client"`
+
 ## 🛠️ Tech Stack
 
 ### Backend

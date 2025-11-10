@@ -23,6 +23,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef.novak@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'alternative_email' => 'jozef.personal@gmail.com',
             'phone_number' => '+421901234567',
             'study_level' => 'Bc.',
@@ -84,6 +85,7 @@ class StudentRegistrationTest extends TestCase
             // Missing surname
             'email' => 'jozef.novak@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'study_level' => 'Bc.',
             'study_field' => 'Informatika',
             'state' => 'Slovensko',
@@ -111,6 +113,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef.novak@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'study_level' => 'Bc.',
             // Missing study_field
             'state' => 'Slovensko',
@@ -138,6 +141,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef@gmail.com', // Not a university email
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'study_level' => 'Bc.',
             'study_field' => 'Informatika',
             'state' => 'Slovensko',
@@ -165,6 +169,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Kováčová',
             'email' => 'maria.kovacova@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'study_level' => 'Mgr.',
             'study_field' => 'Ekonomika',
             'state' => 'Slovensko',
@@ -196,6 +201,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef.novak@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'alternative_email' => 'jozef.novak@student.ukf.sk', // Same as email
             'study_level' => 'Bc.',
             'study_field' => 'Informatika',
@@ -224,6 +230,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef.novak@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'study_level' => 'Bc.',
             'study_field' => 'Informatika',
             // Missing all address fields
@@ -261,6 +268,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef.novak@student.ukf.sk', // Duplicate
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'study_level' => 'Bc.',
             'study_field' => 'Informatika',
             'state' => 'Slovensko',
@@ -288,6 +296,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef.novak@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             // No alternative_email
             // No phone_number
             'study_level' => 'Bc.',
@@ -322,6 +331,7 @@ class StudentRegistrationTest extends TestCase
             'surname' => 'Novák',
             'email' => 'jozef.novak@student.ukf.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'study_level' => 'Bc.',
             'study_field' => 'Informatika',
             'state' => 'Slovensko',
@@ -343,3 +353,4 @@ class StudentRegistrationTest extends TestCase
         $this->assertTrue(\Hash::check('password123', $user->password));
     }
 }
+

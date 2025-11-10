@@ -44,7 +44,7 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                  <router-link to="/dashboard" class="dropdown-item">
+                  <router-link :to="dashboardRoute" class="dropdown-item">
                     <i class="bi bi-speedometer2 me-2"></i>
                     Dashboard
                   </router-link>
@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, watch } from 'vue'
+import { onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import NotificationBell from './components/NotificationBell.vue'
@@ -85,8 +85,8 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 // Methods
-const logout = () => {
-  authStore.logout()
+const logout = async () => {
+  await authStore.logout()
   router.push('/')
 }
 
@@ -95,17 +95,28 @@ onMounted(() => {
   authStore.initializeAuth()
   
   // Listen for storage changes (login/logout from other tabs)
-  window.addEventListener('storage', () => {
+  // Use a named function so we can properly remove it
+  const handleStorageChange = () => {
     authStore.initializeAuth()
-  })
-})
+  }
+  
+  window.addEventListener('storage', handleStorageChange)
 
 onBeforeUnmount(() => {
-  window.removeEventListener('storage', authStore.initializeAuth)
+    window.removeEventListener('storage', handleStorageChange)
+  })
 })
 
 // Watch for route changes to update auth status
 watch(() => router.currentRoute.value, () => {
   authStore.initializeAuth()
+})
+
+// Compute correct dashboard route based on user role (BUGFIX: students need /student-dashboard)
+const dashboardRoute = computed(() => {
+  if (authStore.isAdmin || authStore.isGarant) return '/dashboard'
+  if (authStore.isStudent) return '/student-dashboard'
+  if (authStore.isCompany) return '/company-dashboard'
+  return '/'
 })
 </script>

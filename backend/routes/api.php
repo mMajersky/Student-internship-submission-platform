@@ -57,6 +57,17 @@ Route::middleware(['auth:api'])->group(function () {
 // Auth routes from develop
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+Route::middleware('auth:api')->post('/auth/logout', [AuthController::class, 'logout']);
+
+// Email verification and password reset
+Route::get('/auth/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->name('verification.verify')
+    ->middleware(['signed', 'throttle:6,1']);
+Route::post('/auth/resend-verification', [AuthController::class, 'resendVerification'])
+    ->middleware('throttle:3,1');
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])
+    ->middleware('throttle:5,1');
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
 // DEBUG: Check authentication status
 Route::get('/debug-auth', function (Request $request) {

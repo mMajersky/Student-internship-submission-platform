@@ -55,7 +55,9 @@ class InternshipPdfController extends Controller
         // 3. VYGENEROVANIE PDF
         $pdf = Pdf::loadView('pdf.internship_agreement', $data);
         $pdf->setPaper('A4', 'portrait');
-        $pdf->setOption('isHtml5ParserEnabled', true);
+        if (method_exists($pdf, 'setOptions')) {
+            $pdf->setOptions(['isHtml5ParserEnabled' => true]);
+        }
 
         return $pdf->download('Dohoda_o_odbornej_praxi_' . $student->surname . '.pdf');
     }

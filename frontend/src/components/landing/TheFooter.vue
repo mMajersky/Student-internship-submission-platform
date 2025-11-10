@@ -10,12 +10,12 @@
             <router-link to="/login" class="text-decoration-none text-muted">
               Prihlásenie
             </router-link>
-            <a href="#" class="text-decoration-none text-muted">
+            <router-link :to="{ name: 'register', state: { role: 'student' } }" class="text-decoration-none text-muted">
               Registrácia študenta
-            </a>
-            <a href="#" class="text-decoration-none text-muted">
+            </router-link>
+            <router-link :to="{ name: 'register', state: { role: 'company' } }" class="text-decoration-none text-muted">
               Registrácia firmy
-            </a>
+            </router-link>
           </div>
         </div>
       </div>

@@ -21,6 +21,7 @@ class CompanyRegistrationTest extends TestCase
             'name' => 'Testovacia Firma',
             'email' => 'firma@test.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'company_name' => 'Tech Solutions s.r.o.',
             'state' => 'Slovensko',
             'region' => 'Bratislavský kraj',
@@ -69,6 +70,7 @@ class CompanyRegistrationTest extends TestCase
             'name' => 'Testovacia Firma',
             'email' => 'firma@test.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             // Missing company_name
             'state' => 'Slovensko',
             'region' => 'Bratislavský kraj',
@@ -94,6 +96,7 @@ class CompanyRegistrationTest extends TestCase
             'name' => 'Testovacia Firma',
             'email' => 'firma@test.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'company_name' => 'Tech Solutions s.r.o.',
             // Missing all address fields
         ];
@@ -129,6 +132,7 @@ class CompanyRegistrationTest extends TestCase
             'name' => 'Testovacia Firma',
             'email' => 'firma@test.sk', // Duplicate
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'company_name' => 'Tech Solutions s.r.o.',
             'state' => 'Slovensko',
             'region' => 'Bratislavský kraj',
@@ -154,6 +158,7 @@ class CompanyRegistrationTest extends TestCase
             'name' => 'Testovacia Firma',
             'email' => 'firma@test.sk',
             'password' => 'password123',
+            'password_confirmation' => 'password123',
             'company_name' => 'Tech Solutions s.r.o.',
             'state' => 'Slovensko',
             'region' => 'Bratislavský kraj',
@@ -174,3 +179,4 @@ class CompanyRegistrationTest extends TestCase
         $this->assertTrue(\Hash::check('password123', $user->password));
     }
 }
+
