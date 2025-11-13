@@ -1,34 +1,33 @@
 <template>
   <div class="min-vh-100 d-flex flex-column bg-light">
     <main class="flex-grow-1 container py-4" style="max-width: 800px;">
-      <h1 class="fs-2 fw-semibold mb-4 text-dark">Nastavenia</h1>
+      <h1 class="fs-2 fw-semibold mb-4 text-dark">{{ $t('settings.title') }}</h1>
 
       <!-- Email Notifications -->
       <div class="card border shadow-sm mb-4">
         <div class="card-body">
           <h5 class="card-title mb-3">
             <i class="bi bi-envelope me-2"></i>
-            Email notifikácie
+            {{ $t('settings.emailNotifications') }}
           </h5>
-          <p class="text-muted small">Povoľte alebo zakážte prijímanie emailov od systému.</p>
-          
+          <p class="text-muted small">{{ $t('settings.emailNotificationsDesc') }}</p>
+
           <div class="form-check form-switch">
-            <input 
-              class="form-check-input" 
-              type="checkbox" 
+            <input
+              class="form-check-input"
+              type="checkbox"
               id="emailNotifications"
               v-model="settings.email_notifications"
               @change="updateEmailNotifications">
             <label class="form-check-label" for="emailNotifications">
-              {{ settings.email_notifications ? 'Zapnuté' : 'Vypnuté' }}
+              {{ settings.email_notifications ? $t('settings.enabled') : $t('settings.disabled') }}
             </label>
           </div>
 
           <div class="alert alert-info mt-3 mb-0">
             <small>
               <i class="bi bi-info-circle me-2"></i>
-              <strong>Poznámka:</strong> Aj keď sú emailové notifikácie vypnuté, stále budete vidieť notifikácie 
-              v systéme (zvonček v hlavičke).
+              <strong>{{ $t('common.note') }}:</strong> {{ $t('settings.emailNote') }}
             </small>
           </div>
         </div>
@@ -39,45 +38,45 @@
         <div class="card-body">
           <h5 class="card-title mb-3">
             <i class="bi bi-person me-2"></i>
-            Informácie o profile
+            {{ $t('settings.profileInfo') }}
           </h5>
-          
+
           <div class="mb-3">
-            <label for="name" class="form-label">Meno</label>
-            <input 
-              type="text" 
-              class="form-control" 
+            <label for="name" class="form-label">{{ $t('settings.name') }}</label>
+            <input
+              type="text"
+              class="form-control"
               id="name"
               v-model="profile.name"
-              placeholder="Vaše meno">
+              :placeholder="$t('settings.namePlaceholder')">
           </div>
 
           <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input 
-              type="email" 
-              class="form-control" 
+            <label for="email" class="form-label">{{ $t('settings.email') }}</label>
+            <input
+              type="email"
+              class="form-control"
               id="email"
               v-model="profile.email"
-              placeholder="vasemail@example.com">
+              :placeholder="$t('settings.emailPlaceholder')">
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Rola</label>
-            <input 
-              type="text" 
-              class="form-control" 
+            <label class="form-label">{{ $t('settings.role') }}</label>
+            <input
+              type="text"
+              class="form-control"
               :value="settings.role"
               disabled
               readonly>
           </div>
 
-          <button 
-            @click="updateProfile" 
+          <button
+            @click="updateProfile"
             class="btn btn-primary"
             :disabled="isUpdatingProfile">
             <span v-if="isUpdatingProfile" class="spinner-border spinner-border-sm me-2"></span>
-            Uložiť zmeny
+            {{ $t('settings.saveChanges') }}
           </button>
         </div>
       </div>
@@ -87,52 +86,52 @@
         <div class="card-body">
           <h5 class="card-title mb-3">
             <i class="bi bi-shield-lock me-2"></i>
-            Zmena hesla
+            {{ $t('settings.changePassword') }}
           </h5>
-          
+
           <div class="mb-3">
-            <label for="currentPassword" class="form-label">Aktuálne heslo</label>
-            <input 
-              type="password" 
-              class="form-control" 
+            <label for="currentPassword" class="form-label">{{ $t('settings.currentPassword') }}</label>
+            <input
+              type="password"
+              class="form-control"
               id="currentPassword"
               v-model="password.current"
-              placeholder="Zadajte aktuálne heslo">
+              :placeholder="$t('settings.currentPasswordPlaceholder')">
           </div>
 
           <div class="mb-3">
-            <label for="newPassword" class="form-label">Nové heslo</label>
-            <input 
-              type="password" 
-              class="form-control" 
+            <label for="newPassword" class="form-label">{{ $t('settings.newPassword') }}</label>
+            <input
+              type="password"
+              class="form-control"
               id="newPassword"
               v-model="password.new"
-              placeholder="Zadajte nové heslo (min. 8 znakov)">
+              :placeholder="$t('settings.newPasswordPlaceholder')">
           </div>
 
           <div class="mb-3">
-            <label for="confirmPassword" class="form-label">Potvrdiť nové heslo</label>
-            <input 
-              type="password" 
-              class="form-control" 
+            <label for="confirmPassword" class="form-label">{{ $t('settings.confirmPassword') }}</label>
+            <input
+              type="password"
+              class="form-control"
               id="confirmPassword"
               v-model="password.confirm"
-              placeholder="Potvrďte nové heslo">
+              :placeholder="$t('settings.confirmPasswordPlaceholder')">
           </div>
 
-          <button 
-            @click="changePassword" 
+          <button
+            @click="changePassword"
             class="btn btn-warning"
             :disabled="isChangingPassword">
             <span v-if="isChangingPassword" class="spinner-border spinner-border-sm me-2"></span>
-            Zmeniť heslo
+            {{ $t('settings.changePasswordButton') }}
           </button>
         </div>
       </div>
     </main>
 
     <footer class="bg-white border-top py-3 text-center text-muted small">
-      © 2025 Odborná prax CRM
+      {{ $t('footer.copyright') }}
     </footer>
   </div>
 </template>
@@ -140,6 +139,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const authStore = useAuthStore();
 
@@ -205,15 +207,15 @@ const updateEmailNotifications = async () => {
     const data = await response.json();
     
     if (response.ok) {
-      alert(data.message || 'Nastavenie bolo aktualizované.');
+      alert(data.message || t('settings.validation.settingUpdated'));
     } else {
-      alert(data.message || 'Chyba pri aktualizácii nastavenia.');
+      alert(data.message || t('settings.validation.settingUpdateError'));
       // Revert on error
       settings.email_notifications = !settings.email_notifications;
     }
   } catch (error) {
     console.error('Error updating email notifications:', error);
-    alert('Chyba pri aktualizácii nastavenia.');
+    alert(t('settings.validation.settingUpdateError'));
     settings.email_notifications = !settings.email_notifications;
   }
 };
@@ -234,15 +236,15 @@ const updateProfile = async () => {
     const data = await response.json();
     
     if (response.ok) {
-      alert(data.message || 'Profil bol aktualizovaný.');
+      alert(data.message || t('settings.validation.profileUpdated'));
       settings.name = profile.name;
       settings.email = profile.email;
     } else {
-      alert(data.message || 'Chyba pri aktualizácii profilu.');
+      alert(data.message || t('settings.validation.profileUpdateError'));
     }
   } catch (error) {
     console.error('Error updating profile:', error);
-    alert('Chyba pri aktualizácii profilu.');
+    alert(t('settings.validation.profileUpdateError'));
   } finally {
     isUpdatingProfile.value = false;
   }
@@ -250,17 +252,17 @@ const updateProfile = async () => {
 
 const changePassword = async () => {
   if (!password.current || !password.new || !password.confirm) {
-    alert('Prosím vyplňte všetky polia.');
+    alert(t('settings.validation.fillAllFields'));
     return;
   }
 
   if (password.new !== password.confirm) {
-    alert('Nové heslo a potvrdenie hesla sa nezhodujú.');
+    alert(t('settings.validation.passwordsDontMatch'));
     return;
   }
 
   if (password.new.length < 8) {
-    alert('Nové heslo musí mať aspoň 8 znakov.');
+    alert(t('settings.validation.passwordTooShort'));
     return;
   }
 
@@ -283,16 +285,16 @@ const changePassword = async () => {
     const data = await response.json();
     
     if (response.ok) {
-      alert(data.message || 'Heslo bolo zmenené.');
+      alert(data.message || t('settings.validation.passwordChanged'));
       password.current = '';
       password.new = '';
       password.confirm = '';
     } else {
-      alert(data.message || 'Chyba pri zmene hesla.');
+      alert(data.message || t('settings.validation.passwordChangeError'));
     }
   } catch (error) {
     console.error('Error changing password:', error);
-    alert('Chyba pri zmene hesla.');
+    alert(t('settings.validation.passwordChangeError'));
   } finally {
     isChangingPassword.value = false;
   }
@@ -302,4 +304,3 @@ onMounted(() => {
   loadSettings();
 });
 </script>
-

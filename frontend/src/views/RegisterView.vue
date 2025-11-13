@@ -7,9 +7,9 @@
             <!-- HEADER -->
             <div class="text-center mb-4">
               <h3 class="card-title fw-bolder">
-                {{ formData.role === 'company' ? 'Registrácia firmy' : 'Registrácia študenta' }}
+                {{ formData.role === 'company' ? $t('auth.register.companyTitle') : $t('auth.register.studentTitle') }}
               </h3>
-              <p class="text-muted">Vyplňte všetky potrebné údaje pre registráciu.</p>
+              <p class="text-muted">{{ $t('auth.register.subtitle') }}</p>
             </div>
 
             <!-- ERROR -->
@@ -371,7 +371,10 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
+
+const { t } = useI18n()
 
 // Use relative path to leverage Vite proxy
 const API_URL = ''

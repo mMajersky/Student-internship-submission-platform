@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2>Dashboard garanta</h2>
+          <h2>{{ $t('garantDashboard.title') }}</h2>
           <span class="badge bg-warning text-dark fs-6">{{ authStore.userRole }}</span>
         </div>
       </div>
@@ -19,7 +19,7 @@
           type="button"
         >
           <i class="bi bi-house me-2"></i>
-          Prehľad
+          {{ $t('garantDashboard.tabs.overview') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
@@ -30,7 +30,7 @@
           type="button"
         >
           <i class="bi bi-plus-circle me-2"></i>
-          Nová prax
+          {{ $t('garantDashboard.tabs.createInternship') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
@@ -41,7 +41,7 @@
           type="button"
         >
           <i class="bi bi-briefcase me-2"></i>
-          Všetky praxe
+          {{ $t('garantDashboard.tabs.internships') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
@@ -52,7 +52,7 @@
           type="button"
         >
           <i class="bi bi-folder me-2"></i>
-          Dokumenty
+          {{ $t('garantDashboard.tabs.documents') }}
         </button>
       </li>
     </ul>
@@ -67,12 +67,12 @@
               <div class="card-body">
                 <h5 class="card-title">
                   <i class="bi bi-plus-circle me-2 text-primary"></i>
-                  Vytvoriť prax
+                  {{ $t('garantDashboard.cards.createInternship') }}
                 </h5>
-                <p class="card-text">Vytvorte novú prax pre študenta</p>
+                <p class="card-text">{{ $t('garantDashboard.cards.createInternshipDesc') }}</p>
                 <button class="btn btn-primary" @click="handleNewInternship">
                   <i class="bi bi-plus me-2"></i>
-                  Nová prax
+                  {{ $t('garantDashboard.cards.newInternship') }}
                 </button>
               </div>
             </div>
@@ -83,12 +83,12 @@
               <div class="card-body">
                 <h5 class="card-title">
                   <i class="bi bi-briefcase me-2 text-info"></i>
-                  Správa praxí
+                  {{ $t('garantDashboard.cards.manageInternships') }}
                 </h5>
-                <p class="card-text">Zobrazenie a správa všetkých praxí</p>
+                <p class="card-text">{{ $t('garantDashboard.cards.manageInternshipsDesc') }}</p>
                 <button class="btn btn-info" @click="activeTab = 'internships'">
                   <i class="bi bi-eye me-2"></i>
-                  Zobraziť praxe
+                  {{ $t('garantDashboard.cards.viewInternships') }}
                 </button>
               </div>
             </div>
@@ -99,12 +99,12 @@
               <div class="card-body">
                 <h5 class="card-title">
                   <i class="bi bi-file-earmark-pdf me-2 text-success"></i>
-                  Dokumenty
+                  {{ $t('garantDashboard.cards.documents') }}
                 </h5>
-                <p class="card-text">Správa dokumentov a dohôd</p>
+                <p class="card-text">{{ $t('garantDashboard.cards.documentsDesc') }}</p>
                 <button class="btn btn-success" @click="activeTab = 'documents'">
                   <i class="bi bi-folder me-2"></i>
-                  Zobraziť dokumenty
+                  {{ $t('garantDashboard.cards.viewDocuments') }}
                 </button>
               </div>
             </div>
@@ -114,13 +114,13 @@
         <!-- Statistics -->
         <div class="row mt-4">
           <div class="col-12">
-            <h4 class="mb-3">Štatistiky</h4>
+            <h4 class="mb-3">{{ $t('garantDashboard.statistics') }}</h4>
           </div>
           <div class="col-md-3 mb-3">
             <div class="card text-center">
               <div class="card-body">
                 <h3 class="text-primary mb-0">{{ stats.total }}</h3>
-                <p class="text-muted mb-0">Celkový počet praxí</p>
+                <p class="text-muted mb-0">{{ $t('garantDashboard.totalInternships') }}</p>
               </div>
             </div>
           </div>
@@ -128,7 +128,7 @@
             <div class="card text-center">
               <div class="card-body">
                 <h3 class="text-warning mb-0">{{ stats.inProgress }}</h3>
-                <p class="text-muted mb-0">Prebieha</p>
+                <p class="text-muted mb-0">{{ $t('garantDashboard.inProgress') }}</p>
               </div>
             </div>
           </div>
@@ -136,7 +136,7 @@
             <div class="card text-center">
               <div class="card-body">
                 <h3 class="text-success mb-0">{{ stats.completed }}</h3>
-                <p class="text-muted mb-0">Ukončené</p>
+                <p class="text-muted mb-0">{{ $t('garantDashboard.completed') }}</p>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@
             <div class="card text-center">
               <div class="card-body">
                 <h3 class="text-info mb-0">{{ stats.planned }}</h3>
-                <p class="text-muted mb-0">Plánované</p>
+                <p class="text-muted mb-0">{{ $t('garantDashboard.planned') }}</p>
               </div>
             </div>
           </div>
@@ -168,14 +168,14 @@
       <div v-if="activeTab === 'internships'" class="tab-pane fade show active">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">Zoznam praxí</h5>
-            
+            <h5 class="card-title mb-4">{{ $t('garantDashboard.internshipsList') }}</h5>
+
             <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
-              <p class="text-muted mt-3">Zatiaľ neboli vytvorené žiadne praxe.</p>
+              <p class="text-muted mt-3">{{ $t('garantDashboard.noInternships') }}</p>
               <button class="btn btn-primary" @click="activeTab = 'create-internship'">
                 <i class="bi bi-plus me-2"></i>
-                Vytvoriť prvú prax
+                {{ $t('garantDashboard.createFirstInternship') }}
               </button>
             </div>
 
@@ -183,14 +183,14 @@
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Študent</th>
-                    <th>Firma</th>
-                    <th>Rok</th>
-                    <th>Semester</th>
-                    <th>Začiatok</th>
-                    <th>Koniec</th>
-                    <th>Stav</th>
-                    <th>Akcie</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.student') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.company') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.year') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.semester') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.start') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.end') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.status') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -203,20 +203,20 @@
                     <td>{{ formatDate(internship.end_date) }}</td>
                     <td>
                       <span class="badge" :class="getStatusClass(internship.status)">
-                        {{ internship.status }}
+                        {{ getTranslatedStatus(internship.status) }}
                       </span>
                     </td>
                     <td>
-                      <button class="btn btn-sm btn-outline-success me-1" title="Pridať komentár" @click="handleAddComment(internship)">
+                      <button class="btn btn-sm btn-outline-success me-1" :title="$t('garantDashboard.actions.addComment')" @click="handleAddComment(internship)">
                         <i class="bi bi-chat-left-text"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-primary me-1" title="Upraviť" @click="handleEditInternship(internship)">
+                      <button class="btn btn-sm btn-outline-primary me-1" :title="$t('garantDashboard.actions.edit')" @click="handleEditInternship(internship)">
                         <i class="bi bi-pencil"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-secondary me-1" title="Zobraziť dokumenty" @click="openDocuments(internship)">
+                      <button class="btn btn-sm btn-outline-secondary me-1" :title="$t('garantDashboard.actions.viewDocuments')" @click="openDocuments(internship)">
                         <i class="bi bi-folder"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-danger" title="Vymazať" @click="handleDeleteInternship(internship.id)">
+                      <button class="btn btn-sm btn-outline-danger" :title="$t('garantDashboard.actions.delete')" @click="handleDeleteInternship(internship.id)">
                         <i class="bi bi-trash"></i>
                       </button>
                     </td>
@@ -232,24 +232,24 @@
       <div v-if="activeTab === 'documents'" class="tab-pane fade show active">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">Dokumenty všetkých praxí</h5>
-            
+            <h5 class="card-title mb-4">{{ $t('garantDashboard.documentsTitle') }}</h5>
+
             <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
-              <p class="text-muted mt-3">Zatiaľ neboli vytvorené žiadne praxe.</p>
+              <p class="text-muted mt-3">{{ $t('garantDashboard.noInternships') }}</p>
             </div>
 
             <div v-else class="table-responsive">
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Študent</th>
-                    <th>Firma</th>
-                    <th>Rok</th>
-                    <th>Semester</th>
-                    <th>Stav</th>
-                    <th>Počet dokumentov</th>
-                    <th>Akcie</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.student') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.company') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.year') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.semester') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.status') }}</th>
+                    <th>{{ $t('garantDashboard.documentCount') }}</th>
+                    <th>{{ $t('garantDashboard.tableHeaders.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -260,16 +260,16 @@
                     <td><span class="badge bg-secondary">{{ getSemester(internship.start_date) }}</span></td>
                     <td>
                       <span class="badge" :class="getStatusClass(internship.status)">
-                        {{ internship.status }}
+                        {{ getTranslatedStatus(internship.status) }}
                       </span>
                     </td>
                     <td>
                       <span class="badge bg-info">{{ internship.documents_count || 0 }}</span>
                     </td>
                     <td>
-                      <button class="btn btn-sm btn-outline-primary" title="Zobraziť dokumenty" @click="openDocuments(internship)">
+                      <button class="btn btn-sm btn-outline-primary" :title="$t('garantDashboard.actions.viewDocuments')" @click="openDocuments(internship)">
                         <i class="bi bi-folder-open me-1"></i>
-                        Dokumenty
+                        {{ $t('garantDashboard.viewDocumentsBtn') }}
                       </button>
                     </td>
                   </tr>
@@ -296,8 +296,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from 'vue-i18n'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -416,21 +419,21 @@ const handleCreateInternship = async (formData) => {
     await fetchInternships()
     
     // Show success message
-    alert(editingInternship.value ? 'Prax bola úspešne upravená!' : 'Prax bola úspešne vytvorená!')
-    
+    alert(editingInternship.value ? t('garantDashboard.messages.internshipUpdated') : t('garantDashboard.messages.internshipCreated'))
+
     // Reset editing state
     editingInternship.value = null
-    
+
     // Switch to internships tab
     activeTab.value = 'internships'
   } catch (error) {
     console.error('Error creating internship:', error)
-    alert(error.message || 'Chyba pri vytváraní praxe. Skúste to znova.')
+    alert(error.message || t('garantDashboard.messages.createError'))
   }
 }
 
 const handleDeleteInternship = async (internshipId) => {
-  if (!confirm('Naozaj chcete vymazať túto prax?')) {
+  if (!confirm(t('garantDashboard.messages.confirmDelete'))) {
     return
   }
   
@@ -452,10 +455,10 @@ const handleDeleteInternship = async (internshipId) => {
     await fetchInternships()
     
     // Show success message
-    alert('Prax bola úspešne vymazaná!')
+    alert(t('garantDashboard.messages.internshipDeleted'))
   } catch (error) {
     console.error('Error deleting internship:', error)
-    alert(error.message || 'Chyba pri mazaní praxe. Skúste to znova.')
+    alert(error.message || t('garantDashboard.messages.deleteError'))
   }
 }
 
@@ -500,6 +503,30 @@ const getStatusClass = (status) => {
   return statusClasses[status] || 'bg-secondary'
 }
 
+const getTranslatedStatus = (status) => {
+  // Map API status values to translation keys
+  const statusMap = {
+    'vytvorená': 'studentInternship.status.vytvorena',
+    'potvrdená': 'studentInternship.status.schvalena',
+    'schválená': 'studentInternship.status.schvalena',
+    'obhájená': 'studentInternship.status.obhajena',
+    'ukončená': 'studentInternship.status.ukoncena',
+    'prebieha': 'studentInternship.status.prebieha',
+    'zamietnutá': 'studentInternship.status.zamietnuta',
+    'zrušená': 'studentInternship.status.zrusena',
+    'pending': 'studentInternship.status.vytvorena',
+    'confirmed': 'studentInternship.status.schvalena',
+    'approved': 'studentInternship.status.schvalena',
+    'in_progress': 'studentInternship.status.prebieha',
+    'completed': 'studentInternship.status.obhajena',
+    'rejected': 'studentInternship.status.zamietnuta',
+    'cancelled': 'studentInternship.status.zrusena'
+  }
+
+  const translationKey = statusMap[status] || 'studentInternship.status.vytvorena'
+  return t(translationKey)
+}
+
 // Comment handling
 const handleAddComment = (internship) => {
   selectedInternshipForComment.value = internship
@@ -536,7 +563,7 @@ const handleSubmitComment = async (commentData) => {
     }
 
     // Show success message
-    alert('Komentár bol úspešne pridaný!')
+    alert(t('garantDashboard.messages.commentAdded'))
     
     // Close modal
     handleCloseCommentModal()

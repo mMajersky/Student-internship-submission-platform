@@ -2,42 +2,41 @@
   <div id="app-wrapper" class="p-4">
     <div class="container">
       <h5 class="mb-4">
-        <i class="bi bi-file-earmark-text me-2"></i> Odborná prax
+        <i class="bi bi-file-earmark-text me-2"></i> {{ $t('studentDocuments.title') }}
       </h5>
 
       <ul class="nav nav-tabs mb-4">
         <li class="nav-item">
-          <a class="nav-link active" href="#">Dokumenty</a>
+          <a class="nav-link active" href="#">{{ $t('studentDocuments.tabs.documents') }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-muted" href="#">Prehľad</a>
+          <a class="nav-link text-muted" href="#">{{ $t('studentDocuments.tabs.overview') }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-muted" href="#">Moje praxe</a>
+          <a class="nav-link text-muted" href="#">{{ $t('studentDocuments.tabs.myInternships') }}</a>
         </li>
       </ul>
 
       <div class="card p-4">
-        <h5 class="mb-4">Dokumenty praxe</h5>
+        <h5 class="mb-4">{{ $t('studentDocuments.documentsTitle') }}</h5>
 
         <div class="row g-4">
           <!-- Ľavý stĺpec -->
           <div class="col-md-6">
             <div class="border rounded p-4 bg-white h-100">
-              <h6 class="fw-semibold mb-3">Dohoda o odbornej praxi (PDF)</h6>
+              <h6 class="fw-semibold mb-3">{{ $t('studentDocuments.generatedAgreement') }}</h6>
               <p class="text-muted small mb-3">
-                Generované systémom po vytvorení praxe.
+                {{ $t('studentDocuments.generatedAgreementDesc') }}
               </p>
               <button class="btn btn-primary btn-sm" @click="downloadGeneratedAgreement">
-                <i class="bi bi-download me-1"></i> Stiahnuť dohodu
+                <i class="bi bi-download me-1"></i> {{ $t('studentDocuments.downloadAgreement') }}
               </button>
 
               <div class="alert alert-info mt-4" role="alert">
-                <h6 class="alert-heading"><i class="bi bi-shield-lock me-2"></i>Bezpečnosť dokumentov</h6>
+                <h6 class="alert-heading"><i class="bi bi-shield-lock me-2"></i>{{ $t('studentDocuments.securityTitle') }}</h6>
                 <p class="mb-0 small">
-                  <strong>Kde sa ukladajú dokumenty?</strong><br>
-                  Všetky nahraté dokumenty (najmä podpísané PDF) sú uložené v <strong>zabezpečenom súkromnom úložisku</strong> Dokumenty <strong>NIE SÚ verejne prístupné</strong> - prístup k nim majú 
-                  len autorizovaní používatelia cez API s kontrolou oprávnení.
+                  <strong>{{ $t('studentDocuments.securityWhere') }}</strong><br>
+                  {{ $t('studentDocuments.securityDesc') }}
                 </p>
               </div>
             </div>
@@ -47,14 +46,14 @@
           <div class="col-md-6">
             <div class="border rounded p-4 bg-white mb-4">
               <h6 class="fw-semibold mb-3">
-                Zmluva podpísaná študentom
+                {{ $t('studentDocuments.signedAgreement') }}
                 <small class="text-muted d-block">
-                  (povinné pri stave „Schválená“)
+                  {{ $t('studentDocuments.signedAgreementDesc') }}
                 </small>
               </h6>
 
               <div class="mb-3">
-                <label for="uploadZmluva" class="form-label">Nahrať dokument (PDF)</label>
+                <label for="uploadZmluva" class="form-label">{{ $t('studentDocuments.uploadDocument') }}</label>
                 <input
                   type="file"
                   id="uploadZmluva"
@@ -64,31 +63,31 @@
                 />
               </div>
               <button class="btn btn-primary btn-sm" @click="uploadFile('zmluva')">
-                Nahrať
+                {{ $t('studentDocuments.upload') }}
               </button>
 
               <div class="mt-3" v-if="signedAgreement">
                 <div class="alert alert-success py-2 px-3 mb-2">
                   <i class="bi bi-check-circle me-2"></i>
-                  Nahrané: <strong>{{ signedAgreement.name }}</strong>
+                  {{ $t('studentDocuments.uploaded') }}: <strong>{{ signedAgreement.name }}</strong>
                   <small class="text-muted ms-2">({{ new Date(signedAgreement.created_at).toLocaleString() }})</small>
                 </div>
                 <div class="d-flex gap-2">
                   <button class="btn btn-success btn-sm" @click="downloadSignedAgreement">
-                    <i class="bi bi-download me-1"></i> Stiahnuť
+                    <i class="bi bi-download me-1"></i> {{ $t('studentDocuments.download') }}
                   </button>
                   <button class="btn btn-danger btn-sm" @click="deleteSignedAgreement">
-                    <i class="bi bi-trash me-1"></i> Odstrániť
+                    <i class="bi bi-trash me-1"></i> {{ $t('studentDocuments.delete') }}
                   </button>
                 </div>
               </div>
             </div>
 
             <div class="border rounded p-4 bg-white">
-              <h6 class="fw-semibold mb-3">Výkaz praxe (nepovinné)</h6>
+              <h6 class="fw-semibold mb-3">{{ $t('studentDocuments.report') }}</h6>
 
               <div class="mb-3">
-                <label for="uploadVykaz" class="form-label">Nahrať dokument (PDF)</label>
+                <label for="uploadVykaz" class="form-label">{{ $t('studentDocuments.uploadDocument') }}</label>
                 <input
                   type="file"
                   id="uploadVykaz"
@@ -98,7 +97,7 @@
                 />
               </div>
               <button class="btn btn-primary btn-sm" @click="uploadFile('vykaz')">
-                Nahrať
+                {{ $t('studentDocuments.upload') }}
               </button>
             </div>
           </div>
@@ -112,6 +111,9 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const zmluvaFile = ref(null);
 const vykazFile = ref(null);
@@ -154,23 +156,23 @@ async function uploadFile(type) {
   const file = type === "zmluva" ? zmluvaFile.value : vykazFile.value;
 
   if (!internshipId.value) {
-    alert('Chýba ID praxe.');
+    alert(t('studentDocuments.internshipIdMissing'));
     return;
   }
 
   if (!file) {
-    alert("Vyber súbor pred nahraním.");
+    alert(t('studentDocuments.selectFile'));
     return;
   }
 
   if (!authStore.token) {
-    alert('Nie ste prihlásený.');
+    alert(t('studentDocuments.notLoggedIn'));
     return;
   }
 
   // Zatiaľ implementujeme iba upload podpísanej dohody
   if (type !== 'zmluva') {
-    alert('Upload výkazu nie je ešte implementovaný.');
+    alert(t('studentDocuments.reportNotImplemented'));
     return;
   }
 
@@ -191,7 +193,7 @@ async function uploadFile(type) {
       throw new Error(data.message || 'Nepodarilo sa nahrať súbor.');
     }
 
-    alert('Podpísaná dohoda bola nahraná.');
+    alert(t('studentDocuments.uploadSuccess'));
     await loadSignedMeta();
   } catch (e) {
     alert(e.message);
@@ -200,20 +202,20 @@ async function uploadFile(type) {
 
 async function downloadGeneratedAgreement() {
   if (!internshipId.value || !authStore.token) {
-    alert('Chýba ID praxe alebo nie ste prihlásený.');
+    alert(t('studentDocuments.downloadError'));
     return;
   }
   try {
     const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-generated`, {
       method: 'GET',
-      headers: { 
-        'Accept': 'application/pdf', 
-        'Authorization': `Bearer ${authStore.token}` 
+      headers: {
+        'Accept': 'application/pdf',
+        'Authorization': `Bearer ${authStore.token}`
       }
     });
     if (!resp.ok) {
       const data = await resp.json().catch(() => ({}));
-      throw new Error(data.message || `Chyba servera: ${resp.status}`);
+      throw new Error(data.message || `${t('studentDocuments.serverError')} ${resp.status}`);
     }
     const blob = await resp.blob();
     const url = window.URL.createObjectURL(blob);
@@ -229,19 +231,19 @@ async function downloadGeneratedAgreement() {
 
 async function downloadSignedAgreement() {
   if (!internshipId.value || !authStore.token) {
-    alert('Chýba ID praxe alebo nie ste prihlásený.');
+    alert(t('studentDocuments.downloadError'));
     return;
   }
   try {
     const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
       method: 'GET',
-      headers: { 
-        'Authorization': `Bearer ${authStore.token}` 
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
       }
     });
     if (!resp.ok) {
       const data = await resp.json().catch(() => ({}));
-      throw new Error(data.message || `Chyba servera: ${resp.status}`);
+      throw new Error(data.message || `${t('studentDocuments.serverError')} ${resp.status}`);
     }
     const blob = await resp.blob();
     const url = window.URL.createObjectURL(blob);
@@ -256,31 +258,31 @@ async function downloadSignedAgreement() {
 }
 
 async function deleteSignedAgreement() {
-  if (!confirm('Naozaj chcete odstrániť tento dokument? Táto akcia sa nedá vrátiť späť.')) {
+  if (!confirm(t('studentDocuments.deleteConfirm'))) {
     return;
   }
 
   if (!internshipId.value || !authStore.token) {
-    alert('Chýba ID praxe alebo nie ste prihlásený.');
+    alert(t('studentDocuments.downloadError'));
     return;
   }
 
   try {
     const resp = await fetch(`/api/student/internships/${internshipId.value}/documents/agreement-signed`, {
       method: 'DELETE',
-      headers: { 
+      headers: {
         'Authorization': `Bearer ${authStore.token}`,
         'Accept': 'application/json'
       }
     });
 
     const data = await resp.json();
-    
+
     if (!resp.ok) {
-      throw new Error(data.message || `Chyba servera: ${resp.status}`);
+      throw new Error(data.message || `${t('studentDocuments.serverError')} ${resp.status}`);
     }
 
-    alert('Dokument bol úspešne odstránený.');
+    alert(t('studentDocuments.deleteSuccess'));
     signedAgreement.value = null;
   } catch (e) {
     alert(e.message);

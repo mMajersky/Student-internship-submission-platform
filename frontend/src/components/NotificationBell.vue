@@ -20,25 +20,25 @@
       
       <!-- Header -->
       <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-        <h6 class="mb-0 fw-semibold">Notifikácie</h6>
-        <button 
+        <h6 class="mb-0 fw-semibold">{{ $t('notifications.title') }}</h6>
+        <button
           v-if="unreadCount > 0"
-          @click="markAllAsRead" 
+          @click="markAllAsRead"
           class="btn btn-sm btn-link text-decoration-none p-0">
-          Označiť všetko
+          {{ $t('notifications.markAllAsRead') }}
         </button>
       </div>
 
       <!-- Notifications List -->
       <div v-if="loading" class="p-4 text-center">
         <div class="spinner-border spinner-border-sm" role="status">
-          <span class="visually-hidden">Načítavam...</span>
+          <span class="visually-hidden">{{ $t('notifications.loading') }}</span>
         </div>
       </div>
 
       <div v-else-if="notifications.length === 0" class="p-4 text-center text-muted">
         <i class="bi bi-bell-slash fs-3 d-block mb-2"></i>
-        <small>Žiadne notifikácie</small>
+        <small>{{ $t('notifications.noNotifications') }}</small>
       </div>
 
       <div v-else>
@@ -59,11 +59,11 @@
               </small>
             </div>
             <div>
-              <span v-if="!notification.is_read" class="badge bg-primary">Nové</span>
-              <button 
+              <span v-if="!notification.is_read" class="badge bg-primary">{{ $t('notifications.new') }}</span>
+              <button
                 @click.stop="deleteNotification(notification.id)"
                 class="btn btn-sm btn-link text-danger p-0 ms-2"
-                title="Odstrániť">
+                :title="$t('notifications.delete')">
                 <i class="bi bi-x-lg"></i>
               </button>
             </div>
@@ -74,7 +74,7 @@
       <!-- Footer -->
       <div class="p-2 border-top text-center">
         <router-link to="/notifications" class="btn btn-sm btn-link text-decoration-none" @click="showDropdown = false">
-          Zobraziť všetky notifikácie
+          {{ $t('notifications.viewAll') }}
         </router-link>
       </div>
     </div>
@@ -92,6 +92,9 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -225,11 +228,11 @@ const formatDate = (dateString) => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'Práve teraz';
-  if (diffMins < 60) return `Pred ${diffMins} min`;
-  if (diffHours < 24) return `Pred ${diffHours} hod`;
-  if (diffDays < 7) return `Pred ${diffDays} dňami`;
-  
+  if (diffMins < 1) return t('notifications.justNow');
+  if (diffMins < 60) return `${t('common.previous')} ${diffMins} ${t('notifications.minutesAgo')}`;
+  if (diffHours < 24) return `${t('common.previous')} ${diffHours} ${t('notifications.hoursAgo')}`;
+  if (diffDays < 7) return `${t('common.previous')} ${diffDays} ${t('notifications.daysAgo')}`;
+
   return date.toLocaleDateString('sk-SK');
 };
 
@@ -268,4 +271,3 @@ onUnmounted(() => {
   background-color: transparent;
 }
 </style>
-
