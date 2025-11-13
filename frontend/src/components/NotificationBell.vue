@@ -42,17 +42,17 @@
       </div>
 
       <div v-else>
-        <div 
-          v-for="notification in notifications" 
+        <div
+          v-for="notification in notifications"
           :key="notification.id"
           class="notification-item p-3 border-bottom"
           :class="{ 'bg-light': !notification.is_read }"
           @click="handleNotificationClick(notification)">
-          
+
           <div class="d-flex justify-content-between align-items-start">
             <div class="flex-grow-1">
-              <strong class="d-block mb-1">{{ notification.title }}</strong>
-              <small class="text-muted d-block mb-2">{{ notification.message }}</small>
+              <strong class="d-block mb-1">{{ getTranslatedTitle(notification) }}</strong>
+              <small class="text-muted d-block mb-2">{{ getTranslatedMessage(notification) }}</small>
               <small class="text-muted">
                 <i class="bi bi-clock me-1"></i>
                 {{ formatDate(notification.created_at) }}
@@ -217,6 +217,65 @@ const deleteNotification = async (id) => {
     }
   } catch (error) {
     console.error('Error deleting notification:', error);
+  }
+};
+
+const getTranslatedTitle = (notification) => {
+  switch (notification.type) {
+    case 'comment_added':
+      return t('notifications.commentAdded.title');
+    case 'approval_request':
+      return t('notifications.approvalRequest.title');
+    case 'internship_status_changed':
+      return t('notifications.internshipStatusChanged.title');
+    case 'internship_created':
+      return t('notifications.internshipCreated.title');
+    case 'document_uploaded':
+      return t('notifications.documentUploaded.title');
+    default:
+      return notification.title; // Fallback to original title
+  }
+};
+
+const getTranslatedMessage = (notification) => {
+  switch (notification.type) {
+    case 'comment_added':
+      // Extract garant name from the original message
+      const garantNameMatch = notification.message.match(/Garant (.+?) pridal/);
+      const garantName = garantNameMatch ? garantNameMatch[1] : 'Unknown';
+      return t('notifications.commentAdded.message', { garantName });
+
+    case 'approval_request':
+      // Extract student name from the original message
+      const studentNameMatch = notification.message.match(/Študent (.+?) žiada/);
+      const studentName = studentNameMatch ? studentNameMatch[1] : 'Unknown';
+      return t('notifications.approvalRequest.message', { studentName });
+
+    case 'internship_status_changed':
+      // Use the status from notification data
+      const status = notification.data?.new_status || 'Unknown';
+      return t('notifications.internshipStatusChanged.message', { status });
+
+    case 'internship_created':
+      // Extract student name and company name from the original message
+      const createdMatch = notification.message.match(/Študent (.+?) vytvoril novú prax(?: vo firme (.+?))?\./);
+      const createdStudentName = createdMatch ? createdMatch[1] : 'Unknown';
+      const companyName = createdMatch && createdMatch[2] ? createdMatch[2] : '';
+
+      if (companyName) {
+        return t('notifications.internshipCreated.message', { studentName: createdStudentName, companyName });
+      } else {
+        return t('notifications.internshipCreatedUnassigned.message', { studentName: createdStudentName });
+      }
+
+    case 'document_uploaded':
+      // Extract student name from the original message
+      const docStudentMatch = notification.message.match(/Študent (.+?) nahral/);
+      const docStudentName = docStudentMatch ? docStudentMatch[1] : 'Unknown';
+      return t('notifications.documentUploaded.message', { studentName: docStudentName });
+
+    default:
+      return notification.message; // Fallback to original message
   }
 };
 

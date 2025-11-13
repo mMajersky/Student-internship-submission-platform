@@ -213,7 +213,31 @@ const messages = {
       justNow: 'Just now',
       minutesAgo: 'min ago',
       hoursAgo: 'hours ago',
-      daysAgo: 'days ago'
+      daysAgo: 'days ago',
+      commentAdded: {
+        title: 'New Comment on Internship',
+        message: 'Garant {garantName} added a comment to your internship.'
+      },
+      approvalRequest: {
+        title: 'New Internship Approval Request',
+        message: 'Student {studentName} requests confirmation of their internship.'
+      },
+      internshipStatusChanged: {
+        title: 'Internship Status Changed',
+        message: 'Your internship status has been changed to: {status}'
+      },
+      internshipCreated: {
+        title: 'New Internship Created',
+        message: 'Student {studentName} created a new internship at {companyName}.'
+      },
+      internshipCreatedUnassigned: {
+        title: 'New Internship Awaiting Assignment',
+        message: 'Student {studentName} created a new internship. No garant assigned yet.'
+      },
+      documentUploaded: {
+        title: 'Document Uploaded',
+        message: 'Student {studentName} uploaded a signed agreement for their internship.'
+      }
     },
     editAnnouncement: {
       title: 'Edit Announcement',
@@ -789,7 +813,31 @@ const messages = {
       justNow: 'Práve teraz',
       minutesAgo: 'min',
       hoursAgo: 'hod',
-      daysAgo: 'dňami'
+      daysAgo: 'dňami',
+      commentAdded: {
+        title: 'Nový komentár k praxi',
+        message: 'Garant {garantName} pridal komentár k vašej praxi.'
+      },
+      approvalRequest: {
+        title: 'Nová žiadosť o potvrdenie stáže',
+        message: 'Študent {studentName} žiada o potvrdenie svojej stáže.'
+      },
+      internshipStatusChanged: {
+        title: 'Stav praxe bol zmenený',
+        message: 'Stav vašej praxe bol zmenený na: {status}'
+      },
+      internshipCreated: {
+        title: 'Študent vytvoril novú prax',
+        message: 'Študent {studentName} vytvoril novú prax vo firme {companyName}.'
+      },
+      internshipCreatedUnassigned: {
+        title: 'Nová prax čaká na priradenie',
+        message: 'Študent {studentName} vytvoril novú prax. Prax ešte nemá priradeného garanta.'
+      },
+      documentUploaded: {
+        title: 'Študent nahral dokument',
+        message: 'Študent {studentName} nahral podpísanú dohodu k svojej praxi.'
+      }
     },
     editAnnouncement: {
       title: 'Úprava oznámenia',
