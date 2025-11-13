@@ -373,8 +373,7 @@ import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
-// Use relative path to leverage Vite proxy
-const API_URL = ''
+const API_URL = import.meta.env.VITE_API_URL
 
 const router = useRouter()
 const authStore = useAuthStore()
