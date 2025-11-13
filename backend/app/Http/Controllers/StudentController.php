@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
-class StudentController extends BaseApiController
+class StudentController extends Controller
 {
     /**
      * Display a listing of all students.
@@ -15,22 +15,32 @@ class StudentController extends BaseApiController
      */
     public function index()
     {
-        return $this->executeWithExceptionHandling(function () {
+        try {
             $students = Student::select('id', 'name', 'surname', 'student_email')
                 ->orderBy('surname')
                 ->orderBy('name')
                 ->get();
 
-            return $this->respondWithCollection($students, function ($student) {
-                return [
-                    'id' => $student->id,
-                    'name' => $student->name,
-                    'surname' => $student->surname,
-                    'student_email' => $student->student_email,
-                    'full_name' => $student->name . ' ' . $student->surname,
-                ];
-            });
-        }, 'fetching students');
+            return response()->json([
+                'data' => $students->map(function ($student) {
+                    return [
+                        'id' => $student->id,
+                        'name' => $student->name,
+                        'surname' => $student->surname,
+                        'student_email' => $student->student_email,
+                        'full_name' => $student->name . ' ' . $student->surname,
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching students: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching students.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**
@@ -41,11 +51,11 @@ class StudentController extends BaseApiController
      */
     public function show($id)
     {
-        return $this->executeWithExceptionHandling(function () use ($id) {
+        try {
             $student = Student::findOrFail($id);
 
-            return $this->respondWithResource($student, function ($student) {
-                return [
+            return response()->json([
+                'data' => [
                     'id' => $student->id,
                     'name' => $student->name,
                     'surname' => $student->surname,
@@ -62,8 +72,20 @@ class StudentController extends BaseApiController
                     'house_number' => $student->house_number,
                     'created_at' => $student->created_at?->toIso8601String(),
                     'updated_at' => $student->updated_at?->toIso8601String(),
-                ];
-            });
-        }, 'fetching student');
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Student not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching student: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching the student.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 }

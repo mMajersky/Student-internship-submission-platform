@@ -18,7 +18,8 @@ class DemoEntitiesSeeder extends Seeder
     public function run()
     {
         // --- 1. VYTVORENIE GARANTA ---
-        $garantUser = User::where('role', 'garant')->first();
+        // Nájdem používateľa s rolou 'garant' (podľa tvojej DB má id=3)
+        $garantUser = User::where('id', 3)->where('role', 'garant')->first();
 
         if ($garantUser) {
             // Vytvorím záznam v tabuľke 'garants' a prepojím ho s používateľom
@@ -32,12 +33,13 @@ class DemoEntitiesSeeder extends Seeder
             );
             $this->command->info("Garant '{$garantUser->name} {$garantUser->surname}' bol úspešne vytvorený/nájdený.");
         } else {
-            $this->command->error('Nebol nájdený žiadny používateľ s rolou garanta.');
+            $this->command->error('Nebol nájdený používateľ pre rolu Garanta (user_id=3).');
         }
 
 
         // --- 2. VYTVORENIE FIRMY ---
-        $companyUser = User::where('role', 'company')->first();
+        // Nájdem používateľa s rolou 'company_representative' (podľa tvojej DB má id=4)
+        $companyUser = User::where('id', 4)->where('role', 'company_representative')->first();
 
         if ($companyUser) {
             // Vytvorím záznam pre firmu a prepojím ho s používateľom
@@ -69,7 +71,7 @@ class DemoEntitiesSeeder extends Seeder
             $this->command->info("Kontaktná osoba 'Martina Projektová' pre firmu {$company->name} bola vytvorená/nájdená.");
 
         } else {
-            $this->command->error('Nebol nájdený žiadny používateľ s rolou company.');
+            $this->command->error('Nebol nájdený používateľ pre rolu zástupcu firmy (user_id=4).');
         }
     }
 }
