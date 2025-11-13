@@ -274,3 +274,6 @@ Projekt vytvorený študentmi UKF v Nitre pre kurz **Tímový projekt**.
 - 📝 **[Changelog](backend/CHANGELOG.md)**
 - 🐛 **[Issues](../../issues)**
 
+---
+
+**Made with ❤️ at UKF Nitra**
