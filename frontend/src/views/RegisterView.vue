@@ -23,7 +23,7 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="name" class="form-label">
-                    Meno <span class="text-danger">*</span>
+                    {{ $t('auth.register.name') }} <span class="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -31,13 +31,13 @@
                     id="name"
                     v-model="formData.name"
                     required
-                    placeholder="Vaše meno"
+                    :placeholder="$t('auth.register.namePlaceholder')"
                   />
                 </div>
 
                 <div v-if="formData.role === 'student'" class="col-md-6 mb-3">
                   <label for="surname" class="form-label">
-                    Priezvisko <span class="text-danger">*</span>
+                    {{ $t('auth.register.surname') }} <span class="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -45,13 +45,13 @@
                     id="surname"
                     v-model="formData.surname"
                     required
-                    placeholder="Vaše priezvisko"
+                    :placeholder="$t('auth.register.surnamePlaceholder')"
                   />
                 </div>
 
                 <div v-if="formData.role === 'company'" class="col-md-6 mb-3">
                   <label for="company_name" class="form-label">
-                    Názov firmy <span class="text-danger">*</span>
+                    {{ $t('auth.register.companyName') }} <span class="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -59,14 +59,14 @@
                     id="company_name"
                     v-model="formData.company_name"
                     required
-                    placeholder="Názov spoločnosti"
+                    :placeholder="$t('auth.register.companyNamePlaceholder')"
                   />
                 </div>
               </div>
 
               <div class="mb-3">
                 <label for="email" class="form-label">
-                  {{ formData.role === 'student' ? 'Univerzitný email' : 'Email' }} <span class="text-danger">*</span>
+                  {{ formData.role === 'student' ? $t('auth.register.universityEmail') : $t('auth.register.email') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   type="email"
@@ -74,16 +74,16 @@
                   id="email"
                   v-model="formData.email"
                   required
-                  :placeholder="formData.role === 'student' ? 'meno@student.ukf.sk' : 'meno@priklad.sk'"
+                  :placeholder="formData.role === 'student' ? $t('auth.register.universityEmailPlaceholder') : $t('auth.register.alternativeEmailPlaceholder')"
                 />
                 <small v-if="formData.role === 'student'" class="form-text text-muted">
-                  Použite váš univerzitný email (@student.ukf.sk)
+                  {{ $t('auth.register.universityEmailHelp') }}
                 </small>
               </div>
 
               <div class="mb-3">
                 <label for="password" class="form-label">
-                  Heslo <span class="text-danger">*</span>
+                  {{ $t('auth.register.password') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   type="password"
@@ -91,41 +91,41 @@
                   id="password"
                   v-model="formData.password"
                   required
-                  placeholder="********"
+                  :placeholder="$t('auth.register.passwordPlaceholder')"
                 />
               </div>
 
               <!-- Student-specific fields -->
               <template v-if="formData.role === 'student'">
                 <div class="mb-3">
-                  <label for="alternative_email" class="form-label">Alternatívny email</label>
+                  <label for="alternative_email" class="form-label">{{ $t('auth.register.alternativeEmail') }}</label>
                   <input
                     type="email"
                     class="form-control"
                     id="alternative_email"
                     v-model="formData.alternative_email"
-                    placeholder="napr. osobny@mail.sk"
+                    :placeholder="$t('auth.register.alternativeEmailPlaceholder')"
                   />
                   <small class="form-text text-muted">
-                    Musí byť odlišný od univerzitného emailu
+                    {{ $t('auth.register.alternativeEmailHelp') }}
                   </small>
                 </div>
 
                 <div class="mb-3">
-                  <label for="phone_number" class="form-label">Telefónne číslo</label>
+                  <label for="phone_number" class="form-label">{{ $t('auth.register.phoneNumber') }}</label>
                   <input
                     type="text"
                     class="form-control"
                     id="phone_number"
                     v-model="formData.phone_number"
-                    placeholder="+421..."
+                    :placeholder="$t('auth.register.phonePlaceholder')"
                   />
                 </div>
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="study_level" class="form-label">
-                      Stupeň štúdia <span class="text-danger">*</span>
+                      {{ $t('auth.register.studyLevel') }} <span class="text-danger">*</span>
                     </label>
                     <select
                       class="form-control"
@@ -133,17 +133,17 @@
                       v-model="formData.study_level"
                       required
                     >
-                      <option value="">-- Vyberte --</option>
-                      <option value="Bc.">Bc. (Bakalárske)</option>
-                      <option value="Mgr.">Mgr. (Magisterské)</option>
-                      <option value="Ing.">Ing. (Inžinierske)</option>
-                      <option value="PhD.">PhD. (Doktorandské)</option>
+                      <option value="">{{ $t('auth.register.selectOption') }}</option>
+                      <option value="Bc.">{{ $t('auth.register.bcLevel') }}</option>
+                      <option value="Mgr.">{{ $t('auth.register.mgrLevel') }}</option>
+                      <option value="Ing.">{{ $t('auth.register.ingLevel') }}</option>
+                      <option value="PhD.">{{ $t('auth.register.phdLevel') }}</option>
                     </select>
                   </div>
 
                   <div class="col-md-6 mb-3">
                     <label for="study_field" class="form-label">
-                      Študijný odbor <span class="text-danger">*</span>
+                      {{ $t('auth.register.studyField') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -151,7 +151,7 @@
                       id="study_field"
                       v-model="formData.study_field"
                       required
-                      placeholder="napr. Informatika"
+                      :placeholder="$t('auth.register.studyFieldPlaceholder')"
                     />
                   </div>
                 </div>
@@ -159,11 +159,11 @@
 
               <!-- Address fields (for students - required) -->
               <template v-if="formData.role === 'student'">
-                <h5 class="mt-4 mb-3">Adresa</h5>
+                <h5 class="mt-4 mb-3">{{ $t('auth.register.address') }}</h5>
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="state" class="form-label">
-                      Štát <span class="text-danger">*</span>
+                      {{ $t('auth.register.state') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -171,12 +171,12 @@
                       id="state"
                       v-model="formData.state"
                       required
-                      placeholder="Slovensko"
+                      :placeholder="$t('auth.register.statePlaceholder')"
                     />
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="region" class="form-label">
-                      Región <span class="text-danger">*</span>
+                      {{ $t('auth.register.region') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -184,7 +184,7 @@
                       id="region"
                       v-model="formData.region"
                       required
-                      placeholder="Nitriansky kraj"
+                      :placeholder="$t('auth.register.regionPlaceholder')"
                     />
                   </div>
                 </div>
@@ -192,7 +192,7 @@
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="city" class="form-label">
-                      Mesto <span class="text-danger">*</span>
+                      {{ $t('auth.register.city') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -200,12 +200,12 @@
                       id="city"
                       v-model="formData.city"
                       required
-                      placeholder="Nitra"
+                      :placeholder="$t('auth.register.cityPlaceholder')"
                     />
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="postal_code" class="form-label">
-                      PSČ <span class="text-danger">*</span>
+                      {{ $t('auth.register.postalCode') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -213,7 +213,7 @@
                       id="postal_code"
                       v-model="formData.postal_code"
                       required
-                      placeholder="94901"
+                      :placeholder="$t('auth.register.postalCodePlaceholder')"
                     />
                   </div>
                 </div>
@@ -221,7 +221,7 @@
                 <div class="row">
                   <div class="col-md-8 mb-3">
                     <label for="street" class="form-label">
-                      Ulica <span class="text-danger">*</span>
+                      {{ $t('auth.register.street') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -229,12 +229,12 @@
                       id="street"
                       v-model="formData.street"
                       required
-                      placeholder="Štefánikova"
+                      :placeholder="$t('auth.register.streetPlaceholder')"
                     />
                   </div>
                   <div class="col-md-4 mb-3">
                     <label for="house_number" class="form-label">
-                      Číslo domu <span class="text-danger">*</span>
+                      {{ $t('auth.register.houseNumber') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -242,7 +242,7 @@
                       id="house_number"
                       v-model="formData.house_number"
                       required
-                      placeholder="12/A"
+                      :placeholder="$t('auth.register.houseNumberPlaceholder')"
                     />
                   </div>
                 </div>
@@ -250,11 +250,11 @@
 
               <!-- Address fields (for companies - required) -->
               <template v-if="formData.role === 'company'">
-                <h5 class="mt-4 mb-3">Adresa</h5>
+                <h5 class="mt-4 mb-3">{{ $t('auth.register.address') }}</h5>
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="state" class="form-label">
-                      Štát <span class="text-danger">*</span>
+                      {{ $t('auth.register.state') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -262,12 +262,12 @@
                       id="state"
                       v-model="formData.state"
                       required
-                      placeholder="Slovensko"
+                      :placeholder="$t('auth.register.statePlaceholder')"
                     />
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="region" class="form-label">
-                      Región <span class="text-danger">*</span>
+                      {{ $t('auth.register.region') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -275,7 +275,7 @@
                       id="region"
                       v-model="formData.region"
                       required
-                      placeholder="Nitriansky kraj"
+                      :placeholder="$t('auth.register.regionPlaceholder')"
                     />
                   </div>
                 </div>
@@ -283,7 +283,7 @@
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="city" class="form-label">
-                      Mesto <span class="text-danger">*</span>
+                      {{ $t('auth.register.city') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -291,12 +291,12 @@
                       id="city"
                       v-model="formData.city"
                       required
-                      placeholder="Nitra"
+                      :placeholder="$t('auth.register.cityPlaceholder')"
                     />
                   </div>
                   <div class="col-md-6 mb-3">
                     <label for="postal_code" class="form-label">
-                      PSČ <span class="text-danger">*</span>
+                      {{ $t('auth.register.postalCode') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -304,7 +304,7 @@
                       id="postal_code"
                       v-model="formData.postal_code"
                       required
-                      placeholder="94901"
+                      :placeholder="$t('auth.register.postalCodePlaceholder')"
                     />
                   </div>
                 </div>
@@ -312,7 +312,7 @@
                 <div class="row">
                   <div class="col-md-8 mb-3">
                     <label for="street" class="form-label">
-                      Ulica <span class="text-danger">*</span>
+                      {{ $t('auth.register.street') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -320,12 +320,12 @@
                       id="street"
                       v-model="formData.street"
                       required
-                      placeholder="Štefánikova"
+                      :placeholder="$t('auth.register.streetPlaceholder')"
                     />
                   </div>
                   <div class="col-md-4 mb-3">
                     <label for="house_number" class="form-label">
-                      Číslo domu <span class="text-danger">*</span>
+                      {{ $t('auth.register.houseNumber') }} <span class="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -333,7 +333,7 @@
                       id="house_number"
                       v-model="formData.house_number"
                       required
-                      placeholder="12/A"
+                      :placeholder="$t('auth.register.houseNumberPlaceholder')"
                     />
                   </div>
                 </div>
@@ -348,16 +348,16 @@
                     role="status"
                     aria-hidden="true"
                   ></span>
-                  <span v-else>Registrovať</span>
+                  <span v-else>{{ $t('auth.register.registerButton') }}</span>
                 </button>
               </div>
             </form>
 
             <div class="text-center mt-4">
               <p class="text-muted small">
-                Už máte účet?
+                {{ $t('auth.register.hasAccount') }}
                 <router-link to="/login" class="text-primary text-decoration-none fw-medium">
-                  Prihláste sa
+                  {{ $t('auth.register.login') }}
                 </router-link>.
               </p>
             </div>
@@ -376,8 +376,7 @@ import { useAuthStore } from '../stores/auth'
 
 const { t } = useI18n()
 
-// Use relative path to leverage Vite proxy
-const API_URL = ''
+const API_URL = import.meta.env.VITE_API_URL
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -407,31 +406,31 @@ const errorMessage = ref(null)
 const handleRegister = async () => {
   // Basic client-side validation
   if (!formData.name || !formData.email || !formData.password) {
-    errorMessage.value = 'Meno, email a heslo sú povinné.'
+    errorMessage.value = t('auth.register.validation.requiredFields')
     return
   }
 
   if (formData.role === 'student') {
     if (!formData.surname) {
-      errorMessage.value = 'Priezvisko je povinné.'
+      errorMessage.value = t('auth.register.validation.surnameRequired')
       return
     }
     if (!formData.study_level) {
-      errorMessage.value = 'Stupeň štúdia je povinný.'
+      errorMessage.value = t('auth.register.validation.studyLevelRequired')
       return
     }
     if (!formData.study_field) {
-      errorMessage.value = 'Študijný odbor je povinný.'
+      errorMessage.value = t('auth.register.validation.studyFieldRequired')
       return
     }
     if (!formData.state || !formData.city || !formData.postal_code || !formData.street || !formData.house_number) {
-      errorMessage.value = 'Všetky polia adresy sú povinné.'
+      errorMessage.value = t('auth.register.validation.addressRequired')
       return
     }
     // Validate university email
     const emailDomain = formData.email.split('@')[1]?.toLowerCase()
     if (!emailDomain || emailDomain !== 'student.ukf.sk') {
-      errorMessage.value = 'Použite univerzitný email (@student.ukf.sk).'
+      errorMessage.value = t('auth.register.validation.universityEmailRequired')
       return
     }
   }
@@ -454,13 +453,13 @@ const handleRegister = async () => {
 
     if (!response.ok) {
       console.error('Register error:', data)
-      
+
       // Handle validation errors from Laravel
       if (data?.errors) {
         const firstError = Object.values(data.errors)[0]
         errorMessage.value = Array.isArray(firstError) ? firstError[0] : firstError
       } else {
-        errorMessage.value = data?.message || 'Registrácia zlyhala.'
+        errorMessage.value = data?.message || t('auth.register.validation.registerFailed')
       }
       return
     }
@@ -469,7 +468,7 @@ const handleRegister = async () => {
   } catch (error) {
     authStore.isLoading = false
     console.error('Fetch error:', error)
-    errorMessage.value = 'Chyba pri registrácii.'
+    errorMessage.value = t('auth.register.validation.registerError')
   }
 }
 </script>
