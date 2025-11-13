@@ -85,8 +85,10 @@ Route::get('/debug-auth', function (Request $request) {
     }
 });
 
-// Public announcements endpoint - accessible to everyone
-Route::get('/announcements/published', [AnnouncementController::class, 'published']);
+// Public announcements endpoint from develop
+Route::get('/announcements/published', function() {
+    return response()->json(['message' => 'No announcements available']);
+});
 
 // Protected routes for Admin/Garant
 Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
