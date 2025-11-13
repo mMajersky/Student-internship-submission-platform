@@ -5,12 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Garant;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
-class GarantController extends BaseApiController
+class GarantController extends Controller
 {
     /**
      * Display a listing of all garants.
@@ -20,24 +19,34 @@ class GarantController extends BaseApiController
      */
     public function index()
     {
-        return $this->executeWithExceptionHandling(function () {
+        try {
             $garants = Garant::with('user:id,name,email,created_at')
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return $this->respondWithCollection($garants, function ($garant) {
-                return [
-                    'id' => $garant->id,
-                    'name' => $garant->name,
-                    'surname' => $garant->surname,
-                    'full_name' => $garant->getFullNameAttribute(),
-                    'faculty' => $garant->faculty,
-                    'user_id' => $garant->user_id,
-                    'email' => $garant->user ? $garant->user->email : null,
-                    'created_at' => $garant->user ? $garant->user->created_at->toIso8601String() : null,
-                ];
-            });
-        }, 'fetching garants');
+            return response()->json([
+                'data' => $garants->map(function ($garant) {
+                    return [
+                        'id' => $garant->id,
+                        'name' => $garant->name,
+                        'surname' => $garant->surname,
+                        'full_name' => $garant->getFullNameAttribute(),
+                        'faculty' => $garant->faculty,
+                        'user_id' => $garant->user_id,
+                        'email' => $garant->user->email ?? null,
+                        'created_at' => $garant->user->created_at?->toIso8601String(),
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching garants: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching garants.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**
@@ -106,7 +115,7 @@ class GarantController extends BaseApiController
             // Rollback the transaction on error
             DB::rollBack();
             
-            Log::error('Error creating garant: ' . $e->getMessage());
+            \Log::error('Error creating garant: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while creating the garant.',
@@ -124,11 +133,11 @@ class GarantController extends BaseApiController
      */
     public function show($id)
     {
-        return $this->executeWithExceptionHandling(function () use ($id) {
+        try {
             $garant = Garant::with('user:id,name,email,created_at')->findOrFail($id);
 
-            return $this->respondWithResource($garant, function ($garant) {
-                return [
+            return response()->json([
+                'data' => [
                     'id' => $garant->id,
                     'name' => $garant->name,
                     'surname' => $garant->surname,
@@ -138,9 +147,21 @@ class GarantController extends BaseApiController
                     'email' => $garant->user->email ?? null,
                     'created_at' => $garant->user->created_at?->toIso8601String(),
                     'updated_at' => $garant->updated_at?->toIso8601String(),
-                ];
-            });
-        }, 'fetching garant');
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Garant not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching garant: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching the garant.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**
@@ -238,7 +259,7 @@ class GarantController extends BaseApiController
             // Rollback the transaction on error
             DB::rollBack();
             
-            Log::error('Error updating garant: ' . $e->getMessage());
+            \Log::error('Error updating garant: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while updating the garant.',
@@ -287,7 +308,7 @@ class GarantController extends BaseApiController
             // Rollback the transaction on error
             DB::rollBack();
             
-            Log::error('Error deleting garant: ' . $e->getMessage());
+            \Log::error('Error deleting garant: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while deleting the garant.',
