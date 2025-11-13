@@ -57,8 +57,6 @@ Route::middleware(['auth:api'])->group(function () {
 // Auth routes from develop
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
-Route::middleware('auth:api')->post('/auth/refresh', [AuthController::class, 'refresh']);
-Route::middleware('auth:api')->post('/auth/logout', [AuthController::class, 'logout']);
 
 // DEBUG: Check authentication status
 Route::get('/debug-auth', function (Request $request) {
@@ -85,8 +83,10 @@ Route::get('/debug-auth', function (Request $request) {
     }
 });
 
-// Public announcements endpoint - accessible to everyone
-Route::get('/announcements/published', [AnnouncementController::class, 'published']);
+// Public announcements endpoint from develop
+Route::get('/announcements/published', function() {
+    return response()->json(['message' => 'No announcements available']);
+});
 
 // Protected routes for Admin/Garant
 Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
