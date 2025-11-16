@@ -1,14 +1,14 @@
 <template>
   <div class="container" v-if="authStore.user">
     <main class="main">
-      <h1 class="title">Nová prax</h1>
+      <h1 class="title">{{ $t('createInternship.title') }}</h1>
 
       <form @submit.prevent="handleSubmit" class="form">
         <!-- Výber firmy -->
         <div class="form-group">
-          <label for="company" class="label">Firma<span class="required">*</span></label>
+          <label for="company" class="label">{{ $t('createInternship.company') }}<span class="required">*</span></label>
           <select id="company" v-model="formData.company_id" class="input" required>
-            <option disabled value="">Vyberte firmu zo zoznamu</option>
+            <option disabled value="">{{ $t('createInternship.selectCompany') }}</option>
             <option v-for="company in companies" :key="company.id" :value="company.id">
               {{ company.name }}
             </option>
@@ -17,47 +17,47 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="rok" class="label">Akademický rok<span class="required">*</span></label>
+            <label for="rok" class="label">{{ $t('createInternship.academicYear') }}<span class="required">*</span></label>
             <input
               id="rok"
               v-model="formData.academy_year"
               type="text"
-              placeholder="napr. 2025/2026"
+              :placeholder="$t('createInternship.academicYearPlaceholder')"
               class="input"
               required
             />
           </div>
 
           <div class="form-group">
-            <label for="datumZaciatku" class="label">Dátum začiatku<span class="required">*</span></label>
+            <label for="datumZaciatku" class="label">{{ $t('createInternship.startDate') }}<span class="required">*</span></label>
             <input id="datumZaciatku" v-model="formData.start_date" type="date" class="input" required />
           </div>
 
           <div class="form-group">
-            <label for="datumKonca" class="label">Dátum konca<span class="required">*</span></label>
+            <label for="datumKonca" class="label">{{ $t('createInternship.endDate') }}<span class="required">*</span></label>
             <input id="datumKonca" v-model="formData.end_date" type="date" class="input" required />
           </div>
         </div>
 
         <div class="form-actions">
-          <button type="button" @click="handleCancel" class="btn btn-secondary">Zrušiť</button>
-          <button type="submit" class="btn btn-primary">Vytvoriť prax</button>
+          <button type="button" @click="handleCancel" class="btn btn-secondary">{{ $t('createInternship.cancel') }}</button>
+          <button type="submit" class="btn btn-primary">{{ $t('createInternship.createInternship') }}</button>
         </div>
 
         <div class="info-box">
-          Po vytvorení praxe systém vygeneruje PDF „Dohoda o odbornej praxi“. Stav bude
-          <strong>Vytvorená</strong>.
+          {{ $t('createInternship.infoMessage') }}
+          <strong>{{ $t('createInternship.statusCreated') }}</strong>.
         </div>
       </form>
     </main>
 
     <footer class="footer">
-      © 2025 Odborná prax CRM
+      {{ $t('createInternship.footer') }}
     </footer>
   </div>
 
   <div v-else class="loading">
-    <p>Načítavam údaje používateľa...</p>
+    <p>{{ $t('createInternship.loadingUser') }}</p>
   </div>
 </template>
 
@@ -65,6 +65,9 @@
 import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -86,7 +89,7 @@ const loadCompanies = async () => {
     const response = await fetch('api/student/companies', {
       headers: { Authorization: `Bearer ${token}` }
     })
-    if (!response.ok) throw new Error('Nepodarilo sa načítať firmy.')
+    if (!response.ok) throw new Error(t('createInternship.loadCompaniesError'))
 
     const data = await response.json()
     companies.value = data.data
@@ -107,7 +110,7 @@ onMounted(async () => {
 const handleSubmit = async () => {
   const token = authStore.token
   if (!token) {
-    alert('Chyba: Neboli nájdené prihlasovacie údaje.')
+    alert(t('createInternship.authError'))
     router.push('/login')
     return
   }
@@ -116,7 +119,7 @@ const handleSubmit = async () => {
   const studentId = authStore.user?.student?.id || authStore.user?.id
 
   if (!studentId) {
-    alert('Chyba: Nebolo možné získať ID študenta. Kontaktujte administrátora.')
+    alert(t('createInternship.studentIdError'))
     return
   }
 
@@ -142,12 +145,12 @@ const handleSubmit = async () => {
     if (!response.ok) {
       if (response.status === 422) {
         const errors = Object.values(data.errors).flat().join('\n')
-        throw new Error(`Chyba validácie:\n${errors}`)
+        throw new Error(`${t('createInternship.validationError')}\n${errors}`)
       }
-      throw new Error(data.message || 'Nepodarilo sa vytvoriť prax.')
+      throw new Error(data.message || t('createInternship.createError'))
     }
 
-    alert(data.message || 'Prax bola úspešne vytvorená!')
+    alert(data.message || t('createInternship.createSuccess'))
     router.push('/internships')
   } catch (error) {
     console.error('Chyba:', error)

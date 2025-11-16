@@ -6,8 +6,8 @@
           <div class="card-body">
             <!-- HEADER -->
             <div class="text-center mb-4">
-              <h3 class="card-title fw-bolder">Prihlásenie</h3>
-              <p class="text-muted">Použite email a heslo.</p>
+              <h3 class="card-title fw-bolder">{{ $t('auth.login.title') }}</h3>
+              <p class="text-muted">{{ $t('auth.login.subtitle') }}</p>
             </div>
 
             <!-- ERROR -->
@@ -19,7 +19,7 @@
             <form @submit.prevent="handleLogin" novalidate>
               <div class="mb-3">
                 <label for="email" class="form-label">
-                  Email <span class="text-danger">*</span>
+                  {{ $t('auth.login.email') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   type="email"
@@ -27,13 +27,13 @@
                   id="email"
                   v-model="formData.email"
                   required
-                  placeholder="meno@priklad.sk"
+                  :placeholder="$t('auth.login.emailPlaceholder')"
                 />
               </div>
 
               <div class="mb-3">
                 <label for="password" class="form-label">
-                  Heslo <span class="text-danger">*</span>
+                  {{ $t('auth.login.password') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   type="password"
@@ -41,7 +41,7 @@
                   id="password"
                   v-model="formData.password"
                   required
-                  placeholder="********"
+                  :placeholder="$t('auth.login.passwordPlaceholder')"
                 />
               </div>
 
@@ -53,9 +53,9 @@
                     v-model="formData.remember"
                     id="rememberMe"
                   />
-                  <label class="form-check-label" for="rememberMe">Zapamätať</label>
+                  <label class="form-check-label" for="rememberMe">{{ $t('auth.login.remember') }}</label>
                 </div>
-                <a href="#" class="small">Zabudli ste heslo?</a>
+                <a href="#" class="small">{{ $t('auth.login.forgotPassword') }}</a>
               </div>
 
               <div class="d-grid">
@@ -66,18 +66,18 @@
                     role="status"
                     aria-hidden="true"
                   ></span>
-                  <span v-else>Prihlásiť sa</span>
+                  <span v-else>{{ $t('auth.login.loginButton') }}</span>
                 </button>
               </div>
             </form>
 
             <div class="text-center mt-4">
               <p class="text-muted small">
-                Nemáte účet?
+                {{ $t('auth.login.noAccount') }}
 
-                <a href="#">Registrácia študenta</a> alebo
+                <a href="#">{{ $t('auth.login.registerStudent') }}</a> alebo
 
-                <a href="#">registrácia firmy</a>.
+                <a href="#">{{ $t('auth.login.registerCompany') }}</a>.
               </p>
             </div>
           </div>
@@ -90,10 +90,12 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const formData = reactive({
   email: '',
@@ -106,7 +108,7 @@ const errorMessage = computed(() => authStore.error)
 
 const handleLogin = async () => {
   if (!formData.email || !formData.password) {
-    authStore.error = 'Email a heslo sú povinné polia.'
+    authStore.error = t('auth.login.requiredFields')
     return
   }
 

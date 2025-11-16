@@ -1,3 +1,9 @@
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+</script>
+
 <template>
   <section class="py-5 bg-white">
     <div class="container px-4">
@@ -8,14 +14,14 @@
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <i class="bi bi-mortarboard-fill text-primary fs-4 me-3"></i>
-                <h5 class="card-title mb-0">Pre študentov</h5>
+                <h5 class="card-title mb-0">{{ $t('infoCards.forStudents') }}</h5>
               </div>
               <p class="card-text text-muted">
-                Vytvorte novú prax, vyberte firmu, doplňte termíny a sledujte stav. Nahrajte zmluvu a výkaz.
+                {{ $t('infoCards.forStudentsDesc') }}
               </p>
               <button class="btn btn-outline-primary">
                 <i class="bi bi-play-circle me-2"></i>
-                Začať
+                {{ $t('infoCards.start') }}
               </button>
             </div>
           </div>
@@ -27,14 +33,14 @@
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <i class="bi bi-building text-primary fs-4 me-3"></i>
-                <h5 class="card-title mb-0">Pre firmy</h5>
+                <h5 class="card-title mb-0">{{ $t('infoCards.forCompanies') }}</h5>
               </div>
               <p class="card-text text-muted">
-                Potvrďte alebo zamietnite praxe v stave „Vytvorená". Spravujte dokumenty a komunikáciu.
+                {{ $t('infoCards.forCompaniesDesc') }}
               </p>
               <button class="btn btn-outline-primary">
                 <i class="bi bi-building-add me-2"></i>
-                Registrovať firmu
+                {{ $t('infoCards.registerCompany') }}
               </button>
             </div>
           </div>
@@ -46,14 +52,14 @@
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <i class="bi bi-people-fill text-primary fs-4 me-3"></i>
-                <h5 class="card-title mb-0">Pre garanta praxe</h5>
+                <h5 class="card-title mb-0">{{ $t('infoCards.forGarants') }}</h5>
               </div>
               <p class="card-text text-muted">
-                Filtrujte, upravujte atribúty praxí a exportujte dáta do CSV pre reporty a štatistiky.
+                {{ $t('infoCards.forGarantsDesc') }}
               </p>
               <button class="btn btn-outline-primary">
                 <i class="bi bi-box-arrow-in-right me-2"></i>
-                Prihlásiť sa
+                {{ $t('infoCards.login') }}
               </button>
             </div>
           </div>
@@ -62,7 +68,3 @@
     </div>
   </section>
 </template>
-
-<script setup>
-// No additional logic needed for this static component
-</script>

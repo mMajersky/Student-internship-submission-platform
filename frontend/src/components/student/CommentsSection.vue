@@ -3,7 +3,7 @@
     <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
       <h5 class="mb-0 d-flex align-items-center">
         <i class="bi bi-chat-left-text me-2"></i>
-        Komentáre garanta
+        {{ $t('studentComments.title') }}
       </h5>
       <span v-if="comments.length > 0" class="badge bg-primary rounded-pill">
         {{ comments.length }}
@@ -13,9 +13,9 @@
     <div class="card-body">
       <div v-if="loading" class="text-center py-4">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Načítavam...</span>
+          <span class="visually-hidden">{{ $t('studentComments.loading') }}</span>
         </div>
-        <p class="text-muted mt-2 mb-0">Načítavam komentáre...</p>
+        <p class="text-muted mt-2 mb-0">{{ $t('studentComments.loadingComments') }}</p>
       </div>
 
       <div v-else-if="error" class="alert alert-danger" role="alert">
@@ -25,7 +25,7 @@
 
       <div v-else-if="comments.length === 0" class="text-center py-5">
         <i class="bi bi-chat-left text-muted" style="font-size: 3rem;"></i>
-        <p class="text-muted mb-0 mt-3">Zatiaľ nie sú žiadne komentáre.</p>
+        <p class="text-muted mb-0 mt-3">{{ $t('studentComments.noComments') }}</p>
       </div>
 
       <div v-else class="d-flex flex-column gap-3">
@@ -63,6 +63,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   internshipId: {
@@ -101,14 +104,14 @@ const fetchComments = async () => {
 
     if (!response.ok) {
       const data = await response.json()
-      throw new Error(data.message || 'Chyba pri načítaní komentárov')
+      throw new Error(data.message || t('studentComments.loadError'))
     }
 
     const data = await response.json()
     comments.value = data.data || data || []
   } catch (err) {
     console.error('Error fetching comments:', err)
-    error.value = err.message || 'Nepodarilo sa načítať komentáre.'
+    error.value = err.message || t('studentComments.loadErrorGeneric')
   } finally {
     loading.value = false
   }
@@ -203,4 +206,3 @@ defineExpose({
   fetchComments
 })
 </script>
-
