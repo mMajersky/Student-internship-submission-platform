@@ -100,9 +100,10 @@ class InternshipController extends Controller
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send email to company with approve/reject buttons ONLY when created with "schválená" status (garant approves)
+            // Send email to company with approve/reject buttons ONLY when created with "potvrdená" status (garant confirms)
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
             // This is the moment when company needs to confirm/reject
-            if ($validated['status'] === Internship::STATUS_SCHVALENA && $internship->company && $internship->company->user && $internship->company->user->email) {
+            if ($validated['status'] === Internship::STATUS_POTVRDENA && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
@@ -116,8 +117,8 @@ class InternshipController extends Controller
                     'startDate' => $internship->start_date?->format('Y-m-d'),
                     'endDate' => $internship->end_date?->format('Y-m-d'),
                     'status' => $internship->status,
-                    'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
-                    'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
+                    'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                    'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
                     'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
                     'showButtons' => true, // Show buttons for company emails
                 ];
@@ -384,7 +385,7 @@ class InternshipController extends Controller
             // Check if status is being changed
             $oldStatus = $internship->status;
             $statusChanged = isset($validated['status']) && $oldStatus !== $validated['status'];
-            $statusChangedToSchvalena = $statusChanged && $validated['status'] === Internship::STATUS_SCHVALENA;
+            $statusChangedToPotvrdena = $statusChanged && $validated['status'] === Internship::STATUS_POTVRDENA;
 
             // Update the internship
             $internship->update($validated);
@@ -392,9 +393,10 @@ class InternshipController extends Controller
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send email to company with approve/reject buttons ONLY when garant approves (changes to "schválená")
-            // This is the moment when company needs to confirm/reject
-            if ($statusChangedToSchvalena && $internship->company && $internship->company->user && $internship->company->user->email) {
+            // Send email to company with approve/reject buttons when garant confirms (changes to "potvrdená")
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
+            // This is the moment when company needs to confirm/reject (after garant confirms)
+            if ($statusChangedToPotvrdena && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
@@ -408,8 +410,8 @@ class InternshipController extends Controller
                     'startDate' => $internship->start_date?->format('Y-m-d'),
                     'endDate' => $internship->end_date?->format('Y-m-d'),
                     'status' => $internship->status,
-                    'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
-                    'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
+                    'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                    'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
                     'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
                     'showButtons' => true, // Show buttons for company emails
                 ];
@@ -463,8 +465,8 @@ class InternshipController extends Controller
                 }
 
                 // Send email to company (if exists) - always send on status change, not just when email_notifications enabled
-                // But skip if we already sent the approval request email above (when changing to "schválená")
-                if ($internship->company && $internship->company->user && $internship->company->user->email && !$statusChangedToSchvalena) {
+                // But skip if we already sent the approval request email above (when changing to "potvrdená")
+                if ($internship->company && $internship->company->user && $internship->company->user->email && !$statusChangedToPotvrdena) {
                     if ($internship->company->user->email_notifications) {
                         NotificationService::createAndNotify(
                             $internship->company->user->id,
@@ -923,9 +925,10 @@ class InternshipController extends Controller
 
             $internship = Internship::with(['student.user', 'company.user', 'garant.user'])->findOrFail($tokenData['internship_id']);
 
-            // Check if internship is still in "schválená" status (pending company action)
-            // Company can only confirm/reject after garant has approved (status "schválená")
-            if ($internship->status !== Internship::STATUS_SCHVALENA) {
+            // Check if internship is still in "potvrdená" status (pending company action)
+            // Company can only confirm/reject after garant has confirmed (status "potvrdená")
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
+            if ($internship->status !== Internship::STATUS_POTVRDENA) {
                 return response()->json([
                     'message' => 'This internship has already been processed and is no longer available for action.',
                     'current_status' => $internship->status,
@@ -937,10 +940,10 @@ class InternshipController extends Controller
             $oldStatus = $internship->status;
 
             // Update status based on action
-            // After garant approved (status "schválená"), company confirms → "potvrdená"
+            // After garant confirmed (status "potvrdená"), company confirms → "schválená" (Approved)
             // Company rejects → "zamietnutá"
             $newStatus = $tokenData['action'] === 'confirm'
-                ? Internship::STATUS_POTVRDENA // Company confirmed - status "potvrdená"
+                ? Internship::STATUS_SCHVALENA // Company confirmed - status "schválená" (Approved)
                 : Internship::STATUS_ZAMIETNUTA; // Company rejected
 
             $internship->update(['status' => $newStatus]);

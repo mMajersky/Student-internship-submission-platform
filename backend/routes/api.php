@@ -16,6 +16,10 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\GarantController;
 
 
+// Company action routes for internship confirmation/rejection (public for email links)
+// MUST be at the top, before any middleware groups, to ensure it's truly public
+Route::get('/internships/company-action', [InternshipController::class, 'companyAction']);
+
 // PDF generation routes from feature/Generate_PDF_template
 Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
 
@@ -156,8 +160,6 @@ Route::middleware(['auth:api', 'role:company'])->group(function () {
     // Future company-specific routes
 });
 
-// Company action routes for internship confirmation/rejection (public for email links)
-Route::get('/internships/company-action', [InternshipController::class, 'companyAction']);
 
 // Admin-only routes
 Route::middleware(['auth:api', 'role:admin'])->group(function () {
