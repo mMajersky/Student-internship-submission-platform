@@ -22,6 +22,12 @@ const router = createRouter({
       meta: { guest: true }
     },
     {
+      path: '/register-company',
+      name: 'register-company',
+      component: () => import('../views/RegisterCompanyView.vue'),
+      meta: { guest: true }
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginView,

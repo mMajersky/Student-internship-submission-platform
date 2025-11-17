@@ -47,6 +47,17 @@
       <li class="nav-item" role="presentation">
         <button
           class="nav-link"
+          :class="{ active: activeTab === 'company-requests' }"
+          @click="activeTab = 'company-requests'"
+          type="button"
+        >
+          <i class="bi bi-building-check me-2"></i>
+         {{ $t('garantDashboard.tabs.companyRequests') }}
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
           :class="{ active: activeTab === 'documents' }"
           @click="activeTab = 'documents'"
           type="button"
@@ -279,6 +290,11 @@
           </div>
         </div>
       </div>
+
+      <!-- Company Requests Tab -->
+      <div v-if="activeTab === 'company-requests'" class="tab-pane fade show active">
+        <CompanyRequests />
+      </div>
     </div>
 
     <!-- Comment Modal -->
@@ -299,6 +315,7 @@ import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
+import CompanyRequests from '@/components/garant/CompanyRequests.vue'
 
 const { t } = useI18n()
 

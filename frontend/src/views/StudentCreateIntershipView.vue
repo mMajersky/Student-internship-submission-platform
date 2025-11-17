@@ -13,6 +13,11 @@
               {{ company.name }}
             </option>
           </select>
+          <small class="text-muted">
+            {{ $t('createInternship.companyNotFound') }}
+            <a href="#" @click.prevent="showCompanyModal = true" class="link">{{ $t('createInternship.clickHere') }}</a>
+            {{ $t('createInternship.toAddNew') }}
+          </small>
         </div>
 
         <div class="form-row">
@@ -59,12 +64,20 @@
   <div v-else class="loading">
     <p>{{ $t('createInternship.loadingUser') }}</p>
   </div>
+
+  <!-- Company Request Modal -->
+  <CompanyRequestModal
+    :show="showCompanyModal"
+    @close="showCompanyModal = false"
+    @success="handleCompanyRequestSuccess"
+  />
 </template>
 
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import CompanyRequestModal from '@/components/company/CompanyRequestModal.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -80,6 +93,7 @@ const formData = reactive({
 })
 
 const companies = ref([])
+const showCompanyModal = ref(false)
 
 const loadCompanies = async () => {
   const token = authStore.token
@@ -161,6 +175,10 @@ const handleSubmit = async () => {
 const handleCancel = () => {
   router.push('/internships')
 }
+
+const handleCompanyRequestSuccess = () => {
+  alert(t('createInternship.companyRequestSuccess'))
+}
 </script>
 
 <style scoped>
@@ -204,6 +222,22 @@ const handleCancel = () => {
 .form-group {
   margin-bottom: 1.5rem;
   flex: 1;
+}
+
+.text-muted {
+  color: #6b7280;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.link {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
 }
 
 .form-row {

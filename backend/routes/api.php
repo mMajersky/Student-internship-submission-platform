@@ -14,6 +14,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\GarantController;
+use App\Http\Controllers\CompanyRequestController;
 
 
 // PDF generation routes from feature/Generate_PDF_template
@@ -57,6 +58,9 @@ Route::middleware(['auth:api'])->group(function () {
 // Auth routes from develop
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+
+// Public company registration (no authentication required)
+Route::post('/company-requests/public', [CompanyRequestController::class, 'publicRegister']);
 
 // DEBUG: Check authentication status
 Route::get('/debug-auth', function (Request $request) {
@@ -126,6 +130,12 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::get('/garants/{id}', [GarantController::class, 'show']);
     Route::put('/garants/{id}', [GarantController::class, 'update']);
     Route::delete('/garants/{id}', [GarantController::class, 'destroy']);
+    
+    // Company request management routes (garant only)
+    Route::get('/company-requests', [CompanyRequestController::class, 'index']);
+    Route::get('/company-requests/{id}', [CompanyRequestController::class, 'show']);
+    Route::post('/company-requests/{id}/approve', [CompanyRequestController::class, 'approve']);
+    Route::post('/company-requests/{id}/reject', [CompanyRequestController::class, 'reject']);
 });
 
 // Student routes - accessible by students
@@ -141,6 +151,9 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     // Students can view comments on their internships (read-only)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
     Route::get('/internships/{internship}/comments/{comment}', [CommentController::class, 'show']);
+    
+    // Company request submission for students
+    Route::post('/company-requests', [CompanyRequestController::class, 'studentRequest']);
 
     // Documents: upload/download signed agreement, metadata, and generated agreement download
     // Špecifickejšie routes musia byť pred všeobecnejšími!
