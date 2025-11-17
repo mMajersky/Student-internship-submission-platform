@@ -959,56 +959,49 @@ class InternshipController extends Controller
             ];
 
             // If company approved (confirmed): send email to student and garant
-            // Always send email regardless of email_notifications setting (critical status change)
+            // Respects email_notifications setting
             if ($tokenData['action'] === 'confirm') {
-                // Send email to student
-                if ($internship->student && $internship->student->user && $internship->student->user->email) {
-                    // Always create notification
-                    NotificationService::create(
+                // Send email to student (respects email_notifications setting)
+                if ($internship->student && $internship->student->user) {
+                    NotificationService::createAndNotify(
                         $internship->student->user->id,
                         Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
                         'Firma schválila vašu prax',
                         'Firma ' . $internship->company->name . ' schválila vašu prax. Stav: ' . $oldStatus . ' → ' . $newStatus,
-                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus]
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
                     );
-                    
-                    // Always send email (regardless of email_notifications setting)
-                    EmailService::send(InternshipStatusChanged::class, $internship->student->user->email, $emailData);
                 }
 
-                // Send email to ALL garants (users with role 'garant')
+                // Send email to ALL garants (users with role 'garant') - respects email_notifications setting
                 $allGarants = User::where('role', 'garant')->whereNotNull('email')->get();
                 
                 foreach ($allGarants as $garantUser) {
-                    // Always create notification
-                    NotificationService::create(
+                    NotificationService::createAndNotify(
                         $garantUser->id,
                         Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
                         'Firma schválila prax',
                         'Firma ' . $internship->company->name . ' schválila prax študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Stav: ' . $oldStatus . ' → ' . $newStatus,
-                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus]
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
                     );
-                    
-                    // Always send email (regardless of email_notifications setting)
-                    EmailService::send(InternshipStatusChanged::class, $garantUser->email, $emailData);
                 }
             }
 
-            // If company rejected: send email only to student
-            // Always send email regardless of email_notifications setting (critical status change)
+            // If company rejected: send email only to student - respects email_notifications setting
             if ($tokenData['action'] === 'reject') {
-                if ($internship->student && $internship->student->user && $internship->student->user->email) {
-                    // Always create notification
-                    NotificationService::create(
+                if ($internship->student && $internship->student->user) {
+                    NotificationService::createAndNotify(
                         $internship->student->user->id,
                         Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
                         'Firma zamietla vašu prax',
                         'Firma ' . $internship->company->name . ' zamietla vašu prax. Stav: ' . $oldStatus . ' → ' . $newStatus,
-                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus]
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
                     );
-                    
-                    // Always send email (regardless of email_notifications setting)
-                    EmailService::send(InternshipStatusChanged::class, $internship->student->user->email, $emailData);
                 }
             }
 
