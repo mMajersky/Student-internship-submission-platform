@@ -94,9 +94,11 @@
             {{ $t('garantInternshipForm.statusRequired') }}
           </label>
           <select
+            ref="statusSelect"
             class="form-select"
             id="status"
-            v-model="formData.status"
+            :value="formData.status"
+            @change="handleStatusChange"
             required
           >
             <option value="" disabled>{{ $t('garantInternshipForm.selectStatus') }}</option>
@@ -196,6 +198,19 @@
         </button>
       </div>
     </form>
+
+    <!-- Confirmation Dialog for Status Change -->
+    <ConfirmationDialog
+      :is-visible="showStatusChangeConfirmation"
+      :title="$t('confirmationDialog.changeStatusTitle')"
+      :message="$t('confirmationDialog.changeStatusMessage')"
+      :confirm-text="$t('confirmationDialog.confirm')"
+      :cancel-text="$t('confirmationDialog.cancel')"
+      type="warning"
+      @confirm="confirmStatusChange"
+      @cancel="cancelStatusChange"
+    />
+
   </div>
 </template>
 
@@ -203,6 +218,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
+import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 
 const { t } = useI18n()
 
@@ -242,6 +258,12 @@ const formData = ref({
 const isSubmitting = ref(false)
 const isLoadingData = ref(false)
 const isResendingEmail = ref(false)
+
+// Confirmation dialogs state
+const showStatusChangeConfirmation = ref(false)
+const originalStatus = ref(null)
+const pendingStatusChange = ref(null)
+const statusSelect = ref(null)
 
 // Students data from API
 const students = ref(props.initialStudents.length > 0 ? props.initialStudents : [])
@@ -316,6 +338,20 @@ const fetchDropdownData = async () => {
   }
 }
 
+// Handle status change
+const handleStatusChange = (event) => {
+  const newStatus = event.target.value
+  
+  // If editing and status is different from original, show confirmation
+  if (isEditMode.value && originalStatus.value && newStatus !== originalStatus.value) {
+    pendingStatusChange.value = newStatus
+    showStatusChangeConfirmation.value = true
+  } else {
+    // For new internships or if status is same, update directly
+    formData.value.status = newStatus
+  }
+}
+
 // Load data when component is mounted
 onMounted(() => {
   fetchDropdownData()
@@ -331,10 +367,17 @@ onMounted(() => {
       start_date: props.internship.start_date || '',
       end_date: props.internship.end_date || ''
     }
+    originalStatus.value = props.internship.status || 'vytvorená'
   }
 })
 
 const handleSubmit = async () => {
+  // For new internships, submit directly
+  // For editing, submit directly (status change already has its own confirmation)
+  await submitForm()
+}
+
+const submitForm = async () => {
   isSubmitting.value = true
   
   try {
@@ -349,6 +392,25 @@ const handleSubmit = async () => {
   }
   // Don't set isSubmitting to false here - parent will handle it after API call completes
 }
+
+const confirmStatusChange = () => {
+  // Status change confirmed - apply the change
+  if (pendingStatusChange.value) {
+    formData.value.status = pendingStatusChange.value
+  }
+  showStatusChangeConfirmation.value = false
+  pendingStatusChange.value = null
+}
+
+const cancelStatusChange = () => {
+  // Revert status change - keep original status
+  if (statusSelect.value && originalStatus.value) {
+    statusSelect.value.value = originalStatus.value
+  }
+  showStatusChangeConfirmation.value = false
+  pendingStatusChange.value = null
+}
+
 
 const handleCancel = () => {
   resetForm()
