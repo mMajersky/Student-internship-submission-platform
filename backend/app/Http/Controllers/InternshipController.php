@@ -9,6 +9,7 @@ use App\Models\Garant;
 use App\Models\Notification;
 use App\Models\User;
 use App\Mail\InternshipCreatedNotification;
+use App\Mail\InternshipCreatedForGarant;
 use App\Mail\InternshipStatusChanged;
 use App\Services\EmailService;
 use App\Services\NotificationService;
@@ -118,6 +119,7 @@ class InternshipController extends Controller
                     'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
                     'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
                     'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    'showButtons' => true, // Show buttons for company emails
                 ];
 
                 // Always create notification
@@ -409,6 +411,7 @@ class InternshipController extends Controller
                     'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
                     'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
                     'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    'showButtons' => true, // Show buttons for company emails
                 ];
 
                 // Always create notification
@@ -805,27 +808,42 @@ class InternshipController extends Controller
             // NO EMAIL TO COMPANY when student creates internship
             // Email with approve/reject buttons will be sent only when garant approves it
 
+            // Prepare email data for garant notification (using new internship_created_for_garant.blade.php template)
+            $emailData = [
+                'internshipId' => $internship->id,
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'companyName' => $internship->company ? $internship->company->name : 'N/A',
+                'academyYear' => $internship->academy_year,
+                'startDate' => $internship->start_date?->format('Y-m-d'),
+                'endDate' => $internship->end_date?->format('Y-m-d'),
+                'status' => $internship->status,
+            ];
+
             // Notify garant(s) about new internship created by student
             if ($internship->garant && $internship->garant->user) {
                 // If garant is already assigned, notify only them
-                NotificationService::create(
+                NotificationService::createAndNotify(
                     $internship->garant->user->id,
                     Notification::TYPE_INTERNSHIP_CREATED,
                     'Študent vytvoril novú prax',
                     'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax vo firme ' . $internship->company->name . '.',
-                    ['internship_id' => $internship->id]
+                    ['internship_id' => $internship->id],
+                    InternshipCreatedForGarant::class,
+                    $emailData
                 );
             } else {
                 // If no garant assigned, notify ALL garants about new internship
                 $allGarants = Garant::with('user')->whereNotNull('user_id')->get();
                 foreach ($allGarants as $garant) {
                     if ($garant->user) {
-                        NotificationService::create(
+                        NotificationService::createAndNotify(
                             $garant->user->id,
                             Notification::TYPE_INTERNSHIP_CREATED,
                             'Nová prax čaká na priradenie',
                             'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax. Prax ešte nemá priradeného garanta.',
-                            ['internship_id' => $internship->id]
+                            ['internship_id' => $internship->id],
+                            InternshipCreatedForGarant::class,
+                            $emailData
                         );
                     }
                 }
@@ -1074,6 +1092,8 @@ class InternshipController extends Controller
                 'status' => $internship->status,
                 'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
                 'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
+                'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                'showButtons' => true, // Show buttons for company emails
             ];
 
             $emailSent = EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $data);
