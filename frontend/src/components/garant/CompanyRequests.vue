@@ -1,72 +1,47 @@
 <template>
   <div class="company-requests">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="mb-0">Správa žiadostí o firmy</h3>
+      <h3 class="mb-0">{{ t('companyRequests.title') }}</h3>
       
       <!-- Filter Dropdown -->
       <div class="d-flex align-items-center gap-3">
         <div class="d-flex align-items-center">
-          <label for="statusFilter" class="me-2 mb-0 text-muted">Filter:</label>
+          <label for="statusFilter" class="me-2 mb-0 text-muted">{{ t('companyRequests.filter.label') }}</label>
           <select
             id="statusFilter"
             class="form-select form-select-sm"
             v-model="activeFilter"
             style="width: auto; min-width: 180px;"
           >
-            <option value="pending">
-              <i class="bi bi-clock-history"></i>
-              Čakajúce
-              <span v-if="stats.pending > 0">({{ stats.pending }})</span>
-            </option>
-            <option value="approved">
-              Schválené
-              <span v-if="stats.approved > 0">({{ stats.approved }})</span>
-            </option>
-            <option value="rejected">
-              Zamietnuté
-              <span v-if="stats.rejected > 0">({{ stats.rejected }})</span>
-            </option>
-            <option value="all">
-              Všetky
-            </option>
+            <option value="pending">{{ t('companyRequests.filter.pending') }} <span v-if="stats.pending > 0">({{ stats.pending }})</span></option>
+            <option value="approved">{{ t('companyRequests.filter.approved') }} <span v-if="stats.approved > 0">({{ stats.approved }})</span></option>
+            <option value="rejected">{{ t('companyRequests.filter.rejected') }} <span v-if="stats.rejected > 0">({{ stats.rejected }})</span></option>
+            <option value="all">{{ t('companyRequests.filter.all') }}</option>
           </select>
-        </div>
-        
-        <!-- Stats badges -->
-        <div class="d-flex gap-2">
-          <span class="badge bg-warning text-dark" v-if="stats.pending > 0">
-            <i class="bi bi-clock-history me-1"></i>{{ stats.pending }}
-          </span>
-          <span class="badge bg-success" v-if="stats.approved > 0">
-            <i class="bi bi-check-circle me-1"></i>{{ stats.approved }}
-          </span>
-          <span class="badge bg-danger" v-if="stats.rejected > 0">
-            <i class="bi bi-x-circle me-1"></i>{{ stats.rejected }}
-          </span>
         </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-5">
+      <div v-if="isLoading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Načítava sa...</span>
+        <span class="visually-hidden">{{ t('companyRequests.loadingAria') }}</span>
       </div>
-      <p class="text-muted mt-2">Načítavajú sa žiadosti...</p>
+      <p class="text-muted mt-2">{{ t('companyRequests.loadingText') }}</p>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="filteredRequests.length === 0" class="text-center py-5">
       <i class="bi bi-inbox fs-1 text-muted"></i>
       <p class="text-muted mt-3">
-        {{ activeFilter === 'pending' ? 'Žiadne čakajúce žiadosti.' : 'Žiadne žiadosti.' }}
+        {{ activeFilter === 'pending' ? t('companyRequests.empty.pending') : t('companyRequests.empty.none') }}
       </p>
     </div>
 
     <!-- Requests Table -->
     <div v-else class="card">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-title mb-0">
             {{ getFilterTitle() }}
           </h5>
@@ -76,7 +51,7 @@
             :disabled="isLoading"
           >
             <i class="bi bi-arrow-clockwise me-1"></i>
-            Obnoviť
+            {{ t('companyRequests.refresh') }}
           </button>
         </div>
 
@@ -84,13 +59,13 @@
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>Firma</th>
-                <th>Kontaktná osoba</th>
-                <th>Zdroj</th>
-                <th>Požiadal</th>
-                <th>Dátum</th>
-                <th>Stav</th>
-                <th>Akcie</th>
+                <th>{{ t('companyRequests.table.company') }}</th>
+                <th>{{ t('companyRequests.table.contactPerson') }}</th>
+                <th>{{ t('companyRequests.table.source') }}</th>
+                <th>{{ t('companyRequests.table.requestedBy') }}</th>
+                <th>{{ t('companyRequests.table.date') }}</th>
+                <th>{{ t('companyRequests.table.status') }}</th>
+                <th>{{ t('companyRequests.table.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -110,7 +85,7 @@
                     class="badge"
                     :class="request.request_source === 'public_registration' ? 'bg-info' : 'bg-primary'"
                   >
-                    {{ request.request_source === 'public_registration' ? 'Verejná' : 'Študent' }}
+                    {{ request.request_source === 'public_registration' ? t('companyRequests.source.public') : t('companyRequests.source.student') }}
                   </span>
                 </td>
                 <td>
@@ -132,7 +107,7 @@
                 <td>
                   <button
                     class="btn btn-sm btn-outline-info me-1"
-                    title="Zobraziť detaily"
+                    :title="t('companyRequests.actions.view')"
                     @click="viewDetails(request)"
                   >
                     <i class="bi bi-eye"></i>
@@ -140,7 +115,7 @@
                   <button
                     v-if="request.status === 'pending'"
                     class="btn btn-sm btn-outline-success me-1"
-                    title="Schváliť"
+                    :title="t('companyRequests.actions.approve')"
                     @click="approveRequest(request.id)"
                   >
                     <i class="bi bi-check-circle"></i>
@@ -148,7 +123,7 @@
                   <button
                     v-if="request.status === 'pending'"
                     class="btn btn-sm btn-outline-danger"
-                    title="Zamietnuť"
+                    :title="t('companyRequests.actions.reject')"
                     @click="rejectRequest(request.id)"
                   >
                     <i class="bi bi-x-circle"></i>
@@ -169,128 +144,140 @@
       tabindex="-1"
       @click.self="selectedRequest = null"
     >
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Detail žiadosti o firmu</h5>
+          <div class="modal-header bg-light">
+            <h5 class="modal-title">
+              <i class="bi bi-building me-2"></i>
+              {{ t('companyRequests.modal.title') }}
+            </h5>
             <button type="button" class="btn-close" @click="selectedRequest = null"></button>
           </div>
           <div class="modal-body">
-            <div class="row mb-3">
-              <div class="col-md-12">
-                <h6 class="text-muted">Informácie o firme</h6>
-                <table class="table table-sm">
-                  <tr>
-                    <th style="width: 30%;">Názov firmy:</th>
-                    <td>{{ selectedRequest.company_name }}</td>
-                  </tr>
-                  <tr>
-                    <th>Štát:</th>
-                    <td>{{ selectedRequest.state || '-' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Región:</th>
-                    <td>{{ selectedRequest.region || '-' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Mesto:</th>
-                    <td>{{ selectedRequest.city || '-' }}</td>
-                  </tr>
-                  <tr>
-                    <th>PSČ:</th>
-                    <td>{{ selectedRequest.postal_code || '-' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Ulica:</th>
-                    <td>{{ selectedRequest.street || '-' }}</td>
-                  </tr>
-                  <tr>
-                    <th>Číslo domu:</th>
-                    <td>{{ selectedRequest.house_number || '-' }}</td>
-                  </tr>
-                </table>
+            <!-- Company Information Card -->
+            <div class="card mb-3">
+              <div class="card-header bg-primary text-white">
+                <i class="bi bi-building me-2"></i>
+                {{ t('companyRequests.modal.sections.companyInfo') }}
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-12">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.companyName') }}</label>
+                    <p class="mb-0">{{ selectedRequest.company_name }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.state') }}</label>
+                    <p class="mb-0">{{ selectedRequest.state || '-' }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.region') }}</label>
+                    <p class="mb-0">{{ selectedRequest.region || '-' }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.city') }}</label>
+                    <p class="mb-0">{{ selectedRequest.city || '-' }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.postalCode') }}</label>
+                    <p class="mb-0">{{ selectedRequest.postal_code || '-' }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.street') }}</label>
+                    <p class="mb-0">{{ selectedRequest.street || '-' }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.houseNumber') }}</label>
+                    <p class="mb-0">{{ selectedRequest.house_number || '-' }}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="row mb-3">
-              <div class="col-md-12">
-                <h6 class="text-muted">Kontaktná osoba</h6>
-                <table class="table table-sm">
-                  <tr>
-                    <th style="width: 30%;">Meno:</th>
-                    <td>{{ selectedRequest.contact_person_name }} {{ selectedRequest.contact_person_surname }}</td>
-                  </tr>
-                  <tr>
-                    <th>Email:</th>
-                    <td>{{ selectedRequest.contact_person_email }}</td>
-                  </tr>
-                  <tr>
-                    <th>Telefón:</th>
-                    <td>{{ selectedRequest.contact_person_phone || '-' }}</td>
-                  </tr>
-                </table>
+            <!-- Contact Person Card -->
+            <div class="card mb-3">
+              <div class="card-header bg-info text-white">
+                <i class="bi bi-person me-2"></i>
+                {{ t('companyRequests.modal.sections.contact') }}
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-12">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.contactName') }}</label>
+                    <p class="mb-0">{{ selectedRequest.contact_person_name }} {{ selectedRequest.contact_person_surname }}</p>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.contactEmail') }}</label>
+                    <p class="mb-0">
+                      <a :href="`mailto:${selectedRequest.contact_person_email}`">{{ selectedRequest.contact_person_email }}</a>
+                    </p>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.contactPhone') }}</label>
+                    <p class="mb-0">{{ selectedRequest.contact_person_phone || '-' }}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="row mb-3">
-              <div class="col-md-12">
-                <h6 class="text-muted">Informácie o žiadosti</h6>
-                <table class="table table-sm">
-                  <tr>
-                    <th style="width: 30%;">Zdroj žiadosti:</th>
-                    <td>
+            <!-- Request Information Card -->
+            <div class="card mb-3">
+              <div class="card-header bg-secondary text-white">
+                <i class="bi bi-info-circle me-2"></i>
+                {{ t('companyRequests.modal.sections.requestInfo') }}
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.requestSource') }}</label>
+                    <p class="mb-0">
                       <span
                         class="badge"
                         :class="selectedRequest.request_source === 'public_registration' ? 'bg-info' : 'bg-primary'"
                       >
-                        {{ selectedRequest.request_source === 'public_registration' ? 'Verejná registrácia' : 'Žiadosť študenta' }}
+                        {{ selectedRequest.request_source === 'public_registration' ? t('companyRequests.source.publicRegistration') : t('companyRequests.source.studentRequest') }}
                       </span>
-                    </td>
-                  </tr>
-                  <tr v-if="selectedRequest.requested_by">
-                    <th>Požiadal:</th>
-                    <td>{{ selectedRequest.requested_by.name }} ({{ selectedRequest.requested_by.email }})</td>
-                  </tr>
-                  <tr>
-                    <th>Dátum vytvorenia:</th>
-                    <td>{{ formatDate(selectedRequest.created_at) }}</td>
-                  </tr>
-                  <tr>
-                    <th>Stav:</th>
-                    <td>
+                    </p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.requestedBy') }}</label>
+                    <p class="mb-0">{{ selectedRequest.requested_by ? `${selectedRequest.requested_by.name} (${selectedRequest.requested_by.email})` : '-' }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.createdAt') }}</label>
+                    <p class="mb-0">{{ formatDate(selectedRequest.created_at) }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.status') }}</label>
+                    <p class="mb-0">
                       <span class="badge" :class="getStatusClass(selectedRequest.status)">
                         {{ getStatusText(selectedRequest.status) }}
                       </span>
-                    </td>
-                  </tr>
-                  <tr v-if="selectedRequest.reviewed_by">
-                    <th>Posúdil:</th>
-                    <td>{{ selectedRequest.reviewed_by.name }}</td>
-                  </tr>
-                  <tr v-if="selectedRequest.reviewed_at">
-                    <th>Dátum posúdenia:</th>
-                    <td>{{ formatDate(selectedRequest.reviewed_at) }}</td>
-                  </tr>
-                  <tr v-if="selectedRequest.rejection_reason">
-                    <th>Dôvod zamietnutia:</th>
-                    <td class="text-danger">{{ selectedRequest.rejection_reason }}</td>
-                  </tr>
-                  <tr v-if="selectedRequest.company_id">
-                    <th>ID firmy:</th>
-                    <td>{{ selectedRequest.company_id }}</td>
-                  </tr>
-                </table>
+                    </p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.reviewedBy') }}</label>
+                    <p class="mb-0">{{ selectedRequest.reviewed_by ? selectedRequest.reviewed_by.name : '-' }}</p>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.reviewedAt') }}</label>
+                    <p class="mb-0">{{ selectedRequest.reviewed_at ? formatDate(selectedRequest.reviewed_at) : '-' }}</p>
+                  </div>
+                  <div v-if="selectedRequest.rejection_reason" class="col-md-12">
+                    <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.rejectionReason') }}</label>
+                    <div class="alert alert-danger mb-0">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      {{ selectedRequest.rejection_reason }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button
-              v-if="selectedRequest.status === 'pending'"
-              class="btn btn-success"
-              @click="approveRequest(selectedRequest.id)"
-            >
-              <i class="bi bi-check-circle me-2"></i>
-              Schváliť
+          <div class="modal-footer bg-light">
+            <button class="btn btn-secondary" @click="selectedRequest = null">
+              <i class="bi bi-x-lg me-2"></i>
+              {{ t('companyRequests.actions.close') }}
             </button>
             <button
               v-if="selectedRequest.status === 'pending'"
@@ -298,9 +285,16 @@
               @click="rejectRequest(selectedRequest.id)"
             >
               <i class="bi bi-x-circle me-2"></i>
-              Zamietnuť
+              {{ t('companyRequests.actions.reject') }}
             </button>
-            <button class="btn btn-secondary" @click="selectedRequest = null">Zavrieť</button>
+            <button
+              v-if="selectedRequest.status === 'pending'"
+              class="btn btn-success"
+              @click="approveRequest(selectedRequest.id)"
+            >
+              <i class="bi bi-check-circle me-2"></i>
+              {{ t('companyRequests.actions.approve') }}
+            </button>
           </div>
         </div>
       </div>
@@ -313,6 +307,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
 
 const authStore = useAuthStore()
@@ -328,6 +323,8 @@ const stats = computed(() => ({
   approved: requests.value.filter(r => r.status === 'approved').length,
   rejected: requests.value.filter(r => r.status === 'rejected').length
 }))
+
+const { t } = useI18n()
 
 // Filtered requests
 const filteredRequests = computed(() => {
@@ -364,7 +361,7 @@ const fetchRequests = async () => {
 
 // Approve request
 const approveRequest = async (requestId) => {
-  if (!confirm('Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.')) {
+  if (!confirm(t('companyRequests.confirm.approve'))) {
     return
   }
 
@@ -380,24 +377,24 @@ const approveRequest = async (requestId) => {
     const data = await response.json()
 
     if (response.ok) {
-      alert(`Žiadosť bola schválená! Firma "${data.data.company_name}" bola pridaná do systému.`)
+      alert(t('companyRequests.alert.approved', { name: data.data.company_name }))
       selectedRequest.value = null
       await fetchRequests()
     } else {
-      alert(data.message || 'Nepodarilo sa schváliť žiadosť.')
+      alert(data.message || t('companyRequests.error.approve'))
     }
   } catch (error) {
     console.error('Error approving request:', error)
-    alert('Vyskytla sa chyba pri schvaľovaní žiadosti.')
+    alert(t('companyRequests.error.approveUnexpected'))
   }
 }
 
 // Reject request
 const rejectRequest = async (requestId) => {
-  const reason = prompt('Zadajte dôvod zamietnutia žiadosti:')
+  const reason = prompt(t('companyRequests.prompt.rejectionReason'))
 
   if (!reason || !reason.trim()) {
-    alert('Dôvod zamietnutia je povinný.')
+    alert(t('companyRequests.error.rejectionReasonRequired'))
     return
   }
 
@@ -417,15 +414,15 @@ const rejectRequest = async (requestId) => {
     const data = await response.json()
 
     if (response.ok) {
-      alert('Žiadosť bola zamietnutá.')
+      alert(t('companyRequests.alert.rejected'))
       selectedRequest.value = null
       await fetchRequests()
     } else {
-      alert(data.message || 'Nepodarilo sa zamietnuť žiadosť.')
+      alert(data.message || t('companyRequests.error.reject'))
     }
   } catch (error) {
     console.error('Error rejecting request:', error)
-    alert('Vyskytla sa chyba pri zamietaní žiadosti.')
+    alert(t('companyRequests.error.rejectUnexpected'))
   }
 }
 
@@ -437,12 +434,12 @@ const viewDetails = (request) => {
 // Helper functions
 const getFilterTitle = () => {
   const titles = {
-    pending: 'Čakajúce žiadosti',
-    approved: 'Schválené žiadosti',
-    rejected: 'Zamietnuté žiadosti',
-    all: 'Všetky žiadosti'
+    pending: t('companyRequests.filter.titles.pending'),
+    approved: t('companyRequests.filter.titles.approved'),
+    rejected: t('companyRequests.filter.titles.rejected'),
+    all: t('companyRequests.filter.titles.all')
   }
-  return titles[activeFilter.value] || 'Žiadosti'
+  return titles[activeFilter.value] || t('companyRequests.filter.titles.default')
 }
 
 const getStatusClass = (status) => {
@@ -456,9 +453,9 @@ const getStatusClass = (status) => {
 
 const getStatusText = (status) => {
   const texts = {
-    pending: 'Čaká',
-    approved: 'Schválené',
-    rejected: 'Zamietnuté'
+    pending: t('companyRequests.status.pending'),
+    approved: t('companyRequests.status.approved'),
+    rejected: t('companyRequests.status.rejected')
   }
   return texts[status] || status
 }
@@ -482,7 +479,7 @@ const formatAddress = (request) => {
     request.city,
     request.postal_code
   ].filter(Boolean)
-  return parts.length > 0 ? parts.join(', ') : 'Adresa neuvedená'
+  return parts.length > 0 ? parts.join(', ') : t('companyRequests.noAddress')
 }
 
 // Watch filter changes

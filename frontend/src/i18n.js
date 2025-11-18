@@ -237,6 +237,18 @@ const messages = {
       documentUploaded: {
         title: 'Document Uploaded',
         message: 'Student {studentName} uploaded a signed agreement for their internship.'
+      },
+      companyRequestCreated: {
+        title: 'New Company Request',
+        message: 'New request to add company "{companyName}".'
+      },
+      companyRequestApproved: {
+        title: 'Company Request Approved',
+        message: 'Your request to add company "{companyName}" has been approved.'
+      },
+      companyRequestRejected: {
+        title: 'Company Request Rejected',
+        message: 'Your request to add company "{companyName}" has been rejected. Reason: {reason}'
       }
     },
     editAnnouncement: {
@@ -500,74 +512,104 @@ const messages = {
     },
     companyRequestModal: {
       title: 'Request to Add New Company',
-      infoMessage: 'Can\'t find your company in the list? Fill out the form below and a supervisor will review your request. Once approved, the company will automatically appear in the list.',
+      info: 'Can\'t find your company in the list? Fill out the form below and a supervisor will review your request. Once approved, the company will automatically appear in the list.',
       submitButton: 'Submit Request'
     },
     companyRequests: {
       title: 'Company Requests Management',
-      filter: 'Filter:',
-      filterPending: 'Pending',
-      filterApproved: 'Approved',
-      filterRejected: 'Rejected',
-      filterAll: 'All',
-      loading: 'Loading...',
-      loadingRequests: 'Loading requests...',
-      noPendingRequests: 'No pending requests.',
-      noRequests: 'No requests.',
+      filter: {
+        label: 'Filter:',
+        pending: 'Pending',
+        approved: 'Approved',
+        rejected: 'Rejected',
+        all: 'All',
+        titles: {
+          pending: 'Pending Requests',
+          approved: 'Approved Requests',
+          rejected: 'Rejected Requests',
+          all: 'All Requests',
+          default: 'Requests'
+        }
+      },
+      loadingAria: 'Loading',
+      loadingText: 'Loading requests...',
+      empty: {
+        pending: 'No pending requests.',
+        none: 'No requests.'
+      },
       refresh: 'Refresh',
-      tableCompany: 'Company',
-      tableContactPerson: 'Contact Person',
-      tableSource: 'Source',
-      tableRequestedBy: 'Requested By',
-      tableDate: 'Date',
-      tableStatus: 'Status',
-      tableActions: 'Actions',
-      sourcePublic: 'Public',
-      sourceStudent: 'Student',
-      statusPending: 'Pending',
-      statusApproved: 'Approved',
-      statusRejected: 'Rejected',
-      viewDetails: 'View details',
-      approve: 'Approve',
-      reject: 'Reject',
-      detailTitle: 'Company Request Details',
-      close: 'Close',
-      companyInfo: 'Company Information',
-      companyName: 'Company Name:',
-      state: 'State:',
-      region: 'Region:',
-      city: 'City:',
-      postalCode: 'Postal Code:',
-      street: 'Street:',
-      houseNumber: 'House Number:',
-      contactPersonInfo: 'Contact Person',
-      contactName: 'Name:',
-      contactEmail: 'Email:',
-      contactPhone: 'Phone:',
-      requestInfo: 'Request Information',
-      requestSource: 'Request Source:',
-      requestSourcePublic: 'Public Registration',
-      requestSourceStudent: 'Student Request',
-      requestedBy: 'Requested By:',
-      dateCreated: 'Date Created:',
-      status: 'Status:',
-      reviewedBy: 'Reviewed By:',
-      reviewedAt: 'Review Date:',
-      rejectionReason: 'Rejection Reason:',
-      companyId: 'Company ID:',
-      addressNotProvided: 'Address not provided',
-      filterTitlePending: 'Pending Requests',
-      filterTitleApproved: 'Approved Requests',
-      filterTitleRejected: 'Rejected Requests',
-      filterTitleAll: 'All Requests',
-      approveConfirm: 'Are you sure you want to approve this request? The company will be added to the system.',
-      approveSuccess: 'Request has been approved! Company "{name}" has been added to the system.',
-      approveError: 'Failed to approve the request.',
-      rejectPrompt: 'Enter the reason for rejecting the request:',
-      rejectReasonRequired: 'Rejection reason is required.',
-      rejectSuccess: 'Request has been rejected.',
-      rejectError: 'Failed to reject the request.',
-      genericError: 'An error occurred.'
+      table: {
+        company: 'Company',
+        contactPerson: 'Contact Person',
+        source: 'Source',
+        requestedBy: 'Requested By',
+        date: 'Date',
+        status: 'Status',
+        actions: 'Actions'
+      },
+      source: {
+        public: 'Public',
+        student: 'Student',
+        publicRegistration: 'Public Registration',
+        studentRequest: 'Student Request'
+      },
+      actions: {
+        view: 'View details',
+        approve: 'Approve',
+        reject: 'Reject',
+        close: 'Close'
+      },
+      modal: {
+        title: 'Company Request Details',
+        sections: {
+          companyInfo: 'Company Information',
+          contact: 'Contact Person',
+          requestInfo: 'Request Information'
+        },
+        fields: {
+          companyName: 'Company Name:',
+          state: 'State:',
+          region: 'Region:',
+          city: 'City:',
+          postalCode: 'Postal Code:',
+          street: 'Street:',
+          houseNumber: 'House Number:',
+          contactName: 'Name:',
+          contactEmail: 'Email:',
+          contactPhone: 'Phone:',
+          requestSource: 'Request Source:',
+          requestedBy: 'Requested By:',
+          createdAt: 'Date Created:',
+          status: 'Status:',
+          reviewedBy: 'Reviewed By:',
+          reviewedAt: 'Review Date:',
+          rejectionReason: 'Rejection Reason:',
+          companyId: 'Company ID:'
+        }
+      },
+      confirm: {
+        approve: 'Are you sure you want to approve this request? The company will be added to the system.'
+      },
+      alert: {
+        approved: 'Request has been approved! Company "{name}" has been added to the system.',
+        rejected: 'Request has been rejected.'
+      },
+      prompt: {
+        rejectionReason: 'Enter the reason for rejecting the request:'
+      },
+      error: {
+        approve: 'Failed to approve the request.',
+        approveUnexpected: 'An error occurred while approving the request.',
+        rejectionReasonRequired: 'Rejection reason is required.',
+        reject: 'Failed to reject the request.',
+        rejectUnexpected: 'An error occurred while rejecting the request.'
+      },
+      status: {
+        pending: 'Pending',
+        approved: 'Approved',
+        rejected: 'Rejected'
+      },
+      noAddress: 'Address not provided'
     },
     aboutInternship: {
       title: 'What is Professional Practice?',
@@ -946,6 +988,18 @@ const messages = {
       documentUploaded: {
         title: 'Študent nahral dokument',
         message: 'Študent {studentName} nahral podpísanú dohodu k svojej praxi.'
+      },
+      companyRequestCreated: {
+        title: 'Nová žiadosť o firmu',
+        message: 'Nová žiadosť o pridanie firmy "{companyName}".'
+      },
+      companyRequestApproved: {
+        title: 'Žiadosť o firmu bola schválená',
+        message: 'Vaša žiadosť o pridanie firmy "{companyName}" bola schválená.'
+      },
+      companyRequestRejected: {
+        title: 'Žiadosť o firmu bola zamietnutá',
+        message: 'Vaša žiadosť o pridanie firmy "{companyName}" bola zamietnutá. Důvod: {reason}'
       }
     },
     editAnnouncement: {
@@ -1250,74 +1304,104 @@ const messages = {
     },
     companyRequestModal: {
       title: 'Požiadať o pridanie novej firmy',
-      infoMessage: 'Nenašli ste svoju firmu v zozname? Vyplňte formulár nižšie a garant posúdi vašu žiadosť. Po schválení sa firma automaticky zobrazí v zozname.',
+      info: 'Nenašli ste svoju firmu v zozname? Vyplňte formulár nižšie a garant posúdi vašu žiadosť. Po schválení sa firma automaticky zobrazí v zozname.',
       submitButton: 'Odoslať žiadosť'
     },
     companyRequests: {
       title: 'Správa žiadostí o firmy',
-      filter: 'Filter:',
-      filterPending: 'Čakajúce',
-      filterApproved: 'Schválené',
-      filterRejected: 'Zamietnuté',
-      filterAll: 'Všetky',
-      loading: 'Načítava sa...',
-      loadingRequests: 'Načítavajú sa žiadosti...',
-      noPendingRequests: 'Žiadne čakajúce žiadosti.',
-      noRequests: 'Žiadne žiadosti.',
+      filter: {
+        label: 'Filter:',
+        pending: 'Čakajúce',
+        approved: 'Schválené',
+        rejected: 'Zamietnuté',
+        all: 'Všetky',
+        titles: {
+          pending: 'Čakajúce žiadosti',
+          approved: 'Schválené žiadosti',
+          rejected: 'Zamietnuté žiadosti',
+          all: 'Všetky žiadosti',
+          default: 'Žiadosti'
+        }
+      },
+      loadingAria: 'Načítava sa',
+      loadingText: 'Načítavajú sa žiadosti...',
+      empty: {
+        pending: 'Žiadne čakajúce žiadosti.',
+        none: 'Žiadne žiadosti.'
+      },
       refresh: 'Obnoviť',
-      tableCompany: 'Firma',
-      tableContactPerson: 'Kontaktná osoba',
-      tableSource: 'Zdroj',
-      tableRequestedBy: 'Požiadal',
-      tableDate: 'Dátum',
-      tableStatus: 'Stav',
-      tableActions: 'Akcie',
-      sourcePublic: 'Verejná',
-      sourceStudent: 'Študent',
-      statusPending: 'Čaká',
-      statusApproved: 'Schválené',
-      statusRejected: 'Zamietnuté',
-      viewDetails: 'Zobraziť detaily',
-      approve: 'Schváliť',
-      reject: 'Zamietnuť',
-      detailTitle: 'Detail žiadosti o firmu',
-      close: 'Zavrieť',
-      companyInfo: 'Informácie o firme',
-      companyName: 'Názov firmy:',
-      state: 'Štát:',
-      region: 'Región:',
-      city: 'Mesto:',
-      postalCode: 'PSČ:',
-      street: 'Ulica:',
-      houseNumber: 'Číslo domu:',
-      contactPersonInfo: 'Kontaktná osoba',
-      contactName: 'Meno:',
-      contactEmail: 'Email:',
-      contactPhone: 'Telefón:',
-      requestInfo: 'Informácie o žiadosti',
-      requestSource: 'Zdroj žiadosti:',
-      requestSourcePublic: 'Verejná registrácia',
-      requestSourceStudent: 'Žiadosť študenta',
-      requestedBy: 'Požiadal:',
-      dateCreated: 'Dátum vytvorenia:',
-      status: 'Stav:',
-      reviewedBy: 'Posúdil:',
-      reviewedAt: 'Dátum posúdenia:',
-      rejectionReason: 'Dôvod zamietnutia:',
-      companyId: 'ID firmy:',
-      addressNotProvided: 'Adresa neuvedená',
-      filterTitlePending: 'Čakajúce žiadosti',
-      filterTitleApproved: 'Schválené žiadosti',
-      filterTitleRejected: 'Zamietnuté žiadosti',
-      filterTitleAll: 'Všetky žiadosti',
-      approveConfirm: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.',
-      approveSuccess: 'Žiadosť bola schválená! Firma "{name}" bola pridaná do systému.',
-      approveError: 'Nepodarilo sa schváliť žiadosť.',
-      rejectPrompt: 'Zadajte dôvod zamietnutia žiadosti:',
-      rejectReasonRequired: 'Dôvod zamietnutia je povinný.',
-      rejectSuccess: 'Žiadosť bola zamietnutá.',
-      rejectError: 'Nepodarilo sa zamietnuť žiadosť.',
-      genericError: 'Vyskytla sa chyba.'
+      table: {
+        company: 'Firma',
+        contactPerson: 'Kontaktná osoba',
+        source: 'Zdroj',
+        requestedBy: 'Požiadal',
+        date: 'Dátum',
+        status: 'Stav',
+        actions: 'Akcie'
+      },
+      source: {
+        public: 'Verejná',
+        student: 'Študent',
+        publicRegistration: 'Verejná registrácia',
+        studentRequest: 'Žiadosť študenta'
+      },
+      actions: {
+        view: 'Zobraziť detaily',
+        approve: 'Schváliť',
+        reject: 'Zamietnuť',
+        close: 'Zavrieť'
+      },
+      modal: {
+        title: 'Detail žiadosti o firmu',
+        sections: {
+          companyInfo: 'Informácie o firme',
+          contact: 'Kontaktná osoba',
+          requestInfo: 'Informácie o žiadosti'
+        },
+        fields: {
+          companyName: 'Názov firmy:',
+          state: 'Štát:',
+          region: 'Región:',
+          city: 'Mesto:',
+          postalCode: 'PSČ:',
+          street: 'Ulica:',
+          houseNumber: 'Číslo domu:',
+          contactName: 'Meno:',
+          contactEmail: 'Email:',
+          contactPhone: 'Telefón:',
+          requestSource: 'Zdroj žiadosti:',
+          requestedBy: 'Požiadal:',
+          createdAt: 'Dátum vytvorenia:',
+          status: 'Stav:',
+          reviewedBy: 'Posúdil:',
+          reviewedAt: 'Dátum posúdenia:',
+          rejectionReason: 'Dôvod zamietnutia:',
+          companyId: 'ID firmy:'
+        }
+      },
+      confirm: {
+        approve: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.'
+      },
+      alert: {
+        approved: 'Žiadosť bola schválená! Firma "{name}" bola pridaná do systému.',
+        rejected: 'Žiadosť bola zamietnutá.'
+      },
+      prompt: {
+        rejectionReason: 'Zadajte dôvod zamietnutia žiadosti:'
+      },
+      error: {
+        approve: 'Nepodarilo sa schváliť žiadosť.',
+        approveUnexpected: 'Vyskytla sa chyba pri schvaľovaní žiadosti.',
+        rejectionReasonRequired: 'Dôvod zamietnutia je povinný.',
+        reject: 'Nepodarilo sa zamietnuť žiadosť.',
+        rejectUnexpected: 'Vyskytla sa chyba pri zamietaní žiadosti.'
+      },
+      status: {
+        pending: 'Čaká',
+        approved: 'Schválené',
+        rejected: 'Zamietnuté'
+      },
+      noAddress: 'Adresa neuvedená'
     },
     studentDocuments: {
       title: 'Odborná prax',

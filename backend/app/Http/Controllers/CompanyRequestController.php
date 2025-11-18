@@ -341,7 +341,7 @@ class CompanyRequestController extends Controller
             if ($companyRequest->request_source === CompanyRequest::SOURCE_STUDENT && $companyRequest->requested_by_user_id) {
                 NotificationService::create(
                     $companyRequest->requested_by_user_id,
-                    'company_request',
+                    'company_request_approved',
                     'Company Request Approved',
                     "Your company request for '{$companyRequest->company_name}' has been approved and is now available in the system.",
                     ['request_id' => $companyRequest->id]
@@ -426,7 +426,7 @@ class CompanyRequestController extends Controller
             if ($companyRequest->request_source === CompanyRequest::SOURCE_STUDENT && $companyRequest->requested_by_user_id) {
                 NotificationService::create(
                     $companyRequest->requested_by_user_id,
-                    'company_request',
+                    'company_request_rejected',
                     'Company Request Rejected',
                     "Your company request for '{$companyRequest->company_name}' has been rejected. Reason: {$request->rejection_reason}",
                     ['request_id' => $companyRequest->id]
@@ -474,7 +474,7 @@ class CompanyRequestController extends Controller
             foreach ($garantUsers as $garantUser) {
                 NotificationService::create(
                     $garantUser->id,
-                    'company_request',
+                    'company_request_created',
                     'New Company Request',
                     "A new company registration request for '{$companyRequest->company_name}' has been submitted via {$source}.",
                     ['request_id' => $companyRequest->id]

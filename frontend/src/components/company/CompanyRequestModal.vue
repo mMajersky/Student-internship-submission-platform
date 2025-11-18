@@ -12,7 +12,7 @@
         <div class="modal-header">
           <h5 class="modal-title">
             <i class="bi bi-building-add me-2"></i>
-            Požiadať o pridanie novej firmy
+            {{ t('companyRequestModal.title') }}
           </h5>
           <button 
             type="button" 
@@ -21,11 +21,10 @@
             :disabled="isSubmitting"
           ></button>
         </div>
-        <div class="modal-body">
+          <div class="modal-body">
           <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>
-            Nenašli ste svoju firmu v zozname? Vyplňte formulár nižšie a garant posúdi vašu žiadosť.
-            Po schválení sa firma automaticky zobrazí v zozname.
+            {{ t('companyRequestModal.info') }}
           </div>
 
           <CompanyRegistrationForm
@@ -33,7 +32,7 @@
             api-endpoint="/api/student/company-requests"
             :auth-token="authToken"
             :show-cancel="true"
-            submit-button-text="Odoslať žiadosť"
+            :submit-button-text="t('companyRequestModal.submitButton')"
             @success="handleSuccess"
             @cancel="handleClose"
           />
@@ -52,6 +51,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
 import CompanyRegistrationForm from './CompanyRegistrationForm.vue'
 
@@ -69,6 +69,7 @@ const formRef = ref(null)
 const isSubmitting = ref(false)
 
 const authToken = computed(() => authStore.token)
+const { t } = useI18n()
 
 // Handle modal close
 const handleClose = () => {
