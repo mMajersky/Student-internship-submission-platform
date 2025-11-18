@@ -17,10 +17,11 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
-            /** @var User $user */
-            $user = Auth::user();
+        // Manually authenticate user (don't use session guard)
+        $user = User::where('email', $credentials['email'])->first();
 
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Create token with 24-hour expiration for security balance
             $token = $user->createToken('authToken')->accessToken;
 
             return response()->json([
@@ -151,6 +152,8 @@ class AuthController extends Controller
             'user' => $user,
         ], 201);
     }
+
+
 
     /**
      * Optionálne – jednoduché mapovanie rolí na povolenia
