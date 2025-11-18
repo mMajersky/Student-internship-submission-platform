@@ -5,23 +5,23 @@
         <div class="modal-header px-4 py-3">
           <h5 class="modal-title d-flex align-items-center mb-0">
             <i class="bi bi-chat-left-text me-2"></i>
-            Pridať komentár k praxi
+            {{ $t('commentModal.title') }}
           </h5>
-          <button type="button" class="btn-close" @click="handleClose" aria-label="Zavrieť"></button>
+          <button type="button" class="btn-close" @click="handleClose" :aria-label="$t('commentModal.close')"></button>
         </div>
 
         <div class="modal-body p-4">
           <div v-if="internship" class="alert alert-info mb-4 border-start border-primary border-top-0 border-end-0 border-bottom-0 rounded-2" style="border-width: 4px !important;">
             <p class="mb-1">
-              <strong>Študent:</strong> 
+              <strong>{{ $t('commentModal.student') }}:</strong>
               {{ internship.student ? `${internship.student.name} ${internship.student.surname}` : '-' }}
             </p>
             <p class="mb-1">
-              <strong>Firma:</strong> 
+              <strong>{{ $t('commentModal.company') }}:</strong>
               {{ internship.company ? internship.company.name : '-' }}
             </p>
             <p class="mb-0">
-              <strong>Aktuálny stav:</strong>
+              <strong>{{ $t('commentModal.currentStatus') }}:</strong>
               <span class="badge ms-2" :class="getStatusClass(internship.status)">
                 {{ internship.status }}
               </span>
@@ -34,7 +34,7 @@
               <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
                 <h6 class="mb-0 d-flex align-items-center">
                   <i class="bi bi-chat-dots me-2"></i>
-                  Predchádzajúce komentáre
+                  {{ $t('commentModal.previousComments') }}
                 </h6>
                 <span v-if="comments.length > 0" class="badge bg-primary rounded-pill">
                   {{ comments.length }}
@@ -44,9 +44,9 @@
               <div class="card-body">
                 <div v-if="loadingComments" class="text-center py-4">
                   <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Načítavam...</span>
+                    <span class="visually-hidden">{{ $t('commentModal.loadingComments') }}</span>
                   </div>
-                  <p class="text-muted mt-2 mb-0">Načítavam komentáre...</p>
+                  <p class="text-muted mt-2 mb-0">{{ $t('commentModal.loadingComments') }}</p>
                 </div>
 
                 <div v-else-if="commentsError" class="alert alert-danger" role="alert">
@@ -56,7 +56,7 @@
 
                 <div v-else-if="comments.length === 0" class="text-center py-5">
                   <i class="bi bi-chat-left text-muted" style="font-size: 3rem;"></i>
-                  <p class="text-muted mb-0 mt-3">Zatiaľ nie sú žiadne komentáre.</p>
+                  <p class="text-muted mb-0 mt-3">{{ $t('commentModal.noComments') }}</p>
                 </div>
 
                 <div v-else class="d-flex flex-column gap-3">
@@ -97,7 +97,7 @@
             <div class="card-header bg-primary text-white">
               <h6 class="mb-0">
                 <i class="bi bi-plus-circle me-2"></i>
-                Nový komentár
+                {{ $t('commentModal.newComment') }}
               </h6>
             </div>
             <div class="card-body">
@@ -105,19 +105,19 @@
             <div class="mb-3">
               <label for="commentType" class="form-label">
                 <i class="bi bi-tag me-1"></i>
-                Typ komentára <span class="text-danger">*</span>
+                {{ $t('commentModal.commentTypeRequired') }}
               </label>
-              <select 
-                id="commentType" 
-                v-model="formData.comment_type" 
+              <select
+                id="commentType"
+                v-model="formData.comment_type"
                 class="form-select"
                 required
               >
-                <option value="" disabled>Vyberte typ komentára</option>
-                <option value="approval">Schválenie</option>
-                <option value="rejection">Zamietnutie</option>
-                <option value="correction">Požadovaná oprava</option>
-                <option value="general">Všeobecný komentár</option>
+                <option value="" disabled>{{ $t('commentModal.selectCommentType') }}</option>
+                <option value="approval">{{ $t('commentModal.approval') }}</option>
+                <option value="rejection">{{ $t('commentModal.rejection') }}</option>
+                <option value="correction">{{ $t('commentModal.correction') }}</option>
+                <option value="general">{{ $t('commentModal.general') }}</option>
               </select>
               <div class="form-text">
                 {{ getCommentTypeDescription(formData.comment_type) }}
@@ -127,19 +127,19 @@
             <div class="mb-3">
               <label for="commentContent" class="form-label">
                 <i class="bi bi-pencil me-1"></i>
-                Komentár <span class="text-danger">*</span>
+                {{ $t('commentModal.commentRequired') }}
               </label>
               <textarea
                 id="commentContent"
                 v-model="formData.content"
                 class="form-control"
                 rows="6"
-                placeholder="Napíšte váš komentár..."
+                :placeholder="$t('commentModal.commentPlaceholder')"
                 required
                 maxlength="2000"
               ></textarea>
               <div class="form-text text-end">
-                {{ formData.content.length }} / 2000 znakov
+                {{ formData.content.length }} / 2000 {{ $t('commentModal.characters') }}
               </div>
             </div>
 
@@ -151,16 +151,16 @@
                 <div class="d-flex justify-content-end gap-2 mt-3">
                   <button type="button" class="btn btn-secondary" @click="handleClose">
                     <i class="bi bi-x-circle me-2"></i>
-                    Zrušiť
+                    {{ $t('commentModal.cancel') }}
                   </button>
                   <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
                     <span v-if="isSubmitting">
                       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Ukladám...
+                      {{ $t('commentModal.saving') }}
                     </span>
                     <span v-else>
                       <i class="bi bi-check-circle me-2"></i>
-                      Uložiť komentár
+                      {{ $t('commentModal.saveComment') }}
                     </span>
                   </button>
                 </div>
@@ -176,6 +176,9 @@
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   isVisible: {
@@ -230,14 +233,14 @@ const fetchComments = async () => {
 
     if (!response.ok) {
       const data = await response.json()
-      throw new Error(data.message || 'Chyba pri načítaní komentárov')
+      throw new Error(data.message || t('commentModal.loadCommentsError'))
     }
 
     const data = await response.json()
     comments.value = data.data || data || []
   } catch (err) {
     console.error('Error fetching comments:', err)
-    commentsError.value = err.message || 'Nepodarilo sa načítať komentáre.'
+    commentsError.value = err.message || t('commentModal.loadCommentsFailed')
   } finally {
     loadingComments.value = false
   }
@@ -274,12 +277,12 @@ const handleClose = () => {
 
 const handleSubmit = async () => {
   if (!formData.comment_type || !formData.content.trim()) {
-    error.value = 'Prosím vyplňte všetky povinné polia.'
+    error.value = t('commentModal.fillRequiredFields')
     return
   }
 
   if (!props.internship || !props.internship.id) {
-    error.value = 'Chyba: Neplatná prax.'
+    error.value = t('commentModal.invalidInternship')
     return
   }
 
@@ -292,15 +295,15 @@ const handleSubmit = async () => {
       comment_type: formData.comment_type,
       content: formData.content.trim()
     })
-    
+
     // Reset form after successful submission
     formData.comment_type = ''
     formData.content = ''
-    
+
     // Refresh comments list to show the new comment
     await fetchComments()
   } catch (err) {
-    error.value = err.message || 'Chyba pri ukladaní komentára.'
+    error.value = err.message || t('commentModal.saveError')
   } finally {
     isSubmitting.value = false
   }
@@ -338,7 +341,7 @@ const getCommentTypeColor = (type) => {
 
 const formatCommentDate = (dateString) => {
   if (!dateString) return '-'
-  
+
   // Ensure the date string is treated as UTC if it doesn't have timezone info
   let date
   if (dateString.includes('T') || dateString.includes('Z') || dateString.includes('+')) {
@@ -348,29 +351,29 @@ const formatCommentDate = (dateString) => {
     // No timezone info, treat as UTC
     date = new Date(dateString + 'Z')
   }
-  
+
   const now = new Date()
-  
+
   // Calculate difference in milliseconds
   const diffInMs = now - date
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
-  
+
   // If less than 1 minute
   if (diffInMinutes < 1) {
-    return 'práve teraz'
+    return t('commentModal.justNow')
   }
-  
+
   // If less than 1 hour
   if (diffInMinutes < 60) {
-    return `pred ${diffInMinutes} minútami`
+    return `${t('common.previous')} ${diffInMinutes} ${t('commentModal.minutesAgo')}`
   }
-  
+
   // If less than 24 hours
   if (diffInHours < 24) {
-    return `pred ${diffInHours} hodinami`
+    return `${t('common.previous')} ${diffInHours} ${t('commentModal.hoursAgo')}`
   }
-  
+
   // Otherwise show full date and time
   return date.toLocaleString('sk-SK', {
     year: 'numeric',
@@ -383,12 +386,12 @@ const formatCommentDate = (dateString) => {
 
 const getCommentTypeDescription = (type) => {
   const descriptions = {
-    'approval': 'Komentár k schváleniu praxe študenta.',
-    'rejection': 'Zdôvodnenie zamietnutia žiadosti o prax.',
-    'correction': 'Požadované opravy alebo úpravy dokumentácie.',
-    'general': 'Všeobecná poznámka alebo informácia.'
+    'approval': t('commentModal.approvalDesc'),
+    'rejection': t('commentModal.rejectionDesc'),
+    'correction': t('commentModal.correctionDesc'),
+    'general': t('commentModal.generalDesc')
   }
-  return descriptions[type] || 'Vyberte typ komentára pre zobrazenie popisu.'
+  return descriptions[type] || t('commentModal.selectTypeDesc')
 }
 
 const getStatusClass = (status) => {
@@ -404,4 +407,3 @@ const getStatusClass = (status) => {
   return statusClasses[status] || 'bg-secondary'
 }
 </script>
-

@@ -16,56 +16,55 @@ class AdminUserSeeder extends Seeder{
      */
     public function run()
     {
-        // Admin používateľ - updateOrCreate to avoid duplicates
-        DB::table('users')->updateOrInsert(
-            ['email' => 'admin@test.com'],
+        DB::table('users')->insert([
+            // Admin používateľ
             [
                 'name' => 'Admin',
                 'surname' => 'Adminovič',
                 'role' => 'admin',
-                'password' => Hash::make('password123'), // Nezabudnite zmeniť heslo na bezpečné
+                'password' => Hash::make('password'), // Nezabudnite zmeniť heslo na bezpečné
+                'email' => 'admin@example.com',
                 'email_verified_at' => Carbon::now(),
                 'remember_token' => Str::random(10),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
-        );
-
-        // Ostatní používatelia - používame updateOrInsert aby sa zabránilo duplikátom
-        $otherUsers = [
+            ],
+            // Študent používateľ
             [
-                'email' => 'student@example.com',
                 'name' => 'Peter',
                 'surname' => 'Hudec',
                 'role' => 'student',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
+                'email' => 'student@example.com',
+                'email_verified_at' => Carbon::now(),
+                'remember_token' => Str::random(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ],
+            // Garant používateľ
             [
-                'email' => 'garant@example.com',
                 'name' => 'Peter',
                 'surname' => 'Zodpovedný',
                 'role' => 'garant',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
+                'email' => 'garant@example.com',
+                'email_verified_at' => Carbon::now(),
+                'remember_token' => Str::random(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ],
+            // Zástupca spoločnosti používateľ
             [
-                'email' => 'company@example.com',
                 'name' => 'Eva',
                 'surname' => 'Podnikavá',
                 'role' => 'company',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
+                'email' => 'company@example.com',
+                'email_verified_at' => Carbon::now(),
+                'remember_token' => Str::random(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ],
-        ];
-
-        foreach ($otherUsers as $userData) {
-            DB::table('users')->updateOrInsert(
-                ['email' => $userData['email']],
-                array_merge($userData, [
-                    'email_verified_at' => Carbon::now(),
-                    'remember_token' => Str::random(10),
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
-                ])
-            );
-        }
+        ]);
     }
 }

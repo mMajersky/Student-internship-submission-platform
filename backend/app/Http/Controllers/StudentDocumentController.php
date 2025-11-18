@@ -8,7 +8,6 @@ use App\Models\Notification;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -52,7 +51,7 @@ class StudentDocumentController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Error getting signed agreement meta: ' . $e->getMessage());
+            \Log::error('Error getting signed agreement meta: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An error occurred.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
@@ -150,7 +149,7 @@ class StudentDocumentController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Error uploading signed agreement: ' . $e->getMessage());
+            \Log::error('Error uploading signed agreement: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while uploading the document.',
@@ -199,7 +198,7 @@ class StudentDocumentController extends Controller
             );
 
         } catch (\Exception $e) {
-            Log::error('Error downloading signed agreement: ' . $e->getMessage());
+            \Log::error('Error downloading signed agreement: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while downloading the document.',
@@ -254,7 +253,7 @@ class StudentDocumentController extends Controller
             return $pdf->download('Dohoda_o_odbornej_praxi_' . $student->surname . '.pdf');
 
         } catch (\Exception $e) {
-            Log::error('Error generating agreement: ' . $e->getMessage());
+            \Log::error('Error generating agreement: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while generating the document.',
@@ -302,7 +301,7 @@ class StudentDocumentController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Error deleting signed agreement: ' . $e->getMessage());
+            \Log::error('Error deleting signed agreement: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while deleting the document.',

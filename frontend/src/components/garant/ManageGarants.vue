@@ -1,18 +1,18 @@
 <template>
   <div class="manage-garants">
-    <h3 class="mb-4">Správa garantov</h3>
-    
+    <h3 class="mb-4">{{ $t('manageGarants.title') }}</h3>
+
     <!-- Create Garant Form -->
     <div class="card mb-4">
       <div class="card-body">
-        <h5 class="card-title mb-3">{{ editingGarant ? 'Upraviť garanta' : 'Vytvoriť nového garanta' }}</h5>
+        <h5 class="card-title mb-3">{{ editingGarant ? $t('manageGarants.editGarant') : $t('manageGarants.createGarant') }}</h5>
         
         <form @submit.prevent="handleSubmit">
           <div class="row mb-3">
             <!-- Name field -->
             <div class="col-md-3">
               <label for="name" class="form-label">
-                Meno<span class="text-danger">*</span>
+                {{ $t('manageGarants.nameRequired') }}
               </label>
               <input
                 type="text"
@@ -20,7 +20,7 @@
                 :class="{ 'is-invalid': errors.name }"
                 id="name"
                 v-model="formData.name"
-                placeholder="Zadajte meno"
+                :placeholder="$t('manageGarants.namePlaceholder')"
                 required
               />
               <div v-if="errors.name" class="invalid-feedback">
@@ -31,7 +31,7 @@
             <!-- Surname field -->
             <div class="col-md-3">
               <label for="surname" class="form-label">
-                Priezvisko<span class="text-danger">*</span>
+                {{ $t('manageGarants.surnameRequired') }}
               </label>
               <input
                 type="text"
@@ -39,7 +39,7 @@
                 :class="{ 'is-invalid': errors.surname }"
                 id="surname"
                 v-model="formData.surname"
-                placeholder="Zadajte priezvisko"
+                :placeholder="$t('manageGarants.surnamePlaceholder')"
                 required
               />
               <div v-if="errors.surname" class="invalid-feedback">
@@ -50,7 +50,7 @@
             <!-- Email field -->
             <div class="col-md-3">
               <label for="email" class="form-label">
-                Email<span class="text-danger">*</span>
+                {{ $t('manageGarants.emailRequired') }}
               </label>
               <input
                 type="email"
@@ -58,19 +58,19 @@
                 :class="{ 'is-invalid': errors.email }"
                 id="email"
                 v-model="formData.email"
-                placeholder="garant@example.com"
+                :placeholder="$t('manageGarants.emailPlaceholder')"
                 required
               />
               <div v-if="errors.email" class="invalid-feedback">
                 {{ errors.email }}
               </div>
-              <small class="text-muted">Email musí byť unikátny</small>
+              <small class="text-muted">{{ $t('manageGarants.emailUnique') }}</small>
             </div>
 
             <!-- Password field -->
             <div class="col-md-3">
               <label for="password" class="form-label">
-                Heslo<span v-if="!editingGarant" class="text-danger">*</span>
+                {{ editingGarant ? $t('manageGarants.password') : $t('manageGarants.passwordRequired') }}
               </label>
               <input
                 type="password"
@@ -78,21 +78,21 @@
                 :class="{ 'is-invalid': errors.password }"
                 id="password"
                 v-model="formData.password"
-                :placeholder="editingGarant ? 'Nechajte prázdne pre zachovanie' : 'Zadajte heslo'"
+                :placeholder="editingGarant ? $t('manageGarants.passwordEditPlaceholder') : $t('manageGarants.passwordPlaceholder')"
                 minlength="6"
                 :required="!editingGarant"
               />
               <div v-if="errors.password" class="invalid-feedback">
                 {{ errors.password }}
               </div>
-              <small class="text-muted">{{ editingGarant ? 'Nechajte prázdne ak nechcete zmeniť' : 'Minimálne 6 znakov' }}</small>
+              <small class="text-muted">{{ editingGarant ? $t('manageGarants.passwordEditNote') : $t('manageGarants.passwordMinLength') }}</small>
             </div>
           </div>
 
           <!-- Info message -->
           <div class="alert alert-info mb-3">
             <i class="bi bi-info-circle me-2"></i>
-            {{ editingGarant ? 'Upravte údaje garanta. Heslo zmeňte len ak je to potrebné.' : 'Po vytvorení bude garant môcť používať zadaný email a heslo na prihlásenie do systému.' }}
+            {{ editingGarant ? $t('manageGarants.infoMessageEdit') : $t('manageGarants.infoMessageCreate') }}
           </div>
 
           <!-- Error message -->
@@ -116,7 +116,7 @@
               :disabled="isSubmitting"
             >
               <i class="bi bi-x-circle me-2"></i>
-              {{ editingGarant ? 'Zrušiť úpravu' : 'Zrušiť' }}
+              {{ editingGarant ? $t('manageGarants.cancelEdit') : $t('manageGarants.cancel') }}
             </button>
             <button
               type="submit"
@@ -125,11 +125,11 @@
             >
               <span v-if="isSubmitting">
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {{ editingGarant ? 'Aktualizuje sa...' : 'Vytvára sa...' }}
+                {{ editingGarant ? $t('manageGarants.updating') : $t('manageGarants.creating') }}
               </span>
               <span v-else>
                 <i :class="editingGarant ? 'bi bi-check-circle me-2' : 'bi bi-plus-circle me-2'"></i>
-                {{ editingGarant ? 'Aktualizovať garanta' : 'Vytvoriť garanta' }}
+                {{ editingGarant ? $t('manageGarants.updateGarantBtn') : $t('manageGarants.createGarantBtn') }}
               </span>
             </button>
           </div>
@@ -141,29 +141,29 @@
     <div class="card">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-title mb-0">Zoznam garantov</h5>
-          <button 
+          <h5 class="card-title mb-0">{{ $t('manageGarants.garantsList') }}</h5>
+          <button
             class="btn btn-sm btn-outline-primary"
             @click="fetchGarants"
             :disabled="isLoadingGarants"
           >
             <i class="bi bi-arrow-clockwise me-1"></i>
-            Obnoviť
+            {{ $t('manageGarants.refresh') }}
           </button>
         </div>
-        
+
         <!-- Loading state -->
         <div v-if="isLoadingGarants" class="text-center py-4">
           <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Načítava sa...</span>
+            <span class="visually-hidden">{{ $t('manageGarants.loadingGarants') }}</span>
           </div>
-          <p class="text-muted mt-2">Načítavajú sa garanti...</p>
+          <p class="text-muted mt-2">{{ $t('manageGarants.loadingGarantsText') }}</p>
         </div>
 
         <!-- Empty state -->
         <div v-else-if="garants.length === 0" class="text-center py-5">
           <i class="bi bi-people fs-1 text-muted"></i>
-          <p class="text-muted mt-3">Zatiaľ neboli vytvorení žiadni garanti.</p>
+          <p class="text-muted mt-3">{{ $t('manageGarants.noGarants') }}</p>
         </div>
 
         <!-- Garants table -->
@@ -171,12 +171,12 @@
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Meno</th>
-                <th>Priezvisko</th>
-                <th>Email</th>
-                <th>Vytvorené</th>
-                <th>Akcie</th>
+                <th>{{ $t('manageGarants.id') }}</th>
+                <th>{{ $t('manageGarants.name') }}</th>
+                <th>{{ $t('manageGarants.surname') }}</th>
+                <th>{{ $t('manageGarants.email') }}</th>
+                <th>{{ $t('manageGarants.created') }}</th>
+                <th>{{ $t('manageGarants.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -187,16 +187,16 @@
                 <td>{{ garant.email }}</td>
                 <td>{{ formatDate(garant.created_at) }}</td>
                 <td>
-                  <button 
-                    class="btn btn-sm btn-outline-primary me-1" 
-                    title="Upraviť"
+                  <button
+                    class="btn btn-sm btn-outline-primary me-1"
+                    :title="$t('manageGarants.edit')"
                     @click="handleEditGarant(garant)"
                   >
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button 
-                    class="btn btn-sm btn-outline-danger" 
-                    title="Vymazať"
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    :title="$t('manageGarants.delete')"
                     @click="handleDeleteGarant(garant.id)"
                   >
                     <i class="bi bi-trash"></i>
@@ -208,12 +208,33 @@
         </div>
       </div>
     </div>
+
+    <!-- Confirmation Dialog -->
+    <ConfirmationDialog
+      :is-visible="showDeleteConfirmation"
+      :title="$t('confirmationDialog.deleteTitle')"
+      :message="$t('confirmationDialog.deleteMessage')"
+      :confirm-text="$t('confirmationDialog.confirm')"
+      :cancel-text="$t('confirmationDialog.cancel')"
+      type="danger"
+      :requires-text-confirmation="true"
+      confirmation-text-required="delete"
+      :text-confirmation-label="$t('confirmationDialog.deleteTextLabel')"
+      :text-confirmation-placeholder="$t('confirmationDialog.deleteTextPlaceholder')"
+      :text-confirmation-hint="$t('confirmationDialog.deleteTextHint')"
+      @confirm="confirmDeleteGarant"
+      @cancel="cancelDeleteGarant"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import { useI18n } from 'vue-i18n'
+import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 
@@ -238,6 +259,10 @@ const isLoadingGarants = ref(false)
 // Editing state
 const editingGarant = ref(null)
 
+// Delete confirmation state
+const showDeleteConfirmation = ref(false)
+const garantToDelete = ref(null)
+
 // Validate form
 const validateForm = () => {
   errors.value = {}
@@ -245,22 +270,22 @@ const validateForm = () => {
 
   // Validate name
   if (!formData.value.name || formData.value.name.trim().length === 0) {
-    errors.value.name = 'Meno je povinné'
+    errors.value.name = t('manageGarants.nameRequiredError')
     isValid = false
   }
 
   // Validate surname
   if (!formData.value.surname || formData.value.surname.trim().length === 0) {
-    errors.value.surname = 'Priezvisko je povinné'
+    errors.value.surname = t('manageGarants.surnameRequiredError')
     isValid = false
   }
 
   // Validate email
   if (!formData.value.email || formData.value.email.trim().length === 0) {
-    errors.value.email = 'Email je povinný'
+    errors.value.email = t('manageGarants.emailRequiredError')
     isValid = false
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
-    errors.value.email = 'Neplatný email formát'
+    errors.value.email = t('manageGarants.emailInvalidError')
     isValid = false
   }
 
@@ -268,11 +293,11 @@ const validateForm = () => {
   if (!formData.value.password || formData.value.password.length < 6) {
     // Only require password for new garants, not when editing
     if (!editingGarant.value) {
-      errors.value.password = 'Heslo musí mať minimálne 6 znakov'
+      errors.value.password = t('manageGarants.passwordRequiredError')
       isValid = false
     } else if (formData.value.password && formData.value.password.length < 6) {
       // If editing and password is provided, it must be at least 6 characters
-      errors.value.password = 'Heslo musí mať minimálne 6 znakov'
+      errors.value.password = t('manageGarants.passwordTooShortError')
       isValid = false
     }
   }
@@ -344,14 +369,14 @@ const handleSubmit = async () => {
     if (!response.ok) {
       // Handle specific error cases
       if (response.status === 409 || data.error?.includes('email')) {
-        errors.value.email = 'Email už existuje v systéme'
-        throw new Error('Email už existuje v systéme')
+        errors.value.email = t('manageGarants.emailExistsError')
+        throw new Error(t('manageGarants.emailExistsError'))
       }
-      throw new Error(data.error || data.message || `Nepodarilo sa ${isEditing ? 'aktualizovať' : 'vytvoriť'} garanta`)
+      throw new Error(data.error || data.message || (isEditing ? t('manageGarants.updateError') : t('manageGarants.createError')))
     }
 
     // Show success message
-    submitSuccess.value = isEditing ? 'Garant bol úspešne aktualizovaný!' : 'Garant bol úspešne vytvorený!'
+    submitSuccess.value = isEditing ? t('manageGarants.updateSuccess') : t('manageGarants.createSuccess')
 
     // Reset form
     formData.value = {
@@ -373,7 +398,7 @@ const handleSubmit = async () => {
 
   } catch (error) {
     console.error('Error creating/updating garant:', error)
-    submitError.value = error.message || `Chyba pri ${editingGarant.value ? 'aktualizácii' : 'vytváraní'} garanta. Skúste to znova.`
+    submitError.value = error.message || (editingGarant.value ? t('manageGarants.updateErrorGeneric') : t('manageGarants.createErrorGeneric'))
   } finally {
     isSubmitting.value = false
   }
@@ -426,13 +451,16 @@ const handleEditGarant = (garant) => {
 }
 
 // Handle delete garant
-const handleDeleteGarant = async (garantId) => {
-  if (!confirm('Naozaj chcete vymazať tohto garanta?')) {
-    return
-  }
+const handleDeleteGarant = (garantId) => {
+  garantToDelete.value = garantId
+  showDeleteConfirmation.value = true
+}
+
+const confirmDeleteGarant = async () => {
+  if (!garantToDelete.value) return
 
   try {
-    const response = await fetch(`/api/garants/${garantId}`, {
+    const response = await fetch(`/api/garants/${garantToDelete.value}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authStore.token}`,
@@ -449,11 +477,19 @@ const handleDeleteGarant = async (garantId) => {
     await fetchGarants()
 
     // Show success message
-    alert('Garant bol úspešne vymazaný!')
+    alert(t('manageGarants.deleteSuccess'))
   } catch (error) {
     console.error('Error deleting garant:', error)
-    alert(error.message || 'Chyba pri mazaní garanta. Skúste to znova.')
+    alert(error.message || t('manageGarants.deleteError'))
+  } finally {
+    showDeleteConfirmation.value = false
+    garantToDelete.value = null
   }
+}
+
+const cancelDeleteGarant = () => {
+  showDeleteConfirmation.value = false
+  garantToDelete.value = null
 }
 
 // Format date
@@ -474,4 +510,3 @@ onMounted(() => {
   fetchGarants()
 })
 </script>
-

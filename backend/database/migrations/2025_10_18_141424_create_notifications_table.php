@@ -14,12 +14,9 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->integer('id', true);
             $table->unsignedBigInteger('user_id')->index('notifications_user_idx');
-            $table->string('type', 50)->nullable();
             $table->string('title', 100)->nullable();
             $table->text('message')->nullable();
-            $table->json('data')->nullable();
             $table->boolean('is_read')->default(false);
-            $table->timestamp('read_at')->nullable();
             $table->dateTime('created_at')->nullable()->useCurrent();
             $table->dateTime('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });
