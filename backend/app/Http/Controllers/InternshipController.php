@@ -7,7 +7,10 @@ use App\Models\Student;
 use App\Models\Company;
 use App\Models\Garant;
 use App\Models\Notification;
+use App\Models\User;
 use App\Mail\InternshipCreatedNotification;
+use App\Mail\InternshipCreatedForGarant;
+use App\Mail\InternshipStatusChanged;
 use App\Services\EmailService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
@@ -97,13 +100,15 @@ class InternshipController extends Controller
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send notification to company if created with "potvrdená" status
-            if ($validated['status'] === Internship::STATUS_POTVRDENA && $internship->company && $internship->company->user) {
+            // Send email to company with approve/reject buttons ONLY when created with "potvrdená" status (garant confirms)
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
+            // This is the moment when company needs to confirm/reject
+            if ($validated['status'] === Internship::STATUS_POTVRDENA && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
 
-                $data = [
+                $emailData = [
                     'studentName' => $internship->student->name . ' ' . $internship->student->surname,
                     'studentEmail' => $internship->student->student_email,
                     'studentPhone' => $internship->student->phone_number ?? 'N/A',
@@ -114,18 +119,22 @@ class InternshipController extends Controller
                     'status' => $internship->status,
                     'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
                     'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                    'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    'showButtons' => true, // Show buttons for company emails
                 ];
 
-                // Create notification and email
-                NotificationService::createAndNotify(
+                // Always create notification
+                NotificationService::create(
                     $internship->company->user->id,
                     Notification::TYPE_APPROVAL_REQUEST,
-                    'Nová žiadosť o stáž',
-                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' žiada o potvrdenie stáže.',
-                    ['internship_id' => $internship->id],
-                    InternshipCreatedNotification::class,
-                    $data
+                    'Žiadosť o potvrdenie stáže',
+                    'Garant schválil prax študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Prosíme o potvrdenie stáže.',
+                    ['internship_id' => $internship->id]
                 );
+
+                // Always send email to company when garant approves (regardless of email_notifications setting)
+                // Company needs to approve/reject via email buttons
+                EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $emailData);
             }
 
 
@@ -384,13 +393,15 @@ class InternshipController extends Controller
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send notification to company if status changed to "potvrdená"
-            if ($statusChangedToPotvrdena && $internship->company && $internship->company->user) {
+            // Send email to company with approve/reject buttons when garant confirms (changes to "potvrdená")
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
+            // This is the moment when company needs to confirm/reject (after garant confirms)
+            if ($statusChangedToPotvrdena && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
 
-                $data = [
+                $emailData = [
                     'studentName' => $internship->student->name . ' ' . $internship->student->surname,
                     'studentEmail' => $internship->student->student_email,
                     'studentPhone' => $internship->student->phone_number ?? 'N/A',
@@ -401,28 +412,82 @@ class InternshipController extends Controller
                     'status' => $internship->status,
                     'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
                     'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                    'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    'showButtons' => true, // Show buttons for company emails
                 ];
 
-                NotificationService::createAndNotify(
+                // Always create notification
+                NotificationService::create(
                     $internship->company->user->id,
                     Notification::TYPE_APPROVAL_REQUEST,
                     'Žiadosť o potvrdenie stáže',
-                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' žiada o potvrdenie stáže.',
-                    ['internship_id' => $internship->id],
-                    InternshipCreatedNotification::class,
-                    $data
+                    'Garant schválil prax študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Prosíme o potvrdenie stáže.',
+                    ['internship_id' => $internship->id]
                 );
+
+                // Always send email to company when garant approves (regardless of email_notifications setting)
+                // Company needs to approve/reject via email buttons
+                EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $emailData);
             }
 
-            // Notify student about status change
+            // If garant changed status: send emails to student and company (for any status change)
             if ($statusChanged && $internship->student && $internship->student->user) {
-                NotificationService::create(
-                    $internship->student->user->id,
-                    Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
-                    'Stav praxe bol zmenený',
-                    'Stav vašej praxe bol zmenený na: ' . $internship->status,
-                    ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status]
-                );
+                // Prepare email data
+                $emailData = [
+                    'internshipId' => $internship->id,
+                    'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                    'companyName' => $internship->company ? $internship->company->name : 'N/A',
+                    'academyYear' => $internship->academy_year,
+                    'oldStatus' => $oldStatus,
+                    'newStatus' => $internship->status,
+                ];
+
+                // Send email to student (if email notifications enabled)
+                if ($internship->student->user->email_notifications) {
+                    NotificationService::createAndNotify(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Stav praxe bol zmenený',
+                        'Stav vašej praxe bol zmenený garantom. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                } else {
+                    // Create system notification only (no email)
+                    NotificationService::create(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Stav praxe bol zmenený',
+                        'Stav vašej praxe bol zmenený garantom. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status]
+                    );
+                }
+
+                // Send email to company (if exists) - always send on status change, not just when email_notifications enabled
+                // But skip if we already sent the approval request email above (when changing to "potvrdená")
+                if ($internship->company && $internship->company->user && $internship->company->user->email && !$statusChangedToPotvrdena) {
+                    if ($internship->company->user->email_notifications) {
+                        NotificationService::createAndNotify(
+                            $internship->company->user->id,
+                            Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                            'Stav praxe bol zmenený',
+                            'Garant zmenil stav praxe študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                            ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status],
+                            InternshipStatusChanged::class,
+                            $emailData
+                        );
+                    } else {
+                        // Create notification only (no email)
+                        NotificationService::create(
+                            $internship->company->user->id,
+                            Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                            'Stav praxe bol zmenený',
+                            'Garant zmenil stav praxe študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                            ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status]
+                        );
+                    }
+                }
             }
 
             // Return success response with updated internship
@@ -684,8 +749,9 @@ class InternshipController extends Controller
                 'integer',
                 Rule::exists('garants', 'id')
             ],
+            // Status is not required from student - will be automatically set to "potvrdená"
             'status' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::in(Internship::getStatuses())
@@ -722,7 +788,6 @@ class InternshipController extends Controller
             'company_id.required' => 'The company field is required.',
             'company_id.exists' => 'The selected company does not exist.',
             'garant_id.exists' => 'The selected garant does not exist.',
-            'status.required' => 'The status field is required.',
             'status.in' => 'The status must be one of: ' . implode(', ', Internship::getStatuses()) . '.',
             'academy_year.required' => 'The academy year field is required.',
             'academy_year.regex' => 'The academy year must be in format YYYY/YYYY (e.g., 2024/2025).',
@@ -732,6 +797,9 @@ class InternshipController extends Controller
         try {
             // Add the authenticated student's ID to the validated data
             $validated['student_id'] = $user->student->id;
+            
+            // Automatically set status to "vytvorená" when student creates internship
+            $validated['status'] = Internship::STATUS_VYTVORENA;
 
             // Create the internship
             $internship = Internship::create($validated);
@@ -739,27 +807,45 @@ class InternshipController extends Controller
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
+            // NO EMAIL TO COMPANY when student creates internship
+            // Email with approve/reject buttons will be sent only when garant approves it
+
+            // Prepare email data for garant notification (using new internship_created_for_garant.blade.php template)
+            $emailData = [
+                'internshipId' => $internship->id,
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'companyName' => $internship->company ? $internship->company->name : 'N/A',
+                'academyYear' => $internship->academy_year,
+                'startDate' => $internship->start_date?->format('Y-m-d'),
+                'endDate' => $internship->end_date?->format('Y-m-d'),
+                'status' => $internship->status,
+            ];
+
             // Notify garant(s) about new internship created by student
             if ($internship->garant && $internship->garant->user) {
                 // If garant is already assigned, notify only them
-                NotificationService::create(
+                NotificationService::createAndNotify(
                     $internship->garant->user->id,
                     Notification::TYPE_INTERNSHIP_CREATED,
                     'Študent vytvoril novú prax',
                     'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax vo firme ' . $internship->company->name . '.',
-                    ['internship_id' => $internship->id]
+                    ['internship_id' => $internship->id],
+                    InternshipCreatedForGarant::class,
+                    $emailData
                 );
             } else {
                 // If no garant assigned, notify ALL garants about new internship
                 $allGarants = Garant::with('user')->whereNotNull('user_id')->get();
                 foreach ($allGarants as $garant) {
                     if ($garant->user) {
-                        NotificationService::create(
+                        NotificationService::createAndNotify(
                             $garant->user->id,
                             Notification::TYPE_INTERNSHIP_CREATED,
                             'Nová prax čaká na priradenie',
                             'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax. Prax ešte nemá priradeného garanta.',
-                            ['internship_id' => $internship->id]
+                            ['internship_id' => $internship->id],
+                            InternshipCreatedForGarant::class,
+                            $emailData
                         );
                     }
                 }
@@ -837,9 +923,11 @@ class InternshipController extends Controller
                 ], 400);
             }
 
-            $internship = Internship::findOrFail($tokenData['internship_id']);
+            $internship = Internship::with(['student.user', 'company.user', 'garant.user'])->findOrFail($tokenData['internship_id']);
 
-            // Check if internship is still in "Potvrdená" status
+            // Check if internship is still in "potvrdená" status (pending company action)
+            // Company can only confirm/reject after garant has confirmed (status "potvrdená")
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
             if ($internship->status !== Internship::STATUS_POTVRDENA) {
                 return response()->json([
                     'message' => 'This internship has already been processed and is no longer available for action.',
@@ -848,12 +936,74 @@ class InternshipController extends Controller
                 ], 400);
             }
 
+            // Store old status before update
+            $oldStatus = $internship->status;
+
             // Update status based on action
+            // After garant confirmed (status "potvrdená"), company confirms → "schválená" (Approved)
+            // Company rejects → "zamietnutá"
             $newStatus = $tokenData['action'] === 'confirm'
-                ? Internship::STATUS_SCHVALENA // Company confirmed/approved
+                ? Internship::STATUS_SCHVALENA // Company confirmed - status "schválená" (Approved)
                 : Internship::STATUS_ZAMIETNUTA; // Company rejected
 
             $internship->update(['status' => $newStatus]);
+
+            // Prepare email data
+            $emailData = [
+                'internshipId' => $internship->id,
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'companyName' => $internship->company->name,
+                'academyYear' => $internship->academy_year,
+                'oldStatus' => $oldStatus,
+                'newStatus' => $newStatus,
+            ];
+
+            // If company approved (confirmed): send email to student and garant
+            // Respects email_notifications setting
+            if ($tokenData['action'] === 'confirm') {
+                // Send email to student (respects email_notifications setting)
+                if ($internship->student && $internship->student->user) {
+                    NotificationService::createAndNotify(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Firma schválila vašu prax',
+                        'Firma ' . $internship->company->name . ' schválila vašu prax. Stav: ' . $oldStatus . ' → ' . $newStatus,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                }
+
+                // Send email to ALL garants (users with role 'garant') - respects email_notifications setting
+                $allGarants = User::where('role', 'garant')->whereNotNull('email')->get();
+                
+                foreach ($allGarants as $garantUser) {
+                    NotificationService::createAndNotify(
+                        $garantUser->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Firma schválila prax',
+                        'Firma ' . $internship->company->name . ' schválila prax študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Stav: ' . $oldStatus . ' → ' . $newStatus,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                }
+            }
+
+            // If company rejected: send email only to student - respects email_notifications setting
+            if ($tokenData['action'] === 'reject') {
+                if ($internship->student && $internship->student->user) {
+                    NotificationService::createAndNotify(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Firma zamietla vašu prax',
+                        'Firma ' . $internship->company->name . ' zamietla vašu prax. Stav: ' . $oldStatus . ' → ' . $newStatus,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                }
+            }
 
             return response()->json([
                 'message' => 'Internship ' . ($tokenData['action'] === 'confirm' ? 'confirmed' : 'rejected') . ' successfully.',
@@ -936,8 +1086,10 @@ class InternshipController extends Controller
                 'startDate' => $internship->start_date?->format('Y-m-d'),
                 'endDate' => $internship->end_date?->format('Y-m-d'),
                 'status' => $internship->status,
-                'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
-                'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
+                'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
+                'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                'showButtons' => true, // Show buttons for company emails
             ];
 
             $emailSent = EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $data);

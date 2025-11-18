@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class CompanyController extends Controller
 {
@@ -16,9 +17,11 @@ class CompanyController extends Controller
     public function index()
     {
         try {
-            $companies = Company::select('id', 'name', 'city', 'state', 'region')
-                ->orderBy('name')
-                ->get();
+            $companies = Cache::tags(['dropdowns'])->remember('companies', now()->addHours(8), function() {
+                return Company::select('id', 'name', 'city', 'state', 'region')
+                    ->orderBy('name')
+                    ->get();
+            });
 
             return response()->json([
                 'data' => $companies->map(function ($company) {

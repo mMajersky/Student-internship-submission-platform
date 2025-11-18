@@ -289,6 +289,23 @@
       @close="handleCloseCommentModal"
       @submit="handleSubmitComment"
     />
+
+    <!-- Confirmation Dialog -->
+    <ConfirmationDialog
+      :is-visible="showDeleteConfirmation"
+      :title="$t('confirmationDialog.deleteTitle')"
+      :message="$t('confirmationDialog.deleteMessage')"
+      :confirm-text="$t('confirmationDialog.confirm')"
+      :cancel-text="$t('confirmationDialog.cancel')"
+      type="danger"
+      :requires-text-confirmation="true"
+      confirmation-text-required="delete"
+      :text-confirmation-label="$t('confirmationDialog.deleteTextLabel')"
+      :text-confirmation-placeholder="$t('confirmationDialog.deleteTextPlaceholder')"
+      :text-confirmation-hint="$t('confirmationDialog.deleteTextHint')"
+      @confirm="confirmDeleteInternship"
+      @cancel="cancelDeleteInternship"
+    />
   </div>
 </template>
 
@@ -299,6 +316,7 @@ import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
+import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 
 const { t } = useI18n()
 
@@ -313,6 +331,10 @@ const editingInternship = ref(null)
 // Comment modal state
 const showCommentModal = ref(false)
 const selectedInternshipForComment = ref(null)
+
+// Delete confirmation state
+const showDeleteConfirmation = ref(false)
+const internshipToDelete = ref(null)
 
 // Statistics
 const stats = ref({
@@ -415,8 +437,11 @@ const handleCreateInternship = async (formData) => {
       throw new Error(data.message || data.error || `Failed to ${editingInternship.value ? 'update' : 'create'} internship`)
     }
     
-    // Refresh internships list from API
+    // Refresh internships list from API - force reload
     await fetchInternships()
+    
+    // Force Vue to re-render by updating the reference
+    internships.value = [...internships.value]
     
     // Show success message
     alert(editingInternship.value ? t('garantDashboard.messages.internshipUpdated') : t('garantDashboard.messages.internshipCreated'))
@@ -432,13 +457,16 @@ const handleCreateInternship = async (formData) => {
   }
 }
 
-const handleDeleteInternship = async (internshipId) => {
-  if (!confirm(t('garantDashboard.messages.confirmDelete'))) {
-    return
-  }
+const handleDeleteInternship = (internshipId) => {
+  internshipToDelete.value = internshipId
+  showDeleteConfirmation.value = true
+}
+
+const confirmDeleteInternship = async () => {
+  if (!internshipToDelete.value) return
   
   try {
-    const response = await fetch(`/api/internships/${internshipId}`, {
+    const response = await fetch(`/api/internships/${internshipToDelete.value}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authStore.token}`,
@@ -459,7 +487,15 @@ const handleDeleteInternship = async (internshipId) => {
   } catch (error) {
     console.error('Error deleting internship:', error)
     alert(error.message || t('garantDashboard.messages.deleteError'))
+  } finally {
+    showDeleteConfirmation.value = false
+    internshipToDelete.value = null
   }
+}
+
+const cancelDeleteInternship = () => {
+  showDeleteConfirmation.value = false
+  internshipToDelete.value = null
 }
 
 const getStudentFullName = (internship) => {
@@ -492,6 +528,15 @@ const formatDate = (dateString) => {
 
 const getStatusClass = (status) => {
   const statusClasses = {
+    'vytvorená': 'bg-secondary',
+    'potvrdená': 'bg-info',
+    'schválená': 'bg-success',
+    'obhájená': 'bg-primary',
+    'neobhájená': 'bg-danger',
+    'ukončená': 'bg-primary',
+    'prebieha': 'bg-warning text-dark',
+    'zamietnutá': 'bg-danger',
+    'zrušená': 'bg-danger',
     'pending': 'bg-secondary',
     'confirmed': 'bg-info',
     'approved': 'bg-success',
@@ -507,15 +552,16 @@ const getTranslatedStatus = (status) => {
   // Map API status values to translation keys
   const statusMap = {
     'vytvorená': 'studentInternship.status.vytvorena',
-    'potvrdená': 'studentInternship.status.schvalena',
+    'potvrdená': 'studentInternship.status.potvrdena',
     'schválená': 'studentInternship.status.schvalena',
     'obhájená': 'studentInternship.status.obhajena',
+    'neobhájená': 'studentInternship.status.neobhajena',
     'ukončená': 'studentInternship.status.ukoncena',
     'prebieha': 'studentInternship.status.prebieha',
     'zamietnutá': 'studentInternship.status.zamietnuta',
     'zrušená': 'studentInternship.status.zrusena',
     'pending': 'studentInternship.status.vytvorena',
-    'confirmed': 'studentInternship.status.schvalena',
+    'confirmed': 'studentInternship.status.potvrdena',
     'approved': 'studentInternship.status.schvalena',
     'in_progress': 'studentInternship.status.prebieha',
     'completed': 'studentInternship.status.obhajena',

@@ -16,12 +16,16 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\GarantController;
 
 
+// Company action routes for internship confirmation/rejection (public for email links)
+// MUST be at the top, before any middleware groups, to ensure it's truly public
+Route::get('/internships/company-action', [InternshipController::class, 'companyAction']);
+
 // PDF generation routes from feature/Generate_PDF_template
 Route::get('/vykaz-generate/{internship}', [InternshipPdfController::class, 'generate']);
 
 // User retrieval route from develop
 Route::get('/user', function (Request $request) {
-    $user = $request->user();
+    $user = $request->user('api'); // Explicitly use api guard
 
     // <-- ZMENA 1: Prikáž Laravelu, aby načítal aj prepojený študentský profil
     $user->load('student');
@@ -63,7 +67,7 @@ Route::get('/debug-auth', function (Request $request) {
     try {
         $token = $request->bearerToken();
         $user = $request->user();
-        
+
         return response()->json([
             'has_bearer_token' => !empty($token),
             'token_preview' => $token ? substr($token, 0, 20) . '...' : null,
@@ -80,6 +84,46 @@ Route::get('/debug-auth', function (Request $request) {
             'error' => $e->getMessage(),
             'trace' => config('app.debug') ? $e->getTraceAsString() : null,
         ]);
+    }
+});
+
+// DEBUG: Check OAuth2 database status
+Route::get('/debug-oauth', function (Request $request) {
+    try {
+        $clients = \Laravel\Passport\Client::all();
+        $recentTokens = \Laravel\Passport\Token::latest()->take(5)->get();
+
+        return response()->json([
+            'oauth_clients_count' => $clients->count(),
+            'oauth_clients' => $clients->map(function($client) {
+                return [
+                    'id' => $client->id,
+                    'name' => $client->name,
+                    'redirect' => $client->redirect,
+                    'personal_access_client' => $client->personal_access_client,
+                    'password_client' => $client->password_client,
+                ];
+            }),
+            'recent_tokens_count' => $recentTokens->count(),
+            'recent_tokens' => $recentTokens->map(function($token) {
+                return [
+                    'id' => $token->id,
+                    'token_id' => substr($token->access_token, 0, 20) . '...', // Don't expose full tokens
+                    'client_id' => $token->client_id,
+                    'user_id' => $token->user_id,
+                    'scopes' => $token->scopes,
+                    'created_at' => $token->created_at,
+                    'updated_at' => $token->updated_at,
+                    'expires_at' => $token->expires_at,
+                    'revoked' => $token->revoked,
+                ];
+            }),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => config('app.debug') ? $e->getTraceAsString() : null,
+        ], 500);
     }
 });
 
@@ -156,8 +200,6 @@ Route::middleware(['auth:api', 'role:company'])->group(function () {
     // Future company-specific routes
 });
 
-// Company action routes for internship confirmation/rejection (public for email links)
-Route::get('/internships/company-action', [InternshipController::class, 'companyAction']);
 
 // Admin-only routes
 Route::middleware(['auth:api', 'role:admin'])->group(function () {

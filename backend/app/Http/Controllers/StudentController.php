@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class StudentController extends Controller
 {
@@ -16,10 +17,12 @@ class StudentController extends Controller
     public function index()
     {
         try {
-            $students = Student::select('id', 'name', 'surname', 'student_email')
-                ->orderBy('surname')
-                ->orderBy('name')
-                ->get();
+            $students = Cache::tags(['dropdowns'])->remember('students', now()->addHours(8), function() {
+                return Student::select('id', 'name', 'surname', 'student_email')
+                    ->orderBy('surname')
+                    ->orderBy('name')
+                    ->get();
+            });
 
             return response()->json([
                 'data' => $students->map(function ($student) {
