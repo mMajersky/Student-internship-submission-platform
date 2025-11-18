@@ -399,6 +399,25 @@ const messages = {
       deleteSuccess: 'Garant has been successfully deleted!',
       deleteError: 'Error deleting garant. Please try again.'
     },
+    confirmationDialog: {
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+      deleteTitle: 'Confirm Deletion',
+      deleteMessage: 'Are you sure you want to delete this record? This action cannot be undone.',
+      deleteTextLabel: 'To confirm, type:',
+      deleteTextPlaceholder: 'delete',
+      deleteTextHint: 'Type "delete" to confirm deletion',
+      changeStatusTitle: 'Confirm Status Change',
+      changeStatusMessage: 'Are you sure you want to change the status of this internship?',
+      editTitle: 'Confirm Edit',
+      editMessage: 'Are you sure you want to edit this internship?',
+      changeUserRightsTitle: 'Confirm Rights Change',
+      changeUserRightsMessage: 'Are you sure you want to change the access rights of this user?',
+      addUserTitle: 'Confirm User Addition',
+      addUserMessage: 'Are you sure you want to add this user?',
+      removeUserTitle: 'Confirm User Removal',
+      removeUserMessage: 'Are you sure you want to remove this user?'
+    },
     studentInternship: {
       title: 'Student Overview',
       stats: {
@@ -982,6 +1001,25 @@ const messages = {
       emailResentError: 'Chyba pri preposielaní emailu:',
       emailResentUnknownError: 'Neznáma chyba',
       emailResentFailed: 'Chyba pri preposielaní emailu. Skúste znovu.'
+    },
+    confirmationDialog: {
+      confirm: 'Potvrdiť',
+      cancel: 'Zrušiť',
+      deleteTitle: 'Potvrdiť vymazanie',
+      deleteMessage: 'Naozaj chcete vymazať tento záznam? Táto akcia je nezvratná.',
+      deleteTextLabel: 'Pre potvrdenie napíšte:',
+      deleteTextPlaceholder: 'delete',
+      deleteTextHint: 'Napíšte "delete" pre potvrdenie vymazania',
+      changeStatusTitle: 'Potvrdiť zmenu stavu',
+      changeStatusMessage: 'Naozaj chcete zmeniť stav tejto praxe?',
+      editTitle: 'Potvrdiť úpravu',
+      editMessage: 'Naozaj chcete upraviť túto prax?',
+      changeUserRightsTitle: 'Potvrdiť zmenu práv',
+      changeUserRightsMessage: 'Naozaj chcete zmeniť prístupové práva tohto používateľa?',
+      addUserTitle: 'Potvrdiť pridanie používateľa',
+      addUserMessage: 'Naozaj chcete pridať tohto používateľa?',
+      removeUserTitle: 'Potvrdiť odobranie používateľa',
+      removeUserMessage: 'Naozaj chcete odobrať tohto používateľa?'
     },
     garantDashboard: {
       title: 'Dashboard garanta',
