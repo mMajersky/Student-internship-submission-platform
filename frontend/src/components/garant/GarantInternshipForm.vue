@@ -338,16 +338,16 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
-    // Emit the form data to parent component
+    // Emit the form data to parent component (don't reset form here, parent will handle success)
     emit('submit', { ...formData.value })
     
-    // Reset form after successful submission
-    resetForm()
+    // Don't reset form here - let parent handle it after successful API call
+    // resetForm() will be called after parent confirms success via cancel or explicit reset
   } catch (error) {
     console.error('Error submitting form:', error)
-  } finally {
     isSubmitting.value = false
   }
+  // Don't set isSubmitting to false here - parent will handle it after API call completes
 }
 
 const handleCancel = () => {

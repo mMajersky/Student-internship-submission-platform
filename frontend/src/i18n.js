@@ -428,12 +428,14 @@ const messages = {
       footer: '© 2025 Professional Practice CRM',
       status: {
         vytvorena: 'Created',
+        potvrdena: 'Confirmed',
         schvalena: 'Approved',
         obhajena: 'Completed',
         ukoncena: 'Completed',
         prebieha: 'In Progress',
         zamietnuta: 'Rejected',
-        zrusena: 'Cancelled'
+        zrusena: 'Cancelled',
+        neobhajena: 'Not Completed'
       }
     },
     createInternship: {
@@ -1068,12 +1070,14 @@ const messages = {
       footer: '© 2025 Odborná prax CRM',
       status: {
         vytvorena: 'Vytvorená',
+        potvrdena: 'Potvrdená',
         schvalena: 'Schválená',
         obhajena: 'Obhájená',
         ukoncena: 'Ukončená',
         prebieha: 'Prebieha',
         zamietnuta: 'Zamietnutá',
-        zrusena: 'Zrušená'
+        zrusena: 'Zrušená',
+        neobhajena: 'Neobhájená'
       }
     },
     createInternship: {
