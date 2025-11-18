@@ -208,6 +208,23 @@
         </div>
       </div>
     </div>
+
+    <!-- Confirmation Dialog -->
+    <ConfirmationDialog
+      :is-visible="showDeleteConfirmation"
+      :title="$t('confirmationDialog.deleteTitle')"
+      :message="$t('confirmationDialog.deleteMessage')"
+      :confirm-text="$t('confirmationDialog.confirm')"
+      :cancel-text="$t('confirmationDialog.cancel')"
+      type="danger"
+      :requires-text-confirmation="true"
+      confirmation-text-required="delete"
+      :text-confirmation-label="$t('confirmationDialog.deleteTextLabel')"
+      :text-confirmation-placeholder="$t('confirmationDialog.deleteTextPlaceholder')"
+      :text-confirmation-hint="$t('confirmationDialog.deleteTextHint')"
+      @confirm="confirmDeleteGarant"
+      @cancel="cancelDeleteGarant"
+    />
   </div>
 </template>
 
@@ -215,6 +232,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useI18n } from 'vue-i18n'
+import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 
 const { t } = useI18n()
 
@@ -240,6 +258,10 @@ const isLoadingGarants = ref(false)
 
 // Editing state
 const editingGarant = ref(null)
+
+// Delete confirmation state
+const showDeleteConfirmation = ref(false)
+const garantToDelete = ref(null)
 
 // Validate form
 const validateForm = () => {
@@ -429,13 +451,16 @@ const handleEditGarant = (garant) => {
 }
 
 // Handle delete garant
-const handleDeleteGarant = async (garantId) => {
-  if (!confirm(t('manageGarants.deleteConfirm'))) {
-    return
-  }
+const handleDeleteGarant = (garantId) => {
+  garantToDelete.value = garantId
+  showDeleteConfirmation.value = true
+}
+
+const confirmDeleteGarant = async () => {
+  if (!garantToDelete.value) return
 
   try {
-    const response = await fetch(`/api/garants/${garantId}`, {
+    const response = await fetch(`/api/garants/${garantToDelete.value}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authStore.token}`,
@@ -456,7 +481,15 @@ const handleDeleteGarant = async (garantId) => {
   } catch (error) {
     console.error('Error deleting garant:', error)
     alert(error.message || t('manageGarants.deleteError'))
+  } finally {
+    showDeleteConfirmation.value = false
+    garantToDelete.value = null
   }
+}
+
+const cancelDeleteGarant = () => {
+  showDeleteConfirmation.value = false
+  garantToDelete.value = null
 }
 
 // Format date
