@@ -3,7 +3,6 @@ import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import StudentDocumentView from '../views/StudentDocumentView.vue'
-import CompanyDashboardView from '../views/CompanyDashboardView.vue'
 const GarantDocumentsView = () => import('../views/GarantDocumentsView.vue')
 // Importy sú v poriadku, môžeme ich nechať
 const LandingView = () => import('../views/LandingView.vue')
@@ -89,7 +88,7 @@ const router = createRouter({
     {
       path: '/company-dashboard',
       name: 'company-dashboard',
-      component: CompanyDashboardView,
+      component: () => import('../views/CompanyDashboardView.vue'),
       meta: { 
         requiresAuth: true,
         roles: ['COMPANY']

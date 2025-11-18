@@ -49,7 +49,7 @@
         <tr>
             <td style="border: 1px solid #ffeaa7;">
                 <strong>Technické problémy alebo expirovaný odkaz:</strong><br>
-                V prípade technických problémov alebo expirácie odkazov, kontaktujte svojho garanta: <strong>{{ $internship->garant->user->email ?? 'garant@school.sk' }}</strong>
+                V prípade technických problémov alebo expirácie odkazov, kontaktujte svojho garanta: <strong>{{ $garantEmail ?? 'garant@school.sk' }}</strong>
             </td>
         </tr>
     </table>
@@ -102,7 +102,7 @@
         <tr>
             <td style="border: 1px solid #ffeaa7;">
                 <strong>Technical issues or expired link:</strong><br>
-                For technical issues or expired links, contact the student's supervisor: <strong>{{ $internship->garant->user->email ?? 'supervisor@school.sk' }}</strong>
+                For technical issues or expired links, contact the student's supervisor: <strong>{{ $garantEmail ?? 'supervisor@school.sk' }}</strong>
             </td>
         </tr>
     </table>

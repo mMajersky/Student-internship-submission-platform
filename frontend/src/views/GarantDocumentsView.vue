@@ -1,17 +1,17 @@
 <template>
   <div class="container py-4">
-    <h5 class="mb-3">Dokumenty praxe</h5>
+    <h5 class="mb-3">{{ $t('garantDocuments.title') }}</h5>
 
     <div class="card p-3">
       <div class="table-responsive">
         <table class="table table-sm align-middle">
           <thead>
             <tr>
-              <th>Názov</th>
-              <th>Typ</th>
-              <th>Stav</th>
-              <th>Vytvorené</th>
-              <th class="text-end">Akcie</th>
+              <th>{{ $t('garantDocuments.tableHeaders.name') }}</th>
+              <th>{{ $t('garantDocuments.tableHeaders.type') }}</th>
+              <th>{{ $t('garantDocuments.tableHeaders.status') }}</th>
+              <th>{{ $t('garantDocuments.tableHeaders.created') }}</th>
+              <th class="text-end">{{ $t('garantDocuments.tableHeaders.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -22,12 +22,12 @@
               <td>{{ formatDate(doc.created_at) }}</td>
               <td class="text-end">
                 <button @click="download(doc)" class="btn btn-sm btn-outline-primary">
-                  Stiahnuť
+                  {{ $t('garantDocuments.download') }}
                 </button>
               </td>
             </tr>
             <tr v-if="!documents.length">
-              <td colspan="5" class="text-center text-muted py-4">Žiadne dokumenty</td>
+              <td colspan="5" class="text-center text-muted py-4">{{ $t('garantDocuments.noDocuments') }}</td>
             </tr>
           </tbody>
         </table>
@@ -40,6 +40,9 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -58,7 +61,7 @@ const load = async () => {
     headers: { Authorization: `Bearer ${authStore.token}` }
   })
   const data = await resp.json()
-  if (!resp.ok) throw new Error(data.message || 'Chyba načítania dokumentov')
+  if (!resp.ok) throw new Error(data.message || t('garantDocuments.loadError'))
   documents.value = data.data || []
 }
 
@@ -82,7 +85,3 @@ const download = async (doc) => {
 
 onMounted(load)
 </script>
-
-
-
-

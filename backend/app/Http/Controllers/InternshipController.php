@@ -7,17 +7,19 @@ use App\Models\Student;
 use App\Models\Company;
 use App\Models\Garant;
 use App\Models\Notification;
+use App\Models\User;
 use App\Mail\InternshipCreatedNotification;
+use App\Mail\InternshipCreatedForGarant;
+use App\Mail\InternshipStatusChanged;
 use App\Services\EmailService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
-class InternshipController extends BaseApiController
+class InternshipController extends Controller
 {
     /**
      * Store a newly created internship in storage (admin/garant only).
@@ -98,13 +100,15 @@ class InternshipController extends BaseApiController
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send notification to company if created with "potvrdená" status
-            if ($validated['status'] === Internship::STATUS_POTVRDENA && $internship->company && $internship->company->user) {
+            // Send email to company with approve/reject buttons ONLY when created with "potvrdená" status (garant confirms)
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
+            // This is the moment when company needs to confirm/reject
+            if ($validated['status'] === Internship::STATUS_POTVRDENA && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
 
-                $data = [
+                $emailData = [
                     'studentName' => $internship->student->name . ' ' . $internship->student->surname,
                     'studentEmail' => $internship->student->student_email,
                     'studentPhone' => $internship->student->phone_number ?? 'N/A',
@@ -115,18 +119,22 @@ class InternshipController extends BaseApiController
                     'status' => $internship->status,
                     'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
                     'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                    'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    'showButtons' => true, // Show buttons for company emails
                 ];
 
-                // Create notification and email
-                NotificationService::createAndNotify(
+                // Always create notification
+                NotificationService::create(
                     $internship->company->user->id,
                     Notification::TYPE_APPROVAL_REQUEST,
-                    'Nová žiadosť o stáž',
-                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' žiada o potvrdenie stáže.',
-                    ['internship_id' => $internship->id],
-                    InternshipCreatedNotification::class,
-                    $data
+                    'Žiadosť o potvrdenie stáže',
+                    'Garant schválil prax študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Prosíme o potvrdenie stáže.',
+                    ['internship_id' => $internship->id]
                 );
+
+                // Always send email to company when garant approves (regardless of email_notifications setting)
+                // Company needs to approve/reject via email buttons
+                EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $emailData);
             }
 
 
@@ -167,7 +175,7 @@ class InternshipController extends BaseApiController
 
         } catch (\Exception $e) {
             // Log the error for debugging
-            Log::error('Error creating internship: ' . $e->getMessage());
+            \Log::error('Error creating internship: ' . $e->getMessage());
 
             // Return error response
             return response()->json([
@@ -184,46 +192,56 @@ class InternshipController extends BaseApiController
      */
     public function index()
     {
-        return $this->executeWithExceptionHandling(function () {
+        try {
             // Get all internships for admin/garant with document count
             $internships = Internship::with(['student', 'company', 'garant'])
                 ->withCount('documents')
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return $this->respondWithCollection($internships, function ($internship) {
-                return [
-                    'id' => $internship->id,
-                    'student_id' => $internship->student_id,
-                    'student' => $internship->student ? [
-                        'id' => $internship->student->id,
-                        'name' => $internship->student->name,
-                        'surname' => $internship->student->surname,
-                        'student_email' => $internship->student->student_email,
-                    ] : null,
-                    'company_id' => $internship->company_id,
-                    'company' => $internship->company ? [
-                        'id' => $internship->company->id,
-                        'name' => $internship->company->name,
-                    ] : null,
-                    'garant_id' => $internship->garant_id,
-                    'garant' => $internship->garant ? [
-                        'id' => $internship->garant->id,
-                        'name' => $internship->garant->name ?? null,
-                        'surname' => $internship->garant->surname ?? null,
-                    ] : null,
-                    'status' => $internship->status,
-                    'academy_year' => $internship->academy_year,
-                    'start_date' => $internship->start_date?->format('Y-m-d'),
-                    'end_date' => $internship->end_date?->format('Y-m-d'),
-                    'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
-                    'approved_date' => $internship->approved_date?->format('Y-m-d'),
-                    'documents_count' => $internship->documents_count,
-                    'created_at' => $internship->created_at?->toIso8601String(),
-                    'updated_at' => $internship->updated_at?->toIso8601String(),
-                ];
-            });
-        }, 'fetching internships');
+            return response()->json([
+                'data' => $internships->map(function ($internship) {
+                    return [
+                        'id' => $internship->id,
+                        'student_id' => $internship->student_id,
+                        'student' => $internship->student ? [
+                            'id' => $internship->student->id,
+                            'name' => $internship->student->name,
+                            'surname' => $internship->student->surname,
+                            'student_email' => $internship->student->student_email,
+                        ] : null,
+                        'company_id' => $internship->company_id,
+                        'company' => $internship->company ? [
+                            'id' => $internship->company->id,
+                            'name' => $internship->company->name,
+                        ] : null,
+                        'garant_id' => $internship->garant_id,
+                        'garant' => $internship->garant ? [
+                            'id' => $internship->garant->id,
+                            'name' => $internship->garant->name ?? null,
+                            'surname' => $internship->garant->surname ?? null,
+                        ] : null,
+                        'status' => $internship->status,
+                        'academy_year' => $internship->academy_year,
+                        'start_date' => $internship->start_date?->format('Y-m-d'),
+                        'end_date' => $internship->end_date?->format('Y-m-d'),
+                        'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                        'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                        'documents_count' => $internship->documents_count,
+                        'created_at' => $internship->created_at?->toIso8601String(),
+                        'updated_at' => $internship->updated_at?->toIso8601String(),
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching internships: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching internships.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**
@@ -234,12 +252,12 @@ class InternshipController extends BaseApiController
      */
     public function show($id)
     {
-        return $this->executeWithExceptionHandling(function () use ($id) {
+        try {
             $internship = Internship::with(['student', 'company', 'garant', 'documents'])
                 ->findOrFail($id);
 
-            return $this->respondWithResource($internship, function ($internship) {
-                return [
+            return response()->json([
+                'data' => [
                     'id' => $internship->id,
                     'student_id' => $internship->student_id,
                     'student' => $internship->student ? [
@@ -267,9 +285,21 @@ class InternshipController extends BaseApiController
                     'approved_date' => $internship->approved_date?->format('Y-m-d'),
                     'created_at' => $internship->created_at?->toIso8601String(),
                     'updated_at' => $internship->updated_at?->toIso8601String(),
-                ];
-            });
-        }, 'fetching internship');
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**
@@ -363,13 +393,15 @@ class InternshipController extends BaseApiController
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send notification to company if status changed to "potvrdená"
-            if ($statusChangedToPotvrdena && $internship->company && $internship->company->user) {
+            // Send email to company with approve/reject buttons when garant confirms (changes to "potvrdená")
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
+            // This is the moment when company needs to confirm/reject (after garant confirms)
+            if ($statusChangedToPotvrdena && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
 
-                $data = [
+                $emailData = [
                     'studentName' => $internship->student->name . ' ' . $internship->student->surname,
                     'studentEmail' => $internship->student->student_email,
                     'studentPhone' => $internship->student->phone_number ?? 'N/A',
@@ -380,28 +412,82 @@ class InternshipController extends BaseApiController
                     'status' => $internship->status,
                     'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
                     'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                    'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    'showButtons' => true, // Show buttons for company emails
                 ];
 
-                NotificationService::createAndNotify(
+                // Always create notification
+                NotificationService::create(
                     $internship->company->user->id,
                     Notification::TYPE_APPROVAL_REQUEST,
                     'Žiadosť o potvrdenie stáže',
-                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' žiada o potvrdenie stáže.',
-                    ['internship_id' => $internship->id],
-                    InternshipCreatedNotification::class,
-                    $data
+                    'Garant schválil prax študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Prosíme o potvrdenie stáže.',
+                    ['internship_id' => $internship->id]
                 );
+
+                // Always send email to company when garant approves (regardless of email_notifications setting)
+                // Company needs to approve/reject via email buttons
+                EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $emailData);
             }
 
-            // Notify student about status change
+            // If garant changed status: send emails to student and company (for any status change)
             if ($statusChanged && $internship->student && $internship->student->user) {
-                NotificationService::create(
-                    $internship->student->user->id,
-                    Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
-                    'Stav praxe bol zmenený',
-                    'Stav vašej praxe bol zmenený na: ' . $internship->status,
-                    ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status]
-                );
+                // Prepare email data
+                $emailData = [
+                    'internshipId' => $internship->id,
+                    'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                    'companyName' => $internship->company ? $internship->company->name : 'N/A',
+                    'academyYear' => $internship->academy_year,
+                    'oldStatus' => $oldStatus,
+                    'newStatus' => $internship->status,
+                ];
+
+                // Send email to student (if email notifications enabled)
+                if ($internship->student->user->email_notifications) {
+                    NotificationService::createAndNotify(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Stav praxe bol zmenený',
+                        'Stav vašej praxe bol zmenený garantom. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                } else {
+                    // Create system notification only (no email)
+                    NotificationService::create(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Stav praxe bol zmenený',
+                        'Stav vašej praxe bol zmenený garantom. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status]
+                    );
+                }
+
+                // Send email to company (if exists) - always send on status change, not just when email_notifications enabled
+                // But skip if we already sent the approval request email above (when changing to "potvrdená")
+                if ($internship->company && $internship->company->user && $internship->company->user->email && !$statusChangedToPotvrdena) {
+                    if ($internship->company->user->email_notifications) {
+                        NotificationService::createAndNotify(
+                            $internship->company->user->id,
+                            Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                            'Stav praxe bol zmenený',
+                            'Garant zmenil stav praxe študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                            ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status],
+                            InternshipStatusChanged::class,
+                            $emailData
+                        );
+                    } else {
+                        // Create notification only (no email)
+                        NotificationService::create(
+                            $internship->company->user->id,
+                            Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                            'Stav praxe bol zmenený',
+                            'Garant zmenil stav praxe študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Stav: ' . $oldStatus . ' → ' . $internship->status,
+                            ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $internship->status]
+                        );
+                    }
+                }
             }
 
             // Return success response with updated internship
@@ -443,7 +529,7 @@ class InternshipController extends BaseApiController
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Error updating internship: ' . $e->getMessage());
+            \Log::error('Error updating internship: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while updating the internship.',
@@ -460,9 +546,9 @@ class InternshipController extends BaseApiController
      */
     public function destroy($id)
     {
-        return $this->executeWithExceptionHandling(function () use ($id) {
+        try {
             $internship = Internship::findOrFail($id);
-
+            
             // Store internship data before deletion for response
             $internshipData = [
                 'id' => $internship->id,
@@ -475,8 +561,23 @@ class InternshipController extends BaseApiController
             // Delete the internship
             $internship->delete();
 
-            return $this->successResponse($internshipData, 'Internship deleted successfully.');
-        }, 'deleting internship');
+            return response()->json([
+                'message' => 'Internship deleted successfully.',
+                'data' => $internshipData
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while deleting the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**
@@ -537,7 +638,7 @@ class InternshipController extends BaseApiController
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Error fetching student internships: ' . $e->getMessage());
+            \Log::error('Error fetching student internships: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while fetching internships.',
@@ -573,7 +674,7 @@ class InternshipController extends BaseApiController
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Error confirming internship: ' . $e->getMessage());
+            \Log::error('Error confirming internship: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while confirming the internship.',
@@ -609,7 +710,7 @@ class InternshipController extends BaseApiController
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Error rejecting internship: ' . $e->getMessage());
+            \Log::error('Error rejecting internship: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while rejecting the internship.',
@@ -648,8 +749,9 @@ class InternshipController extends BaseApiController
                 'integer',
                 Rule::exists('garants', 'id')
             ],
+            // Status is not required from student - will be automatically set to "potvrdená"
             'status' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::in(Internship::getStatuses())
@@ -686,7 +788,6 @@ class InternshipController extends BaseApiController
             'company_id.required' => 'The company field is required.',
             'company_id.exists' => 'The selected company does not exist.',
             'garant_id.exists' => 'The selected garant does not exist.',
-            'status.required' => 'The status field is required.',
             'status.in' => 'The status must be one of: ' . implode(', ', Internship::getStatuses()) . '.',
             'academy_year.required' => 'The academy year field is required.',
             'academy_year.regex' => 'The academy year must be in format YYYY/YYYY (e.g., 2024/2025).',
@@ -696,6 +797,9 @@ class InternshipController extends BaseApiController
         try {
             // Add the authenticated student's ID to the validated data
             $validated['student_id'] = $user->student->id;
+            
+            // Automatically set status to "vytvorená" when student creates internship
+            $validated['status'] = Internship::STATUS_VYTVORENA;
 
             // Create the internship
             $internship = Internship::create($validated);
@@ -703,27 +807,45 @@ class InternshipController extends BaseApiController
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
+            // NO EMAIL TO COMPANY when student creates internship
+            // Email with approve/reject buttons will be sent only when garant approves it
+
+            // Prepare email data for garant notification (using new internship_created_for_garant.blade.php template)
+            $emailData = [
+                'internshipId' => $internship->id,
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'companyName' => $internship->company ? $internship->company->name : 'N/A',
+                'academyYear' => $internship->academy_year,
+                'startDate' => $internship->start_date?->format('Y-m-d'),
+                'endDate' => $internship->end_date?->format('Y-m-d'),
+                'status' => $internship->status,
+            ];
+
             // Notify garant(s) about new internship created by student
             if ($internship->garant && $internship->garant->user) {
                 // If garant is already assigned, notify only them
-                NotificationService::create(
+                NotificationService::createAndNotify(
                     $internship->garant->user->id,
                     Notification::TYPE_INTERNSHIP_CREATED,
                     'Študent vytvoril novú prax',
                     'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax vo firme ' . $internship->company->name . '.',
-                    ['internship_id' => $internship->id]
+                    ['internship_id' => $internship->id],
+                    InternshipCreatedForGarant::class,
+                    $emailData
                 );
             } else {
                 // If no garant assigned, notify ALL garants about new internship
                 $allGarants = Garant::with('user')->whereNotNull('user_id')->get();
                 foreach ($allGarants as $garant) {
                     if ($garant->user) {
-                        NotificationService::create(
+                        NotificationService::createAndNotify(
                             $garant->user->id,
                             Notification::TYPE_INTERNSHIP_CREATED,
                             'Nová prax čaká na priradenie',
                             'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' vytvoril novú prax. Prax ešte nemá priradeného garanta.',
-                            ['internship_id' => $internship->id]
+                            ['internship_id' => $internship->id],
+                            InternshipCreatedForGarant::class,
+                            $emailData
                         );
                     }
                 }
@@ -765,7 +887,7 @@ class InternshipController extends BaseApiController
 
         } catch (\Exception $e) {
             // Log the error for debugging
-            Log::error('Error creating student internship: ' . $e->getMessage());
+            \Log::error('Error creating student internship: ' . $e->getMessage());
 
             // Return error response
             return response()->json([
@@ -801,9 +923,11 @@ class InternshipController extends BaseApiController
                 ], 400);
             }
 
-            $internship = Internship::findOrFail($tokenData['internship_id']);
+            $internship = Internship::with(['student.user', 'company.user', 'garant.user'])->findOrFail($tokenData['internship_id']);
 
-            // Check if internship is still in "Potvrdená" status
+            // Check if internship is still in "potvrdená" status (pending company action)
+            // Company can only confirm/reject after garant has confirmed (status "potvrdená")
+            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
             if ($internship->status !== Internship::STATUS_POTVRDENA) {
                 return response()->json([
                     'message' => 'This internship has already been processed and is no longer available for action.',
@@ -812,12 +936,74 @@ class InternshipController extends BaseApiController
                 ], 400);
             }
 
+            // Store old status before update
+            $oldStatus = $internship->status;
+
             // Update status based on action
+            // After garant confirmed (status "potvrdená"), company confirms → "schválená" (Approved)
+            // Company rejects → "zamietnutá"
             $newStatus = $tokenData['action'] === 'confirm'
-                ? Internship::STATUS_SCHVALENA // Company confirmed/approved
+                ? Internship::STATUS_SCHVALENA // Company confirmed - status "schválená" (Approved)
                 : Internship::STATUS_ZAMIETNUTA; // Company rejected
 
             $internship->update(['status' => $newStatus]);
+
+            // Prepare email data
+            $emailData = [
+                'internshipId' => $internship->id,
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'companyName' => $internship->company->name,
+                'academyYear' => $internship->academy_year,
+                'oldStatus' => $oldStatus,
+                'newStatus' => $newStatus,
+            ];
+
+            // If company approved (confirmed): send email to student and garant
+            // Respects email_notifications setting
+            if ($tokenData['action'] === 'confirm') {
+                // Send email to student (respects email_notifications setting)
+                if ($internship->student && $internship->student->user) {
+                    NotificationService::createAndNotify(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Firma schválila vašu prax',
+                        'Firma ' . $internship->company->name . ' schválila vašu prax. Stav: ' . $oldStatus . ' → ' . $newStatus,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                }
+
+                // Send email to ALL garants (users with role 'garant') - respects email_notifications setting
+                $allGarants = User::where('role', 'garant')->whereNotNull('email')->get();
+                
+                foreach ($allGarants as $garantUser) {
+                    NotificationService::createAndNotify(
+                        $garantUser->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Firma schválila prax',
+                        'Firma ' . $internship->company->name . ' schválila prax študenta ' . $internship->student->name . ' ' . $internship->student->surname . '. Stav: ' . $oldStatus . ' → ' . $newStatus,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                }
+            }
+
+            // If company rejected: send email only to student - respects email_notifications setting
+            if ($tokenData['action'] === 'reject') {
+                if ($internship->student && $internship->student->user) {
+                    NotificationService::createAndNotify(
+                        $internship->student->user->id,
+                        Notification::TYPE_INTERNSHIP_STATUS_CHANGED,
+                        'Firma zamietla vašu prax',
+                        'Firma ' . $internship->company->name . ' zamietla vašu prax. Stav: ' . $oldStatus . ' → ' . $newStatus,
+                        ['internship_id' => $internship->id, 'old_status' => $oldStatus, 'new_status' => $newStatus],
+                        InternshipStatusChanged::class,
+                        $emailData
+                    );
+                }
+            }
 
             return response()->json([
                 'message' => 'Internship ' . ($tokenData['action'] === 'confirm' ? 'confirmed' : 'rejected') . ' successfully.',
@@ -833,7 +1019,7 @@ class InternshipController extends BaseApiController
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Error processing company action: ' . $e->getMessage());
+            \Log::error('Error processing company action: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while processing the action.',
@@ -900,8 +1086,10 @@ class InternshipController extends BaseApiController
                 'startDate' => $internship->start_date?->format('Y-m-d'),
                 'endDate' => $internship->end_date?->format('Y-m-d'),
                 'status' => $internship->status,
-                'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
-                'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
+                'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
+                'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
+                'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                'showButtons' => true, // Show buttons for company emails
             ];
 
             $emailSent = EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $data);
@@ -922,7 +1110,7 @@ class InternshipController extends BaseApiController
                 'message' => 'Internship not found.'
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Error resending approval email: ' . $e->getMessage());
+            \Log::error('Error resending approval email: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'An error occurred while resending the email.',

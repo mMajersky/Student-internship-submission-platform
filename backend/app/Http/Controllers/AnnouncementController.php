@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class AnnouncementController extends Controller
 {
     public function published()
     {
-        $announcement = Announcement::published()
-            ->orderBy('updated_at', 'desc')
-            ->first();
+        $announcement = Cache::tags(['announcements'])->remember('published', now()->addDay(), function() {
+            return Announcement::published()
+                ->orderBy('updated_at', 'desc')
+                ->first();
+        });
 
         return response()->json([
             'content_sanitized' => $announcement?->content_sanitized ?? null,
@@ -27,7 +30,9 @@ class AnnouncementController extends Controller
     {
         if ($request->isMethod('GET')) {
             // Get the current announcement (published or unpublished for editing)
-            $announcement = Announcement::orderBy('updated_at', 'desc')->first();
+            $announcement = Cache::tags(['announcements'])->remember('single', now()->addDay(), function() {
+                return Announcement::orderBy('updated_at', 'desc')->first();
+            });
 
             return response()->json([
                 'content' => $announcement?->content ?? '',
@@ -64,6 +69,9 @@ class AnnouncementController extends Controller
                 ]);
             }
 
+            // Clear announcement caches immediately after update
+            Cache::tags(['announcements'])->flush();
+
             return response()->json([
                 'content' => $announcement->content,
                 'content_sanitized' => $announcement->content_sanitized,
@@ -73,5 +81,3 @@ class AnnouncementController extends Controller
         }
     }
 }
-
-

@@ -4,7 +4,7 @@
     <div class="row">
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2>Dashboard študenta</h2>
+          <h2>{{ $t('studentDashboard.title') }}</h2>
           <span class="badge bg-primary fs-6">{{ authStore.userRole }}</span>
         </div>
       </div>
@@ -16,12 +16,12 @@
           <div class="card-body">
             <h5 class="card-title">
               <i class="bi bi-briefcase me-2"></i>
-              Moje praxe
+              {{ $t('studentDashboard.myInternships') }}
             </h5>
-            <p class="card-text">Prehľad vašich praxí a aplikácií</p>
+            <p class="card-text">{{ $t('studentDashboard.myInternshipsDesc') }}</p>
             <button @click="handleZobrazitPraxe" class="btn btn-primary">
               <i class="bi bi-eye me-2"></i>
-              Zobraziť praxe
+              {{ $t('studentDashboard.viewInternships') }}
             </button>
           </div>
         </div>
@@ -32,12 +32,12 @@
           <div class="card-body">
             <h5 class="card-title">
               <i class="bi bi-file-earmark-text me-2"></i>
-              Správy
+              {{ $t('studentDashboard.reports') }}
             </h5>
-            <p class="card-text">Odosielanie a správa správ z praxe</p>
+            <p class="card-text">{{ $t('studentDashboard.reportsDesc') }}</p>
             <button class="btn btn-success" disabled>
               <i class="bi bi-plus me-2"></i>
-              Nová správa
+              {{ $t('studentDashboard.newReport') }}
             </button>
           </div>
         </div>
@@ -48,12 +48,12 @@
           <div class="card-body">
             <h5 class="card-title">
               <i class="bi bi-person-circle me-2"></i>
-              Profil
+              {{ $t('studentDashboard.profile') }}
             </h5>
-            <p class="card-text">Správa vášho profilu a údajov</p>
+            <p class="card-text">{{ $t('studentDashboard.profileDesc') }}</p>
             <button class="btn btn-outline-primary" disabled>
               <i class="bi bi-gear me-2"></i>
-              Upraviť profil
+              {{ $t('studentDashboard.editProfile') }}
             </button>
           </div>
         </div>
@@ -66,14 +66,14 @@
           <div class="card-header">
             <h5 class="card-title mb-0">
               <i class="bi bi-info-circle me-2"></i>
-              Informácie o vašej roli
+              {{ $t('studentDashboard.roleInfo') }}
             </h5>
           </div>
           <div class="card-body">
-            <p><strong>Rola:</strong> {{ authStore.userRole }}</p>
-            <p><strong>Meno:</strong> {{ authStore.userDisplayName }}</p>
-            <p><strong>Email:</strong> {{ authStore.userEmail }}</p>
-            <p><strong>Oprávnenia:</strong></p>
+            <p><strong>{{ $t('studentDashboard.role') }}:</strong> {{ authStore.userRole }}</p>
+            <p><strong>{{ $t('studentDashboard.name') }}:</strong> {{ authStore.userDisplayName }}</p>
+            <p><strong>{{ $t('studentDashboard.email') }}:</strong> {{ authStore.userEmail }}</p>
+            <p><strong>{{ $t('studentDashboard.permissions') }}:</strong></p>
             <ul>
               <li v-for="permission in authStore.userPermissions" :key="permission">
                 {{ permission }}
@@ -89,9 +89,11 @@
 <script setup>
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t } = useI18n()
 
 const handleZobrazitPraxe = () => {
   router.push('/internships')

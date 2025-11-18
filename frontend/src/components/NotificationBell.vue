@@ -20,50 +20,50 @@
       
       <!-- Header -->
       <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-        <h6 class="mb-0 fw-semibold">Notifikácie</h6>
-        <button 
+        <h6 class="mb-0 fw-semibold">{{ $t('notifications.title') }}</h6>
+        <button
           v-if="unreadCount > 0"
-          @click="markAllAsRead" 
+          @click="markAllAsRead"
           class="btn btn-sm btn-link text-decoration-none p-0">
-          Označiť všetko
+          {{ $t('notifications.markAllAsRead') }}
         </button>
       </div>
 
       <!-- Notifications List -->
       <div v-if="loading" class="p-4 text-center">
         <div class="spinner-border spinner-border-sm" role="status">
-          <span class="visually-hidden">Načítavam...</span>
+          <span class="visually-hidden">{{ $t('notifications.loading') }}</span>
         </div>
       </div>
 
       <div v-else-if="notifications.length === 0" class="p-4 text-center text-muted">
         <i class="bi bi-bell-slash fs-3 d-block mb-2"></i>
-        <small>Žiadne notifikácie</small>
+        <small>{{ $t('notifications.noNotifications') }}</small>
       </div>
 
       <div v-else>
-        <div 
-          v-for="notification in notifications" 
+        <div
+          v-for="notification in notifications"
           :key="notification.id"
           class="notification-item p-3 border-bottom"
           :class="{ 'bg-light': !notification.is_read }"
           @click="handleNotificationClick(notification)">
-          
+
           <div class="d-flex justify-content-between align-items-start">
             <div class="flex-grow-1">
-              <strong class="d-block mb-1">{{ notification.title }}</strong>
-              <small class="text-muted d-block mb-2">{{ notification.message }}</small>
+              <strong class="d-block mb-1">{{ getTranslatedTitle(notification) }}</strong>
+              <small class="text-muted d-block mb-2">{{ getTranslatedMessage(notification) }}</small>
               <small class="text-muted">
                 <i class="bi bi-clock me-1"></i>
                 {{ formatDate(notification.created_at) }}
               </small>
             </div>
             <div>
-              <span v-if="!notification.is_read" class="badge bg-primary">Nové</span>
-              <button 
+              <span v-if="!notification.is_read" class="badge bg-primary">{{ $t('notifications.new') }}</span>
+              <button
                 @click.stop="deleteNotification(notification.id)"
                 class="btn btn-sm btn-link text-danger p-0 ms-2"
-                title="Odstrániť">
+                :title="$t('notifications.delete')">
                 <i class="bi bi-x-lg"></i>
               </button>
             </div>
@@ -74,7 +74,7 @@
       <!-- Footer -->
       <div class="p-2 border-top text-center">
         <router-link to="/notifications" class="btn btn-sm btn-link text-decoration-none" @click="showDropdown = false">
-          Zobraziť všetky notifikácie
+          {{ $t('notifications.viewAll') }}
         </router-link>
       </div>
     </div>
@@ -92,6 +92,9 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -217,6 +220,65 @@ const deleteNotification = async (id) => {
   }
 };
 
+const getTranslatedTitle = (notification) => {
+  switch (notification.type) {
+    case 'comment_added':
+      return t('notifications.commentAdded.title');
+    case 'approval_request':
+      return t('notifications.approvalRequest.title');
+    case 'internship_status_changed':
+      return t('notifications.internshipStatusChanged.title');
+    case 'internship_created':
+      return t('notifications.internshipCreated.title');
+    case 'document_uploaded':
+      return t('notifications.documentUploaded.title');
+    default:
+      return notification.title; // Fallback to original title
+  }
+};
+
+const getTranslatedMessage = (notification) => {
+  switch (notification.type) {
+    case 'comment_added':
+      // Extract garant name from the original message
+      const garantNameMatch = notification.message.match(/Garant (.+?) pridal/);
+      const garantName = garantNameMatch ? garantNameMatch[1] : 'Unknown';
+      return t('notifications.commentAdded.message', { garantName });
+
+    case 'approval_request':
+      // Extract student name from the original message
+      const studentNameMatch = notification.message.match(/Študent (.+?) žiada/);
+      const studentName = studentNameMatch ? studentNameMatch[1] : 'Unknown';
+      return t('notifications.approvalRequest.message', { studentName });
+
+    case 'internship_status_changed':
+      // Use the status from notification data
+      const status = notification.data?.new_status || 'Unknown';
+      return t('notifications.internshipStatusChanged.message', { status });
+
+    case 'internship_created':
+      // Extract student name and company name from the original message
+      const createdMatch = notification.message.match(/Študent (.+?) vytvoril novú prax(?: vo firme (.+?))?\./);
+      const createdStudentName = createdMatch ? createdMatch[1] : 'Unknown';
+      const companyName = createdMatch && createdMatch[2] ? createdMatch[2] : '';
+
+      if (companyName) {
+        return t('notifications.internshipCreated.message', { studentName: createdStudentName, companyName });
+      } else {
+        return t('notifications.internshipCreatedUnassigned.message', { studentName: createdStudentName });
+      }
+
+    case 'document_uploaded':
+      // Extract student name from the original message
+      const docStudentMatch = notification.message.match(/Študent (.+?) nahral/);
+      const docStudentName = docStudentMatch ? docStudentMatch[1] : 'Unknown';
+      return t('notifications.documentUploaded.message', { studentName: docStudentName });
+
+    default:
+      return notification.message; // Fallback to original message
+  }
+};
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -225,11 +287,11 @@ const formatDate = (dateString) => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'Práve teraz';
-  if (diffMins < 60) return `Pred ${diffMins} min`;
-  if (diffHours < 24) return `Pred ${diffHours} hod`;
-  if (diffDays < 7) return `Pred ${diffDays} dňami`;
-  
+  if (diffMins < 1) return t('notifications.justNow');
+  if (diffMins < 60) return `${t('common.previous')} ${diffMins} ${t('notifications.minutesAgo')}`;
+  if (diffHours < 24) return `${t('common.previous')} ${diffHours} ${t('notifications.hoursAgo')}`;
+  if (diffDays < 7) return `${t('common.previous')} ${diffDays} ${t('notifications.daysAgo')}`;
+
   return date.toLocaleDateString('sk-SK');
 };
 
@@ -268,4 +330,3 @@ onUnmounted(() => {
   background-color: transparent;
 }
 </style>
-

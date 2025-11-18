@@ -13,12 +13,12 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        // Skontroluj, či je používateľ prihlásený
-        if (!auth()->check()) {
+        // Check if user is authenticated with API guard
+        if (!auth('api')->check()) {
             return response()->json(['error' => 'Unauthenticated'], 401);
         }
 
-        $user = auth()->user();
+        $user = auth('api')->user();
 
         // Role sa teraz berie priamo ako string z DB
         $userRole = $user->role ?? null;

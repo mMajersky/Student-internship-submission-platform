@@ -35,22 +35,6 @@ class Announcement extends Model
     {
         return $query->where('is_published', true);
     }
-
-    /**
-     * Získa používateľa, ktorý vytvoril announcement
-     */
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    /**
-     * Získa používateľa, ktorý naposledy aktualizoval announcement
-     */
-    public function updater()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
 }
 
 
