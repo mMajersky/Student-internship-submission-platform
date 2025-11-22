@@ -148,6 +148,7 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
 
     // Internship email management
     Route::post('/internships/{id}/resend-approval-email', [InternshipController::class, 'resendApprovalEmail']);
+    Route::post('/internships/{id}/send-evaluation-email', [InternshipController::class, 'sendEvaluationEmail']);
     
     // Comment routes for internships (Garant only can create/update/delete)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
@@ -180,7 +181,9 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     
     // Internship management for students - view their own and create new
     Route::get('/internships', [InternshipController::class, 'studentIndex']);
+    Route::get('/internships/{id}', [InternshipController::class, 'studentShow']);
     Route::post('/internships', [InternshipController::class, 'studentStore']);
+    Route::post('/internships/{id}/send-report-to-company', [InternshipController::class, 'sendReportToCompany']);
     
     // Students can view comments on their internships (read-only)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
@@ -193,6 +196,10 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     Route::get('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'downloadSignedAgreement']);
     Route::delete('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'deleteSignedAgreement']);
     Route::get('/internships/{internshipId}/documents/agreement-generated', [StudentDocumentController::class, 'downloadGeneratedAgreement']);
+    
+    // Report scan documents
+    Route::get('/internships/{internshipId}/documents/report-scan/meta', [StudentDocumentController::class, 'getReportScanMeta']);
+    Route::post('/internships/{internshipId}/documents/report-scan', [StudentDocumentController::class, 'uploadReportScan']);
 });
 
 // Company routes
