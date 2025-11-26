@@ -79,6 +79,7 @@ class AuthController extends Controller
         // Additional validation rules for companies
         if ($request->input('role') === 'company') {
             $rules = array_merge($rules, [
+                'surname' => 'required|string|max:100',
                 'company_name' => 'required|string|max:255',
                 'state' => 'required|string|max:100',
                 'region' => 'required|string|max:100',
@@ -86,6 +87,8 @@ class AuthController extends Controller
                 'postal_code' => 'required|string|max:20',
                 'street' => 'required|string|max:100',
                 'house_number' => 'required|string|max:20',
+                'phone_number' => 'nullable|string|max:50',
+                'position' => 'nullable|string|max:100',
             ]);
         }
 
@@ -108,6 +111,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $validated['name'],
+            'surname' => $validated['surname'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
@@ -135,7 +139,7 @@ class AuthController extends Controller
 
         // Ak ide o firmu
         if ($user->role === 'company') {
-            \App\Models\Company::create([
+            $company = \App\Models\Company::create([
                 'user_id' => $user->id,
                 'name' => $request->input('company_name'),
                 'state' => $request->input('state'),
@@ -144,6 +148,18 @@ class AuthController extends Controller
                 'postal_code' => $request->input('postal_code'),
                 'street' => $request->input('street'),
                 'house_number' => $request->input('house_number'),
+                'status' => \App\Models\Company::STATUS_PENDING,
+                'request_source' => \App\Models\Company::SOURCE_PUBLIC,
+            ]);
+
+            // Create contact person - the user registering the company
+            \App\Models\ContactPerson::create([
+                'name' => $request->input('name'),
+                'surname' => $request->input('surname'),
+                'email' => $request->input('email'),
+                'phone_number' => $request->input('phone_number'),
+                'position' => $request->input('position'),
+                'company_id' => $company->id,
             ]);
         }
 
