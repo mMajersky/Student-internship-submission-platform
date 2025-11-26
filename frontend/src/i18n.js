@@ -523,6 +523,8 @@ const messages = {
       contactPersonEmailPlaceholder: 'contact@company.com',
       contactPersonPhone: 'Phone',
       contactPersonPhonePlaceholder: '+421 900 123 456',
+      contactPersonPosition: 'Position',
+      contactPersonPositionPlaceholder: 'e.g. HR Manager',
       cancel: 'Cancel',
       submitting: 'Submitting...',
       submitRequest: 'Submit Request',
@@ -541,13 +543,13 @@ const messages = {
       filter: {
         label: 'Filter:',
         pending: 'Pending',
-        approved: 'Approved',
-        rejected: 'Rejected',
+        accepted: 'Accepted',
+        declined: 'Declined',
         all: 'All',
         titles: {
           pending: 'Pending Requests',
-          approved: 'Approved Requests',
-          rejected: 'Rejected Requests',
+          accepted: 'Accepted Requests',
+          declined: 'Declined Requests',
           all: 'All Requests',
           default: 'Requests'
         }
@@ -598,6 +600,7 @@ const messages = {
           contactName: 'Name:',
           contactEmail: 'Email:',
           contactPhone: 'Phone:',
+          contactPosition: 'Position:',
           requestSource: 'Request Source:',
           requestedBy: 'Requested By:',
           createdAt: 'Date Created:',
@@ -612,8 +615,8 @@ const messages = {
         approve: 'Are you sure you want to approve this request? The company will be added to the system.'
       },
       alert: {
-        approved: 'Request has been approved! Company "{name}" has been added to the system.',
-        rejected: 'Request has been rejected.'
+        accepted: 'Request has been accepted! Company "{name}" has been added to the system.',
+        declined: 'Request has been declined.'
       },
       prompt: {
         rejectionReason: 'Enter the reason for rejecting the request:'
@@ -627,10 +630,12 @@ const messages = {
       },
       status: {
         pending: 'Pending',
-        approved: 'Approved',
-        rejected: 'Rejected'
+        accepted: 'Accepted',
+        declined: 'Declined'
       },
-      noAddress: 'Address not provided'
+      noAddress: 'Address not provided',
+      unknownCompany: 'Unknown company',
+      noContactPerson: 'No contact details provided'
     },
     aboutInternship: {
       title: 'What is Professional Practice?',
@@ -1336,6 +1341,8 @@ const messages = {
       contactPersonEmailPlaceholder: 'kontakt@firma.sk',
       contactPersonPhone: 'Telefón',
       contactPersonPhonePlaceholder: '+421 900 123 456',
+      contactPersonPosition: 'Pozícia',
+      contactPersonPositionPlaceholder: 'napr. HR manažér',
       cancel: 'Zrušiť',
       submitting: 'Odosiela sa...',
       submitRequest: 'Odoslať žiadosť',
@@ -1354,13 +1361,13 @@ const messages = {
       filter: {
         label: 'Filter:',
         pending: 'Čakajúce',
-        approved: 'Schválené',
-        rejected: 'Zamietnuté',
+        accepted: 'Schválené',
+        declined: 'Zamietnuté',
         all: 'Všetky',
         titles: {
           pending: 'Čakajúce žiadosti',
-          approved: 'Schválené žiadosti',
-          rejected: 'Zamietnuté žiadosti',
+          accepted: 'Schválené žiadosti',
+          declined: 'Zamietnuté žiadosti',
           all: 'Všetky žiadosti',
           default: 'Žiadosti'
         }
@@ -1411,6 +1418,7 @@ const messages = {
           contactName: 'Meno:',
           contactEmail: 'Email:',
           contactPhone: 'Telefón:',
+          contactPosition: 'Pozícia:',
           requestSource: 'Zdroj žiadosti:',
           requestedBy: 'Požiadal:',
           createdAt: 'Dátum vytvorenia:',
@@ -1425,8 +1433,8 @@ const messages = {
         approve: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.'
       },
       alert: {
-        approved: 'Žiadosť bola schválená! Firma "{name}" bola pridaná do systému.',
-        rejected: 'Žiadosť bola zamietnutá.'
+        accepted: 'Žiadosť bola schválená! Firma "{name}" bola pridaná do systému.',
+        declined: 'Žiadosť bola zamietnutá.'
       },
       prompt: {
         rejectionReason: 'Zadajte dôvod zamietnutia žiadosti:'
@@ -1440,10 +1448,12 @@ const messages = {
       },
       status: {
         pending: 'Čaká',
-        approved: 'Schválené',
-        rejected: 'Zamietnuté'
+        accepted: 'Schválené',
+        declined: 'Zamietnuté'
       },
-      noAddress: 'Adresa neuvedená'
+      noAddress: 'Adresa neuvedená',
+      unknownCompany: 'Neznáma firma',
+      noContactPerson: 'Kontaktné údaje neboli poskytnuté'
     },
     studentDocuments: {
       title: 'Odborná prax',
