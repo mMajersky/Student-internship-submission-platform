@@ -14,8 +14,8 @@
             style="width: auto; min-width: 180px;"
           >
             <option value="pending">{{ t('companyRequests.filter.pending') }} <span v-if="stats.pending > 0">({{ stats.pending }})</span></option>
-            <option value="approved">{{ t('companyRequests.filter.approved') }} <span v-if="stats.approved > 0">({{ stats.approved }})</span></option>
-            <option value="rejected">{{ t('companyRequests.filter.rejected') }} <span v-if="stats.rejected > 0">({{ stats.rejected }})</span></option>
+            <option value="accepted">{{ t('companyRequests.filter.accepted') }} <span v-if="stats.accepted > 0">({{ stats.accepted }})</span></option>
+            <option value="declined">{{ t('companyRequests.filter.declined') }} <span v-if="stats.declined > 0">({{ stats.declined }})</span></option>
             <option value="all">{{ t('companyRequests.filter.all') }}</option>
           </select>
         </div>
@@ -71,14 +71,17 @@
             <tbody>
               <tr v-for="request in filteredRequests" :key="request.id">
                 <td>
-                  <strong>{{ request.company_name }}</strong>
+                  <strong>{{ request.name }}</strong>
                   <br>
                   <small class="text-muted">{{ formatAddress(request) }}</small>
                 </td>
                 <td>
-                  {{ request.contact_person_name }} {{ request.contact_person_surname }}
-                  <br>
-                  <small class="text-muted">{{ request.contact_person_email }}</small>
+                  <span v-if="request.contact_person">
+                    {{ request.contact_person.name }} {{ request.contact_person.surname }}
+                    <br>
+                    <small class="text-muted">{{ request.contact_person.email || '-' }}</small>
+                  </span>
+                  <span v-else class="text-muted">{{ t('companyRequests.noContactPerson') }}</span>
                 </td>
                 <td>
                   <span
@@ -164,7 +167,7 @@
                 <div class="row g-3">
                   <div class="col-md-12">
                     <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.companyName') }}</label>
-                    <p class="mb-0">{{ selectedRequest.company_name }}</p>
+                    <p class="mb-0">{{ selectedRequest.name }}</p>
                   </div>
                   <div class="col-md-4">
                     <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.state') }}</label>
@@ -204,17 +207,18 @@
                 <div class="row g-3">
                   <div class="col-md-12">
                     <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.contactName') }}</label>
-                    <p class="mb-0">{{ selectedRequest.contact_person_name }} {{ selectedRequest.contact_person_surname }}</p>
+                    <p class="mb-0">{{ selectedRequest.contact_person?.name }} {{ selectedRequest.contact_person?.surname }}</p>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.contactEmail') }}</label>
                     <p class="mb-0">
-                      <a :href="`mailto:${selectedRequest.contact_person_email}`">{{ selectedRequest.contact_person_email }}</a>
+                      <a v-if="selectedRequest.contact_person?.email" :href="`mailto:${selectedRequest.contact_person.email}`">{{ selectedRequest.contact_person.email }}</a>
+                      <span v-else>-</span>
                     </p>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label text-muted fw-semibold small">{{ t('companyRequests.modal.fields.contactPhone') }}</label>
-                    <p class="mb-0">{{ selectedRequest.contact_person_phone || '-' }}</p>
+                    <p class="mb-0">{{ selectedRequest.contact_person?.phone || '-' }}</p>
                   </div>
                 </div>
               </div>
@@ -320,8 +324,8 @@ const selectedRequest = ref(null)
 // Statistics
 const stats = computed(() => ({
   pending: requests.value.filter(r => r.status === 'pending').length,
-  approved: requests.value.filter(r => r.status === 'approved').length,
-  rejected: requests.value.filter(r => r.status === 'rejected').length
+  accepted: requests.value.filter(r => r.status === 'accepted').length,
+  declined: requests.value.filter(r => r.status === 'declined').length
 }))
 
 const { t } = useI18n()
@@ -348,6 +352,8 @@ const fetchRequests = async () => {
 
     if (response.ok) {
       const data = await response.json()
+      console.log('Company requests data:', data)
+      console.log('First request:', data.data?.[0])
       requests.value = data.data || []
     } else {
       console.error('Failed to fetch company requests:', response.status)
@@ -377,7 +383,7 @@ const approveRequest = async (requestId) => {
     const data = await response.json()
 
     if (response.ok) {
-      alert(t('companyRequests.alert.approved', { name: data.data.company_name }))
+      alert(t('companyRequests.alert.accepted', { name: data.data.name }))
       selectedRequest.value = null
       await fetchRequests()
     } else {
@@ -414,7 +420,7 @@ const rejectRequest = async (requestId) => {
     const data = await response.json()
 
     if (response.ok) {
-      alert(t('companyRequests.alert.rejected'))
+      alert(t('companyRequests.alert.declined'))
       selectedRequest.value = null
       await fetchRequests()
     } else {
@@ -435,8 +441,8 @@ const viewDetails = (request) => {
 const getFilterTitle = () => {
   const titles = {
     pending: t('companyRequests.filter.titles.pending'),
-    approved: t('companyRequests.filter.titles.approved'),
-    rejected: t('companyRequests.filter.titles.rejected'),
+    accepted: t('companyRequests.filter.titles.accepted'),
+    declined: t('companyRequests.filter.titles.declined'),
     all: t('companyRequests.filter.titles.all')
   }
   return titles[activeFilter.value] || t('companyRequests.filter.titles.default')
@@ -445,8 +451,8 @@ const getFilterTitle = () => {
 const getStatusClass = (status) => {
   const classes = {
     pending: 'bg-warning text-dark',
-    approved: 'bg-success',
-    rejected: 'bg-danger'
+    accepted: 'bg-success',
+    declined: 'bg-danger'
   }
   return classes[status] || 'bg-secondary'
 }
@@ -454,8 +460,8 @@ const getStatusClass = (status) => {
 const getStatusText = (status) => {
   const texts = {
     pending: t('companyRequests.status.pending'),
-    approved: t('companyRequests.status.approved'),
-    rejected: t('companyRequests.status.rejected')
+    accepted: t('companyRequests.status.accepted'),
+    declined: t('companyRequests.status.declined')
   }
   return texts[status] || status
 }

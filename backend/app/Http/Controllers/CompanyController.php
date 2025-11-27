@@ -65,6 +65,7 @@ class CompanyController extends Controller
     {
         try {
             $company = Company::with(['contactPersons'])->findOrFail($id);
+            $primaryContact = $company->contactPersons->first();
 
             return response()->json([
                 'data' => [
@@ -78,7 +79,10 @@ class CompanyController extends Controller
                     'street' => $company->street,
                     'house_number' => $company->house_number,
                     'status' => $company->status,
-                    'contact_persons' => $company->contactPersons,
+                    'contact_person_name' => $primaryContact?->name,
+                    'contact_person_surname' => $primaryContact?->surname,
+                    'contact_person_email' => $primaryContact?->email,
+                    'contact_person_phone' => $primaryContact?->phone_number,
                     'created_at' => $company->created_at?->toIso8601String(),
                     'updated_at' => $company->updated_at?->toIso8601String(),
                 ]
@@ -93,6 +97,89 @@ class CompanyController extends Controller
 
             return response()->json([
                 'message' => 'An error occurred while fetching the company.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Create a new company request (for students or public)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createCompany(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'street' => 'nullable|string|max:100',
+            'house_number' => 'nullable|string|max:20',
+            'contact_person_name' => 'required|string|max:100',
+            'contact_person_surname' => 'required|string|max:100',
+            'contact_person_email' => 'required|email|max:100',
+            'contact_person_phone' => 'nullable|string|max:50',
+            'contact_person_position' => 'nullable|string|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+            
+            $user = $request->user('api'); // Use 'api' guard to get authenticated user
+           
+            // Create the company with pending status
+            $company = Company::create([
+                'name' => $request->name,
+                'state' => $request->state,
+                'region' => $request->region,
+                'city' => $request->city,
+                'postal_code' => $request->postal_code,
+                'street' => $request->street,
+                'house_number' => $request->house_number,
+                'status' => Company::STATUS_PENDING,
+                'request_source' => $user ? Company::SOURCE_STUDENT : Company::SOURCE_PUBLIC,
+            ]);
+
+            // Create the contact person and assign to company
+            ContactPerson::create([
+                'name' => $request->contact_person_name,
+                'surname' => $request->contact_person_surname,
+                'email' => $request->contact_person_email,
+                'phone_number' => $request->contact_person_phone,
+                'position' => $request->contact_person_position,
+                'company_id' => $company->id,
+            ]);
+
+            DB::commit();
+
+            // Notify all garants about the new company request
+            $this->notifyGarants($company);
+
+            return response()->json([
+                'message' => 'Company registration request submitted successfully. A garant will review your request.',
+                'data' => [
+                    'id' => $company->id,
+                    'name' => $company->name,
+                    'status' => $company->status,
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error creating company request: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while submitting the company request.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
         }
@@ -175,7 +262,7 @@ class CompanyController extends Controller
         try {
             DB::beginTransaction();
 
-            $company = Company::findOrFail($id);
+            $company = Company::with('contactPersons')->findOrFail($id);
 
             if (!$company->isPending()) {
                 return response()->json([
@@ -193,22 +280,56 @@ class CompanyController extends Controller
                 ], 403);
             }
 
-            // Update the company status
+            // Get the primary contact person
+            $contactPerson = $company->contactPersons->first();
+            
+            if (!$contactPerson) {
+                return response()->json([
+                    'message' => 'No contact person found for this company.'
+                ], 400);
+            }
+
+            // Generate random password
+            $password = \Illuminate\Support\Str::random(12);
+
+            // Create user account for the company
+            $companyUser = User::create([
+                'name' => $contactPerson->name,
+                'email' => $contactPerson->email,
+                'password' => \Hash::make($password),
+                'role' => 'company',
+            ]);
+
+            // Update the company status and link to user
             $company->update([
                 'status' => Company::STATUS_ACCEPTED,
                 'reviewed_by_garant_id' => $garant->id,
                 'reviewed_at' => now(),
+                'user_id' => $companyUser->id,
             ]);
 
             // Clear the companies cache
             Cache::tags(['dropdowns'])->forget('companies');
 
-
+            // Send email with credentials
+            try {
+                \Mail::to($contactPerson->email)->send(
+                    new \App\Mail\CompanyCredentials(
+                        $company->name,
+                        $contactPerson->name . ' ' . $contactPerson->surname,
+                        $contactPerson->email,
+                        $password
+                    )
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to send company credentials email: ' . $e->getMessage());
+                // Don't fail the approval if email fails
+            }
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Company request approved successfully.',
+                'message' => 'Company request approved successfully. Login credentials have been sent to the contact person.',
                 'data' => [
                     'id' => $company->id,
                     'name' => $company->name,
@@ -253,7 +374,7 @@ class CompanyController extends Controller
         }
 
         try {
-            $company = Company::findOrFail($id);
+            $company = Company::with('contactPersons')->findOrFail($id);
 
             if (!$company->isPending()) {
                 return response()->json([
@@ -271,6 +392,9 @@ class CompanyController extends Controller
                 ], 403);
             }
 
+            // Get the primary contact person
+            $contactPerson = $company->contactPersons->first();
+
             // Update the company status
             $company->update([
                 'status' => Company::STATUS_DECLINED,
@@ -279,7 +403,21 @@ class CompanyController extends Controller
                 'rejection_reason' => $request->rejection_reason,
             ]);
 
-
+            // Send rejection email to contact person
+            if ($contactPerson) {
+                try {
+                    \Mail::to($contactPerson->email)->send(
+                        new \App\Mail\CompanyRejected(
+                            $company->name,
+                            $contactPerson->name . ' ' . $contactPerson->surname,
+                            $request->rejection_reason
+                        )
+                    );
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send company rejection email: ' . $e->getMessage());
+                    // Don't fail the rejection if email fails
+                }
+            }
 
             return response()->json([
                 'message' => 'Company request rejected.',

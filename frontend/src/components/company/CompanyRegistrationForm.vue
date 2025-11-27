@@ -174,7 +174,7 @@
             </div>
           </div>
 
-          <div class="row">
+          <div class="row mb-3">
             <div class="col-md-6">
               <label for="contactPersonEmail" class="form-label">
                 {{ $t('companyRegistration.contactPersonEmail') }}<span class="text-danger">*</span>
@@ -206,6 +206,24 @@
               />
               <div v-if="errors.contact_person_phone" class="invalid-feedback">
                 {{ errors.contact_person_phone[0] }}
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <label for="contactPersonPosition" class="form-label">{{ $t('companyRegistration.contactPersonPosition') }}</label>
+              <input
+                type="text"
+                class="form-control"
+                :class="{ 'is-invalid': errors.contact_person_position }"
+                id="contactPersonPosition"
+                v-model="formData.contactPersonPosition"
+                :placeholder="$t('companyRegistration.contactPersonPositionPlaceholder')"
+                maxlength="100"
+              />
+              <div v-if="errors.contact_person_position" class="invalid-feedback">
+                {{ errors.contact_person_position[0] }}
               </div>
             </div>
           </div>
@@ -264,7 +282,7 @@ const { t } = useI18n()
 const props = defineProps({
   apiEndpoint: {
     type: String,
-    required: true
+    default: '/api/companies/create'
   },
   authToken: {
     type: String,
@@ -294,7 +312,8 @@ const formData = ref({
   contactPersonName: '',
   contactPersonSurname: '',
   contactPersonEmail: '',
-  contactPersonPhone: ''
+  contactPersonPhone: '',
+  contactPersonPosition: ''
 })
 
 // Form state
@@ -316,7 +335,8 @@ const resetForm = () => {
     contactPersonName: '',
     contactPersonSurname: '',
     contactPersonEmail: '',
-    contactPersonPhone: ''
+    contactPersonPhone: '',
+    contactPersonPosition: ''
   }
   errors.value = {}
   submitError.value = null
@@ -349,7 +369,7 @@ const handleSubmit = async () => {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({
-        company_name: formData.value.companyName.trim(),
+        name: formData.value.companyName.trim(),
         state: formData.value.state.trim() || null,
         region: formData.value.region.trim() || null,
         city: formData.value.city.trim() || null,
@@ -359,7 +379,8 @@ const handleSubmit = async () => {
         contact_person_name: formData.value.contactPersonName.trim(),
         contact_person_surname: formData.value.contactPersonSurname.trim(),
         contact_person_email: formData.value.contactPersonEmail.trim(),
-        contact_person_phone: formData.value.contactPersonPhone.trim() || null
+        contact_person_phone: formData.value.contactPersonPhone.trim() || null,
+        contact_person_position: formData.value.contactPersonPosition.trim() || null
       })
     })
 

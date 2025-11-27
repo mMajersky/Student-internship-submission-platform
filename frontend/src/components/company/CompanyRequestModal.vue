@@ -29,7 +29,7 @@
 
           <CompanyRegistrationForm
             ref="formRef"
-            api-endpoint="/api/student/company-requests"
+            api-endpoint="/api/companies/create"
             :auth-token="authToken"
             :show-cancel="true"
             :submit-button-text="t('companyRequestModal.submitButton')"

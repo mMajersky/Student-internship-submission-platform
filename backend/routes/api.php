@@ -178,6 +178,9 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::post('/company-requests/{id}/reject', [CompanyController::class, 'reject']);
 });
 
+// Company registration - accessible by both authenticated students and public (no auth required)
+Route::post('/companies/create', [CompanyController::class, 'createCompany']);
+
 // Student routes - accessible by students
 Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(function () {
     // Access to companies for dropdown - view only

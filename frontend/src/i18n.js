@@ -499,6 +499,13 @@ const messages = {
       footer: '© 2025 Professional Practice CRM'
     },
     companyRegistration: {
+      title: 'Request to Add Company',
+      description: 'Can\'t find your company in the list? Fill out the form below and a supervisor will review your request.',
+      successTitle: 'Request Submitted!',
+      successMessage: 'Your request has been successfully submitted. You will be notified when a supervisor reviews it.',
+      addAnother: 'Add Another Company',
+      backHome: 'Back to Home',
+      submitButton: 'Submit Request',
       companyInfo: 'Company Information',
       companyName: 'Company Name',
       companyNamePlaceholder: 'e.g. Tech Solutions Ltd.',
@@ -1317,6 +1324,13 @@ const messages = {
       footer: '© 2025 Odborná prax CRM'
     },
     companyRegistration: {
+      title: 'Žiadosť o pridanie firmy',
+      description: 'Nenašli ste svoju firmu v zozname? Vyplňte formulár nižšie a garant posúdi vašu žiadosť.',
+      successTitle: 'Žiadosť odoslaná!',
+      successMessage: 'Vaša žiadosť bola úspešne odoslaná. Budete upozornený, keď ju garant posúdi.',
+      addAnother: 'Pridať ďalšiu firmu',
+      backHome: 'Späť na domov',
+      submitButton: 'Odoslať žiadosť',
       companyInfo: 'Informácie o firme',
       companyName: 'Názov firmy',
       companyNamePlaceholder: 'Napr. Tech Solutions s.r.o.',
