@@ -332,6 +332,10 @@ const messages = {
       documentUploaded: {
         title: 'Document Uploaded',
         message: 'Student {studentName} uploaded a signed agreement for their internship.'
+      },
+      documentNeedsValidation: {
+        title: 'Document Needs Validation',
+        message: 'Student {studentName} uploaded a document. Please validate it.'
       }
     },
     editAnnouncement: {
@@ -1159,6 +1163,10 @@ const messages = {
       documentUploaded: {
         title: 'Študent nahral dokument',
         message: 'Študent {studentName} nahral podpísanú dohodu k svojej praxi.'
+      },
+      documentNeedsValidation: {
+        title: 'Dokument čaká na validáciu',
+        message: 'Študent {studentName} nahral dokument. Prosíme o jeho validáciu.'
       }
     },
     editAnnouncement: {
