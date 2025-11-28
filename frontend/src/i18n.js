@@ -667,6 +667,18 @@ const messages = {
         commentError: 'Error saving comment',
         evaluationEmailSent: 'Evaluation email sent successfully!',
         evaluationEmailError: 'Error sending evaluation email. Please try again.'
+      },
+      filters: {
+        year: 'Year',
+        company: 'Company',
+        studyField: 'Study Field',
+        student: 'Student',
+        all: 'All',
+        selectAll: 'Select All',
+        selected: '{count} selected',
+        clearAll: 'Clear Filters',
+        noResults: 'No internships match the selected filters.',
+        showing: 'Showing {count} of {total} internships'
       }
     },
     garantDocuments: {
@@ -1184,6 +1196,18 @@ const messages = {
         commentError: 'Chyba pri ukladaní komentára',
         evaluationEmailSent: 'Hodnotiaci email bol úspešne odoslaný!',
         evaluationEmailError: 'Chyba pri odosielaní hodnotiaceho emailu. Skúste to znova.'
+      },
+      filters: {
+        year: 'Rok',
+        company: 'Firma',
+        studyField: 'Študijný odbor',
+        student: 'Študent',
+        all: 'Všetky',
+        selectAll: 'Vybrať všetky',
+        selected: '{count} vybraných',
+        clearAll: 'Zrušiť filtre',
+        noResults: 'Žiadne praxe nezodpovedajú vybraným filtrom.',
+        showing: 'Zobrazuje sa {count} z {total} praxí'
       }
     },
     studentInternship: {
