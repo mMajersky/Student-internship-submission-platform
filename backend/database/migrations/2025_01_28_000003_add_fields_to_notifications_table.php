@@ -11,12 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            // Pridať stĺpce ktoré chýbajú v existujúcej tabuľke
-            $table->string('type', 50)->nullable()->after('user_id'); // typ notifikácie
-            $table->json('data')->nullable()->after('message'); // dodatočné dáta (internship_id, atď.)
-            $table->timestamp('read_at')->nullable()->after('is_read'); // kedy bola prečítaná
-        });
+        // Skipped - wrong timestamp, use the new one
     }
 
     /**
@@ -29,4 +24,3 @@ return new class extends Migration
         });
     }
 };
-
