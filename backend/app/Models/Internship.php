@@ -29,6 +29,8 @@ class Internship extends Model
         'confirmed_date',
         'approved_date',
         'academy_year', // voliteľné, ak je už v DB
+        'evaluation', // JSON stĺpec pre hodnotenie od firmy (používa sa pre výkaz praxe)
+        'internship_report', // JSON stĺpec pre výkaz praxe
     ];
 
     protected $casts = [
@@ -38,6 +40,8 @@ class Internship extends Model
         'approved_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'evaluation' => 'array', // JSON stĺpec pre hodnotenie (používa sa pre výkaz praxe)
+        'internship_report' => 'array', // JSON stĺpec pre výkaz praxe
     ];
 
     /**
@@ -96,7 +100,7 @@ class Internship extends Model
     {
         return $this->belongsToMany(
             ContactPerson::class,
-            'contact_person_internships',
+            'internship_contact_person',
             'internship_id',
             'contact_person_id'
         );

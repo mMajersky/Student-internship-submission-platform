@@ -11,7 +11,7 @@ class AnnouncementController extends Controller
 {
     public function published()
     {
-        $announcement = Cache::tags(['announcements'])->remember('published', now()->addDay(), function() {
+        $announcement = Cache::remember('published', now()->addDay(), function() {
             return Announcement::published()
                 ->orderBy('updated_at', 'desc')
                 ->first();
@@ -30,7 +30,7 @@ class AnnouncementController extends Controller
     {
         if ($request->isMethod('GET')) {
             // Get the current announcement (published or unpublished for editing)
-            $announcement = Cache::tags(['announcements'])->remember('single', now()->addDay(), function() {
+            $announcement = Cache::remember('single', now()->addDay(), function() {
                 return Announcement::orderBy('updated_at', 'desc')->first();
             });
 
@@ -70,7 +70,8 @@ class AnnouncementController extends Controller
             }
 
             // Clear announcement caches immediately after update
-            Cache::tags(['announcements'])->flush();
+            Cache::forget('published');
+            Cache::forget('single');
 
             return response()->json([
                 'content' => $announcement->content,
