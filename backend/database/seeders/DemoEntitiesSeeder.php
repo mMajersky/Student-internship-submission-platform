@@ -38,8 +38,8 @@ class DemoEntitiesSeeder extends Seeder
 
 
         // --- 2. VYTVORENIE FIRMY ---
-        // Nájdem používateľa s rolou 'company_representative' (podľa tvojej DB má id=4)
-        $companyUser = User::where('id', 4)->where('role', 'company_representative')->first();
+        // Nájdem používateľa s rolou 'company' (podľa AdminUserSeeder má role='company')
+        $companyUser = User::where('id', 4)->where('role', 'company')->first();
 
         if ($companyUser) {
             // Vytvorím záznam pre firmu a prepojím ho s používateľom

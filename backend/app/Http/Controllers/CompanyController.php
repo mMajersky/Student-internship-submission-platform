@@ -23,9 +23,8 @@ class CompanyController extends Controller
     public function index()
     {
         try {
-            $companies = Cache::tags(['dropdowns'])->remember('companies', now()->addHours(8), function() {
-                return Company::select('id', 'name', 'city', 'state', 'region', 'status')
-                    ->where('status', Company::STATUS_ACCEPTED)
+            $companies = Cache::remember('companies', now()->addHours(8), function() {
+                return Company::select('id', 'name', 'city', 'state', 'region')
                     ->orderBy('name')
                     ->get();
             });

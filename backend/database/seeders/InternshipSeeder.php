@@ -53,36 +53,35 @@ class InternshipSeeder extends Seeder
 
         // --- PRÍPAD 2: Prax schválená garantom ---
 
+        // Podmienky: Musí existovať druhý študent, druhá firma a garant (v tejto DB bude len jeden študent a jedna firma, takže druhá prax sa nevytvorí)
         // Získame ďalšieho študenta, firmu a garanta. UISTITE SA, ŽE EXISTUJÚ!
         $student2 = Student::find(2);
         $company2 = Company::find(2);
         $garant = Garant::first();
 
-        if (!$student2 || !$company2 || !$garant) {
-            $this->command->warn('Pre vytvorenie druhej (schválenej) praxe je potrebné mať v DB aspoň 2 študentov, 2 firmy a 1 garanta. Tento krok sa preskakuje.');
-            return;
-        }
-        
-        $contactPerson2 = ContactPerson::where('company_id', $company2->id)->first();
-        if (!$contactPerson2) {
-            $this->command->error("Pre firmu s ID {$company2->id} neexistuje kontaktná osoba! Druhá prax nebola vytvorená.");
-            return;
-        }
-        
-        $internship2 = Internship::create([
-            'student_id' => $student2->id,
-            'company_id' => $company2->id,
-            'garant_id' => $garant->id, // Garant je priradený
-            'status' => 'schvalena', // Stav je "schvalena"
-            'academy_year' => '2025/2026',
-            'start_date' => Carbon::now()->addMonth(),
-            'end_date' => Carbon::now()->addMonths(4),
-            'confirmed_date' => Carbon::now()->subDays(5), // Potvrdené pred pár dňami
-            'approved_date' => Carbon::now(), // Schválené dnes
-        ]);
+        if ($student2 && $company2 && $garant) {
+            $contactPerson2 = ContactPerson::where('company_id', $company2->id)->first();
+            if ($contactPerson2) {
+                $internship2 = Internship::create([
+                    'student_id' => $student2->id,
+                    'company_id' => $company2->id,
+                    'garant_id' => $garant->id, // Garant je priradený
+                    'status' => 'schvalena', // Stav je "schvalena"
+                    'academy_year' => '2025/2026',
+                    'start_date' => Carbon::now()->addMonth(),
+                    'end_date' => Carbon::now()->addMonths(4),
+                    'confirmed_date' => Carbon::now()->subDays(5), // Potvrdené pred pár dňami
+                    'approved_date' => Carbon::now(), // Schválené dnes
+                ]);
 
-        // Priradíme kontaktnú osobu
-        $internship2->contactPersons()->attach($contactPerson2->id);
-        $this->command->info("Schválená prax (s garantom) pre študenta {$student2->name} bola úspešne založená.");
+                // Priradíme kontaktnú osobu
+                $internship2->contactPersons()->attach($contactPerson2->id);
+                $this->command->info("Schválená prax (s garantom) pre študenta {$student2->name} bola úspešne založená.");
+            } else {
+                $this->command->warn("Pre firmu s ID {$company2->id} neexistuje kontaktná osoba! Druhá prax nebola vytvorená.");
+            }
+        } else {
+            $this->command->info('Druhá prax sa nevytvorila (chýbajú entity druhý študent, druhá firma alebo garant).');
+        }
     }
 }

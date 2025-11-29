@@ -22,7 +22,7 @@ class GarantController extends Controller
     public function index()
     {
         try {
-            $garants = Cache::tags(['dropdowns'])->remember('garants', now()->addHours(8), function() {
+            $garants = Cache::remember('garants', now()->addHours(8), function() {
                 return Garant::with('user:id,name,email,created_at')
                     ->orderBy('created_at', 'desc')
                     ->get();
@@ -102,7 +102,9 @@ class GarantController extends Controller
             DB::commit();
 
             // Clear dropdown caches to reflect new garant
-            Cache::tags(['dropdowns'])->flush();
+            Cache::forget('companies');
+            Cache::forget('students');
+            Cache::forget('garants');
 
             return response()->json([
                 'message' => 'Garant created successfully.',
@@ -245,7 +247,9 @@ class GarantController extends Controller
             $garant->load('user');
 
             // Clear dropdown caches to reflect updated garant
-            Cache::tags(['dropdowns'])->flush();
+            Cache::forget('companies');
+            Cache::forget('students');
+            Cache::forget('garants');
 
             return response()->json([
                 'message' => 'Garant updated successfully.',
@@ -307,7 +311,9 @@ class GarantController extends Controller
             DB::commit();
 
             // Clear dropdown caches to reflect deleted garant
-            Cache::tags(['dropdowns'])->flush();
+            Cache::forget('companies');
+            Cache::forget('students');
+            Cache::forget('garants');
 
             return response()->json([
                 'message' => 'Garant deleted successfully.'

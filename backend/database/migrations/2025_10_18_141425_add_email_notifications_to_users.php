@@ -11,7 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Skipped - wrong timestamp, use the new one
+        if (!Schema::hasColumn('users', 'email_notifications')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('email_notifications')->default(true)->after('password');
+            });
+        }
     }
 
     /**

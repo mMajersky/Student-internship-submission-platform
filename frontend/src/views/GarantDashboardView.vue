@@ -322,6 +322,7 @@
       @confirm="confirmDeleteInternship"
       @cancel="cancelDeleteInternship"
     />
+
   </div>
 </template>
 
@@ -352,6 +353,7 @@ const selectedInternshipForComment = ref(null)
 // Delete confirmation state
 const showDeleteConfirmation = ref(false)
 const internshipToDelete = ref(null)
+
 
 // Statistics
 const stats = ref({
@@ -515,6 +517,7 @@ const cancelDeleteInternship = () => {
   internshipToDelete.value = null
 }
 
+
 const getStudentFullName = (internship) => {
   if (internship.student) {
     return `${internship.student.name} ${internship.student.surname}`
@@ -642,4 +645,5 @@ const handleSubmitComment = async (commentData) => {
 const openDocuments = (internship) => {
   router.push({ name: 'garant-internship-documents', params: { id: internship.id } })
 }
+
 </script>
