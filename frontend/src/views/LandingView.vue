@@ -22,14 +22,14 @@ const { t } = useI18n()
             </p>
               <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
                 <router-link
-                  :to="{ name: 'register', state: { role: 'student' } }"
+                  to="/register"
                   class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
                 >
                   <i class="bi bi-person-plus me-2"></i> {{ $t('landing.registerStudent') }}
                 </router-link>
 
                 <router-link
-                  :to="{ name: 'register', state: { role: 'company' } }"
+                  to="/register-company"
                   class="btn btn-outline-primary btn-lg d-flex align-items-center justify-content-center"
                 >
                   <i class="bi bi-building me-2"></i> {{ $t('landing.registerCompany') }}
