@@ -17,6 +17,13 @@ class Document extends Model
         'status',
         'file_path',
         'name',
+        'company_status',
+        'company_rejection_reason',
+        'company_validated_at',
+    ];
+
+    protected $casts = [
+        'company_validated_at' => 'datetime',
     ];
 
     public function internship()

@@ -212,8 +212,15 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
 });
 
 // Company routes
-Route::middleware(['auth:api', 'role:company'])->group(function () {
-    // Future company-specific routes
+Route::middleware(['auth:api', 'role:company'])->prefix('company')->group(function () {
+    // Internship management for companies - view internships assigned to them
+    Route::get('/internships', [InternshipController::class, 'companyIndex']);
+    Route::get('/internships/{id}', [InternshipController::class, 'companyShow']);
+    
+    // Documents for companies - view and validate
+    Route::get('/internships/{internship}/documents', [InternshipDocumentController::class, 'companyIndex']);
+    Route::get('/internships/{internship}/documents/{document}', [InternshipDocumentController::class, 'companyDownload']);
+    Route::post('/internships/{internship}/documents/{document}/validate', [InternshipDocumentController::class, 'companyValidate']);
 });
 
 
