@@ -17,7 +17,7 @@ class StudentController extends Controller
     public function index()
     {
         try {
-            $students = Cache::tags(['dropdowns'])->remember('students', now()->addHours(8), function() {
+            $students = Cache::remember('students', now()->addHours(8), function() {
                 return Student::select('id', 'name', 'surname', 'student_email')
                     ->orderBy('surname')
                     ->orderBy('name')
