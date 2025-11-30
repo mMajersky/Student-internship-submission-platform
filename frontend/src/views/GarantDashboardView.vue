@@ -47,17 +47,6 @@
       <li class="nav-item" role="presentation">
         <button
           class="nav-link"
-          :class="{ active: activeTab === 'company-requests' }"
-          @click="activeTab = 'company-requests'"
-          type="button"
-        >
-          <i class="bi bi-building-check me-2"></i>
-         {{ $t('garantDashboard.tabs.companyRequests') }}
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
           :class="{ active: activeTab === 'documents' }"
           @click="activeTab = 'documents'"
           type="button"
@@ -179,7 +168,239 @@
       <div v-if="activeTab === 'internships'" class="tab-pane fade show active">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">{{ $t('garantDashboard.internshipsList') }}</h5>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="card-title mb-0">{{ $t('garantDashboard.internshipsList') }}</h5>
+              <button 
+                v-if="hasActiveFilters" 
+                class="btn btn-sm btn-outline-secondary"
+                @click="clearAllFilters"
+              >
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
+              </button>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="row mb-4 g-3" v-if="internships.length > 0">
+              <!-- Year Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  {{ $t('garantDashboard.filters.year') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedYears.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedYears.length === availableYears.length ? $t('garantDashboard.filters.all') :
+                         selectedYears.length === 1 ? selectedYears[0] : 
+                         $t('garantDashboard.filters.selected', { count: selectedYears.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedYears.length === availableYears.length"
+                          :indeterminate="selectedYears.length > 0 && selectedYears.length < availableYears.length"
+                          @change="toggleSelectAllYears"
+                          id="selectAllYears"
+                        >
+                        <label class="form-check-label fw-semibold" for="selectAllYears">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="year in availableYears" :key="year">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="year" 
+                          v-model="selectedYears"
+                          :id="'year-' + year"
+                        >
+                        <label class="form-check-label" :for="'year-' + year">{{ year }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Company Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-building me-1"></i>
+                  {{ $t('garantDashboard.filters.company') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedCompanies.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedCompanies.length === availableCompanies.length ? $t('garantDashboard.filters.all') :
+                         selectedCompanies.length === 1 ? availableCompanies.find(c => c.id === selectedCompanies[0])?.name : 
+                         $t('garantDashboard.filters.selected', { count: selectedCompanies.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedCompanies.length === availableCompanies.length"
+                          :indeterminate="selectedCompanies.length > 0 && selectedCompanies.length < availableCompanies.length"
+                          @change="toggleSelectAllCompanies"
+                          id="selectAllCompanies"
+                        >
+                        <label class="form-check-label fw-semibold" for="selectAllCompanies">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="company in availableCompanies" :key="company.id">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="company.id" 
+                          v-model="selectedCompanies"
+                          :id="'company-' + company.id"
+                        >
+                        <label class="form-check-label" :for="'company-' + company.id">{{ company.name }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Study Field Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-mortarboard me-1"></i>
+                  {{ $t('garantDashboard.filters.studyField') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedStudyFields.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedStudyFields.length === availableStudyFields.length ? $t('garantDashboard.filters.all') :
+                         selectedStudyFields.length === 1 ? selectedStudyFields[0] : 
+                         $t('garantDashboard.filters.selected', { count: selectedStudyFields.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedStudyFields.length === availableStudyFields.length"
+                          :indeterminate="selectedStudyFields.length > 0 && selectedStudyFields.length < availableStudyFields.length"
+                          @change="toggleSelectAllStudyFields"
+                          id="selectAllStudyFields"
+                        >
+                        <label class="form-check-label fw-semibold" for="selectAllStudyFields">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="field in availableStudyFields" :key="field">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="field" 
+                          v-model="selectedStudyFields"
+                          :id="'field-' + field"
+                        >
+                        <label class="form-check-label" :for="'field-' + field">{{ field }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Student Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-person me-1"></i>
+                  {{ $t('garantDashboard.filters.student') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedStudents.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedStudents.length === availableStudents.length ? $t('garantDashboard.filters.all') :
+                         selectedStudents.length === 1 ? availableStudents.find(s => s.id === selectedStudents[0])?.name : 
+                         $t('garantDashboard.filters.selected', { count: selectedStudents.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedStudents.length === availableStudents.length"
+                          :indeterminate="selectedStudents.length > 0 && selectedStudents.length < availableStudents.length"
+                          @change="toggleSelectAllStudents"
+                          id="selectAllStudents"
+                        >
+                        <label class="form-check-label fw-semibold" for="selectAllStudents">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="student in availableStudents" :key="student.id">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="student.id" 
+                          v-model="selectedStudents"
+                          :id="'student-' + student.id"
+                        >
+                        <label class="form-check-label" :for="'student-' + student.id">{{ student.name }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Results count -->
+            <div v-if="internships.length > 0 && hasActiveFilters" class="mb-3">
+              <span class="text-muted">
+                {{ $t('garantDashboard.filters.showing', { count: filteredInternships.length, total: internships.length }) }}
+              </span>
+            </div>
 
             <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
@@ -187,6 +408,15 @@
               <button class="btn btn-primary" @click="activeTab = 'create-internship'">
                 <i class="bi bi-plus me-2"></i>
                 {{ $t('garantDashboard.createFirstInternship') }}
+              </button>
+            </div>
+
+            <div v-else-if="filteredInternships.length === 0" class="text-center py-5">
+              <i class="bi bi-funnel fs-1 text-muted"></i>
+              <p class="text-muted mt-3">{{ $t('garantDashboard.filters.noResults') }}</p>
+              <button class="btn btn-outline-secondary" @click="clearAllFilters">
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
               </button>
             </div>
 
@@ -205,7 +435,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="internship in internships" :key="internship.id">
+                  <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
                     <td>{{ getYear(internship.start_date) }}</td>
@@ -243,11 +473,252 @@
       <div v-if="activeTab === 'documents'" class="tab-pane fade show active">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">{{ $t('garantDashboard.documentsTitle') }}</h5>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="card-title mb-0">{{ $t('garantDashboard.documentsTitle') }}</h5>
+              <button 
+                v-if="hasActiveFilters" 
+                class="btn btn-sm btn-outline-secondary"
+                @click="clearAllFilters"
+              >
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
+              </button>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="row mb-4 g-3" v-if="internships.length > 0">
+              <!-- Year Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  {{ $t('garantDashboard.filters.year') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown" 
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedYears.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedYears.length === availableYears.length ? $t('garantDashboard.filters.all') :
+                         selectedYears.length === 1 ? selectedYears[0] : 
+                         $t('garantDashboard.filters.selected', { count: selectedYears.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedYears.length === availableYears.length"
+                          :indeterminate="selectedYears.length > 0 && selectedYears.length < availableYears.length"
+                          @change="toggleSelectAllYears"
+                          id="docSelectAllYears"
+                        >
+                        <label class="form-check-label fw-semibold" for="docSelectAllYears">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="year in availableYears" :key="'doc-' + year">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="year" 
+                          v-model="selectedYears"
+                          :id="'doc-year-' + year"
+                        >
+                        <label class="form-check-label" :for="'doc-year-' + year">{{ year }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Company Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-building me-1"></i>
+                  {{ $t('garantDashboard.filters.company') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedCompanies.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedCompanies.length === availableCompanies.length ? $t('garantDashboard.filters.all') :
+                         selectedCompanies.length === 1 ? availableCompanies.find(c => c.id === selectedCompanies[0])?.name : 
+                         $t('garantDashboard.filters.selected', { count: selectedCompanies.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedCompanies.length === availableCompanies.length"
+                          :indeterminate="selectedCompanies.length > 0 && selectedCompanies.length < availableCompanies.length"
+                          @change="toggleSelectAllCompanies"
+                          id="docSelectAllCompanies"
+                        >
+                        <label class="form-check-label fw-semibold" for="docSelectAllCompanies">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="company in availableCompanies" :key="'doc-' + company.id">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="company.id" 
+                          v-model="selectedCompanies"
+                          :id="'doc-company-' + company.id"
+                        >
+                        <label class="form-check-label" :for="'doc-company-' + company.id">{{ company.name }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Study Field Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-mortarboard me-1"></i>
+                  {{ $t('garantDashboard.filters.studyField') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedStudyFields.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedStudyFields.length === availableStudyFields.length ? $t('garantDashboard.filters.all') :
+                         selectedStudyFields.length === 1 ? selectedStudyFields[0] : 
+                         $t('garantDashboard.filters.selected', { count: selectedStudyFields.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedStudyFields.length === availableStudyFields.length"
+                          :indeterminate="selectedStudyFields.length > 0 && selectedStudyFields.length < availableStudyFields.length"
+                          @change="toggleSelectAllStudyFields"
+                          id="docSelectAllStudyFields"
+                        >
+                        <label class="form-check-label fw-semibold" for="docSelectAllStudyFields">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="field in availableStudyFields" :key="'doc-' + field">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="field" 
+                          v-model="selectedStudyFields"
+                          :id="'doc-field-' + field"
+                        >
+                        <label class="form-check-label" :for="'doc-field-' + field">{{ field }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Student Filter -->
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                  <i class="bi bi-person me-1"></i>
+                  {{ $t('garantDashboard.filters.student') }}
+                </label>
+                <div class="dropdown">
+                  <button 
+                    class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" 
+                    type="button" 
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                  >
+                    <span class="text-truncate">
+                      {{ selectedStudents.length === 0 ? $t('garantDashboard.filters.all') : 
+                         selectedStudents.length === availableStudents.length ? $t('garantDashboard.filters.all') :
+                         selectedStudents.length === 1 ? availableStudents.find(s => s.id === selectedStudents[0])?.name : 
+                         $t('garantDashboard.filters.selected', { count: selectedStudents.length }) }}
+                    </span>
+                  </button>
+                  <ul class="dropdown-menu w-100 p-2" style="max-height: 250px; overflow-y: auto;">
+                    <li>
+                      <div class="form-check mb-2 pb-2 border-bottom">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :checked="selectedStudents.length === availableStudents.length"
+                          :indeterminate="selectedStudents.length > 0 && selectedStudents.length < availableStudents.length"
+                          @change="toggleSelectAllStudents"
+                          id="docSelectAllStudents"
+                        >
+                        <label class="form-check-label fw-semibold" for="docSelectAllStudents">
+                          {{ $t('garantDashboard.filters.selectAll') }}
+                        </label>
+                      </div>
+                    </li>
+                    <li v-for="student in availableStudents" :key="'doc-' + student.id">
+                      <div class="form-check">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          :value="student.id" 
+                          v-model="selectedStudents"
+                          :id="'doc-student-' + student.id"
+                        >
+                        <label class="form-check-label" :for="'doc-student-' + student.id">{{ student.name }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Results count -->
+            <div v-if="internships.length > 0 && hasActiveFilters" class="mb-3">
+              <span class="text-muted">
+                {{ $t('garantDashboard.filters.showing', { count: filteredInternships.length, total: internships.length }) }}
+              </span>
+            </div>
 
             <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
               <p class="text-muted mt-3">{{ $t('garantDashboard.noInternships') }}</p>
+            </div>
+
+            <div v-else-if="filteredInternships.length === 0" class="text-center py-5">
+              <i class="bi bi-funnel fs-1 text-muted"></i>
+              <p class="text-muted mt-3">{{ $t('garantDashboard.filters.noResults') }}</p>
+              <button class="btn btn-outline-secondary" @click="clearAllFilters">
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
+              </button>
             </div>
 
             <div v-else class="table-responsive">
@@ -264,7 +735,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="internship in internships" :key="internship.id">
+                  <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
                     <td>{{ getYear(internship.start_date) }}</td>
@@ -289,11 +760,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Company Requests Tab -->
-      <div v-if="activeTab === 'company-requests'" class="tab-pane fade show active">
-        <CompanyRequests />
       </div>
     </div>
 
@@ -327,13 +793,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
-import CompanyRequests from '@/components/garant/CompanyRequests.vue'
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 
 const { t } = useI18n()
@@ -354,6 +819,11 @@ const selectedInternshipForComment = ref(null)
 const showDeleteConfirmation = ref(false)
 const internshipToDelete = ref(null)
 
+// Filter state
+const selectedYears = ref([])
+const selectedCompanies = ref([])
+const selectedStudyFields = ref([])
+const selectedStudents = ref([])
 
 // Statistics
 const stats = ref({
@@ -397,6 +867,127 @@ const updateStatistics = () => {
   stats.value.completed = internships.value.filter(i => i.status === 'completed').length
   stats.value.planned = internships.value.filter(i => i.status === 'pending').length
 }
+
+// Computed: unique years from internships
+const availableYears = computed(() => {
+  const years = new Set()
+  internships.value.forEach(i => {
+    if (i.academy_year) years.add(i.academy_year)
+    else if (i.start_date) years.add(getYear(i.start_date))
+  })
+  return Array.from(years).sort().reverse()
+})
+
+// Computed: unique companies from internships
+const availableCompanies = computed(() => {
+  const companies = new Map()
+  internships.value.forEach(i => {
+    if (i.company && i.company.id) {
+      companies.set(i.company.id, { id: i.company.id, name: i.company.name })
+    }
+  })
+  return Array.from(companies.values()).sort((a, b) => a.name.localeCompare(b.name))
+})
+
+// Computed: unique study fields from internships (via student)
+const availableStudyFields = computed(() => {
+  const fields = new Set()
+  internships.value.forEach(i => {
+    if (i.student && i.student.study_field) {
+      fields.add(i.student.study_field)
+    }
+  })
+  return Array.from(fields).sort()
+})
+
+// Computed: unique students from internships
+const availableStudents = computed(() => {
+  const students = new Map()
+  internships.value.forEach(i => {
+    if (i.student && i.student.id) {
+      students.set(i.student.id, {
+        id: i.student.id,
+        name: `${i.student.name} ${i.student.surname}`
+      })
+    }
+  })
+  return Array.from(students.values()).sort((a, b) => a.name.localeCompare(b.name))
+})
+
+// Computed: filtered internships based on selected filters
+const filteredInternships = computed(() => {
+  return internships.value.filter(internship => {
+    // Year filter
+    if (selectedYears.value.length > 0) {
+      const internshipYear = internship.academy_year || getYear(internship.start_date)
+      if (!selectedYears.value.includes(internshipYear)) return false
+    }
+    
+    // Company filter
+    if (selectedCompanies.value.length > 0) {
+      if (!internship.company || !selectedCompanies.value.includes(internship.company.id)) return false
+    }
+    
+    // Study field filter
+    if (selectedStudyFields.value.length > 0) {
+      if (!internship.student || !selectedStudyFields.value.includes(internship.student.study_field)) return false
+    }
+    
+    // Student filter
+    if (selectedStudents.value.length > 0) {
+      if (!internship.student || !selectedStudents.value.includes(internship.student.id)) return false
+    }
+    
+    return true
+  })
+})
+
+// Filter helper functions
+const toggleSelectAllYears = () => {
+  if (selectedYears.value.length === availableYears.value.length) {
+    selectedYears.value = []
+  } else {
+    selectedYears.value = [...availableYears.value]
+  }
+}
+
+const toggleSelectAllCompanies = () => {
+  if (selectedCompanies.value.length === availableCompanies.value.length) {
+    selectedCompanies.value = []
+  } else {
+    selectedCompanies.value = availableCompanies.value.map(c => c.id)
+  }
+}
+
+const toggleSelectAllStudyFields = () => {
+  if (selectedStudyFields.value.length === availableStudyFields.value.length) {
+    selectedStudyFields.value = []
+  } else {
+    selectedStudyFields.value = [...availableStudyFields.value]
+  }
+}
+
+const toggleSelectAllStudents = () => {
+  if (selectedStudents.value.length === availableStudents.value.length) {
+    selectedStudents.value = []
+  } else {
+    selectedStudents.value = availableStudents.value.map(s => s.id)
+  }
+}
+
+const clearAllFilters = () => {
+  selectedYears.value = []
+  selectedCompanies.value = []
+  selectedStudyFields.value = []
+  selectedStudents.value = []
+}
+
+const hasActiveFilters = computed(() => {
+  return selectedYears.value.length > 0 ||
+    selectedCompanies.value.length > 0 ||
+    selectedStudyFields.value.length > 0 ||
+    selectedStudents.value.length > 0
+})
 
 // Load data when component is mounted
 onMounted(() => {
