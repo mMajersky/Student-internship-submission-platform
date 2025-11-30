@@ -55,7 +55,12 @@ const messages = {
         registerCompany: 'company registration',
         requiredFields: 'Email and password are required fields.',
         emailPlaceholder: "{'your.email@example.com'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Send reset link',
+        backToLogin: 'Back to login',
+        resetEmailSent: 'If this email address is registered, you will receive a password reset link.',
+        emailRequired: 'Email is required.',
+        resetError: 'An error occurred. Please try again.'
       },
       register: {
         studentTitle: 'Student Registration',
@@ -757,7 +762,12 @@ const messages = {
         registerCompany: 'registrácia firmy',
         requiredFields: 'Email a heslo sú povinné polia.',
         emailPlaceholder: "{'meno@priklad.sk'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Odoslať odkaz',
+        backToLogin: 'Späť na prihlásenie',
+        resetEmailSent: 'Ak je táto e-mailová adresa registrovaná, obdržíte odkaz na obnovenie hesla.',
+        emailRequired: 'Email je povinný.',
+        resetError: 'Nastala chyba. Skúste to znova.'
       },
       register: {
         studentTitle: 'Registrácia študenta',

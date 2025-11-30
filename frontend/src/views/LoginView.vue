@@ -15,8 +15,13 @@
               {{ errorMessage }}
             </div>
 
-            <!-- FORM -->
-            <form @submit.prevent="handleLogin" novalidate>
+            <!-- SUCCESS MESSAGE FOR PASSWORD RESET -->
+            <div v-if="resetEmailSent" class="alert alert-success" role="alert">
+              {{ $t('auth.login.resetEmailSent') }}
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form v-if="!showForgotPassword" @submit.prevent="handleLogin" novalidate>
               <div class="mb-3">
                 <label for="email" class="form-label">
                   {{ $t('auth.login.email') }} <span class="text-danger">*</span>
@@ -55,7 +60,7 @@
                   />
                   <label class="form-check-label" for="rememberMe">{{ $t('auth.login.remember') }}</label>
                 </div>
-                <a href="#" class="small">{{ $t('auth.login.forgotPassword') }}</a>
+                <a href="#" @click.prevent="showForgotPassword = true" class="small">{{ $t('auth.login.forgotPassword') }}</a>
               </div>
 
               <div class="d-grid">
@@ -67,6 +72,38 @@
                     aria-hidden="true"
                   ></span>
                   <span v-else>{{ $t('auth.login.loginButton') }}</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- FORGOT PASSWORD FORM -->
+            <form v-else @submit.prevent="handleForgotPassword" novalidate>
+              <div class="mb-3">
+                <label for="resetEmail" class="form-label">
+                  {{ $t('auth.login.email') }} <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="resetEmail"
+                  v-model="resetEmail"
+                  required
+                  :placeholder="$t('auth.login.emailPlaceholder')"
+                />
+              </div>
+
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary" :disabled="isResetting">
+                  <span
+                    v-if="isResetting"
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  <span v-else>{{ $t('auth.login.sendResetLink') }}</span>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" @click="showForgotPassword = false">
+                  {{ $t('auth.login.backToLogin') }}
                 </button>
               </div>
             </form>
@@ -103,6 +140,12 @@ const formData = reactive({
   remember: false,
 })
 
+// Forgot password state
+const showForgotPassword = ref(false)
+const resetEmail = ref('')
+const isResetting = ref(false)
+const resetEmailSent = ref(false)
+
 const isLoading = computed(() => authStore.isLoading)
 const errorMessage = computed(() => authStore.error)
 
@@ -130,6 +173,40 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login error:', error.message)
+  }
+}
+
+const handleForgotPassword = async () => {
+  if (!resetEmail.value) {
+    authStore.error = t('auth.login.emailRequired')
+    return
+  }
+
+  isResetting.value = true
+  authStore.error = null
+  resetEmailSent.value = false
+
+  try {
+    const response = await fetch('/api/password/forgot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ email: resetEmail.value })
+    })
+
+    const data = await response.json()
+
+    // Always show success message (don't reveal if email exists)
+    resetEmailSent.value = true
+    showForgotPassword.value = false
+    resetEmail.value = ''
+  } catch (error) {
+    console.error('Password reset error:', error.message)
+    authStore.error = t('auth.login.resetError')
+  } finally {
+    isResetting.value = false
   }
 }
 </script>
