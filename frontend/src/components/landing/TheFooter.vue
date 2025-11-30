@@ -16,12 +16,12 @@ const { t } = useI18n()
             <router-link to="/login" class="text-decoration-none text-muted">
               {{ $t('footer.login') }}
             </router-link>
-            <a href="#" class="text-decoration-none text-muted">
+            <router-link to="/register" class="text-decoration-none text-muted">
               {{ $t('footer.registerStudent') }}
-            </a>
-            <a href="#" class="text-decoration-none text-muted">
+            </router-link>
+            <router-link to="/register-company" class="text-decoration-none text-muted">
               {{ $t('footer.registerCompany') }}
-            </a>
+            </router-link>
           </div>
         </div>
       </div>

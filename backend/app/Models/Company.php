@@ -27,8 +27,29 @@ class Company extends Model
         'postal_code',
         'street',
         'house_number',
+        'status',
+        'request_source',
+        'reviewed_by_garant_id',
+        'rejection_reason',
+        'reviewed_at',
     ];
 
+    protected $casts = [
+        'reviewed_at' => 'datetime',
+    ];
+
+    /**
+     * Status constants
+     */
+    const STATUS_PENDING = 'pending';
+    const STATUS_ACCEPTED = 'accepted';
+    const STATUS_DECLINED = 'declined';
+
+    /**
+     * Request source constants
+     */
+    const SOURCE_PUBLIC = 'public_registration';
+    const SOURCE_STUDENT = 'student_request';
 
     /**
      * Vzťah: firma patrí používateľovi
@@ -52,5 +73,61 @@ class Company extends Model
     public function internships()
     {
         return $this->hasMany(Internship::class, 'company_id');
+    }
+
+    /**
+     * Relationship: Garant who reviewed the request
+     */
+    public function reviewedByGarant()
+    {
+        return $this->belongsTo(Garant::class, 'reviewed_by_garant_id');
+    }
+
+    /**
+     * Scope: Get only pending companies
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    /**
+     * Scope: Get only accepted companies
+     */
+    public function scopeAccepted($query)
+    {
+        return $query->where('status', self::STATUS_ACCEPTED);
+    }
+
+    /**
+     * Scope: Get only declined companies
+     */
+    public function scopeDeclined($query)
+    {
+        return $query->where('status', self::STATUS_DECLINED);
+    }
+
+    /**
+     * Check if company is pending
+     */
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * Check if company is accepted
+     */
+    public function isAccepted(): bool
+    {
+        return $this->status === self::STATUS_ACCEPTED;
+    }
+
+    /**
+     * Check if company is declined
+     */
+    public function isDeclined(): bool
+    {
+        return $this->status === self::STATUS_DECLINED;
     }
 }

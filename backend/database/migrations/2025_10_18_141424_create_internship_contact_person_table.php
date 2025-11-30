@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('internship_contact_person', function (Blueprint $table) {
+        Schema::create('contact_person_internships', function (Blueprint $table) {
             $table->integer('internship_id');
             $table->integer('contact_person_id')->index('icp_contact_fk');
 

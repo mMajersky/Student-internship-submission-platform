@@ -174,7 +174,16 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::get('/garants/{id}', [GarantController::class, 'show']);
     Route::put('/garants/{id}', [GarantController::class, 'update']);
     Route::delete('/garants/{id}', [GarantController::class, 'destroy']);
+    
+    // Company request management routes (garant only)
+    Route::get('/company-requests', [CompanyController::class, 'listRequests']);
+    Route::get('/company-requests/{id}', [CompanyController::class, 'show']);
+    Route::post('/company-requests/{id}/approve', [CompanyController::class, 'approve']);
+    Route::post('/company-requests/{id}/reject', [CompanyController::class, 'reject']);
 });
+
+// Company registration - accessible by both authenticated students and public (no auth required)
+Route::post('/companies/create', [CompanyController::class, 'createCompany']);
 
 // Student routes - accessible by students
 Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(function () {
