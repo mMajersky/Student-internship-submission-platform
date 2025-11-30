@@ -55,7 +55,12 @@ const messages = {
         registerCompany: 'company registration',
         requiredFields: 'Email and password are required fields.',
         emailPlaceholder: "{'your.email@example.com'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Send Reset Link',
+        backToLogin: 'Back to Login',
+        resetEmailSent: 'If an account with that email exists, we have sent a password reset link.',
+        emailRequired: 'Email is required.',
+        resetError: 'An error occurred while sending the reset link. Please try again.'
       },
       register: {
         studentTitle: 'Student Registration',
@@ -336,6 +341,7 @@ const messages = {
       documentNeedsValidation: {
         title: 'Document Needs Validation',
         message: 'Student {studentName} uploaded a document. Please validate it.'
+      },
       companyRequestCreated: {
         title: 'New Company Request',
         message: 'New request to add company "{companyName}".'
@@ -1048,7 +1054,12 @@ const messages = {
         registerCompany: 'registrácia firmy',
         requiredFields: 'Email a heslo sú povinné polia.',
         emailPlaceholder: "{'meno@priklad.sk'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Odoslať odkaz na reset',
+        backToLogin: 'Späť na prihlásenie',
+        resetEmailSent: 'Ak účet s týmto emailom existuje, odoslali sme odkaz na obnovenie hesla.',
+        emailRequired: 'Email je povinný.',
+        resetError: 'Pri odosielaní odkazu na reset nastala chyba. Skúste to znova.'
       },
       register: {
         studentTitle: 'Registrácia študenta',
@@ -1329,6 +1340,7 @@ const messages = {
       documentNeedsValidation: {
         title: 'Dokument čaká na validáciu',
         message: 'Študent {studentName} nahral dokument. Prosíme o jeho validáciu.'
+      },
       companyRequestCreated: {
         title: 'Nová žiadosť o firmu',
         message: 'Nová žiadosť o pridanie firmy "{companyName}".'
