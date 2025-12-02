@@ -36,6 +36,7 @@ class Notification extends Model
     const TYPE_COMMENT_ADDED = 'comment_added';
     const TYPE_DOCUMENT_UPLOADED = 'document_uploaded';
     const TYPE_APPROVAL_REQUEST = 'approval_request';
+    const TYPE_DOCUMENT_STATUS_CHANGED = 'document_status_changed';
 
     /**
      * Notification belongs to a user

@@ -55,7 +55,12 @@ const messages = {
         registerCompany: 'company registration',
         requiredFields: 'Email and password are required fields.',
         emailPlaceholder: "{'your.email@example.com'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Send Reset Link',
+        backToLogin: 'Back to Login',
+        resetEmailSent: 'If an account with that email exists, we have sent a password reset link.',
+        emailRequired: 'Email is required.',
+        resetError: 'An error occurred while sending the reset link. Please try again.'
       },
       register: {
         studentTitle: 'Student Registration',
@@ -146,20 +151,128 @@ const messages = {
     },
     companyDashboard: {
       title: 'Company Dashboard',
-      internships: 'Internships',
-      internshipsDesc: 'Management of offered internships',
-      addInternship: 'Add Internship',
-      applications: 'Applications',
-      applicationsDesc: 'Overview of student applications',
-      viewApplications: 'View Applications',
-      companyProfile: 'Company Profile',
-      companyProfileDesc: 'Manage company profile',
-      editProfile: 'Edit Profile',
-      roleInfo: 'Your role information',
-      role: 'Role',
-      name: 'Name',
-      email: 'Email',
-      permissions: 'Permissions'
+      tabs: {
+        overview: 'Overview',
+        internships: 'All Internships',
+        documents: 'Documents'
+      },
+      cards: {
+        manageInternships: 'Manage Internships',
+        manageInternshipsDesc: 'View and manage all internships',
+        viewInternships: 'View Internships',
+        documents: 'Documents',
+        documentsDesc: 'Manage documents and agreements',
+        viewDocuments: 'View Documents',
+        applications: 'Applications',
+        applicationsDesc: 'Overview of student applications',
+        viewApplications: 'View Applications'
+      },
+      internshipsList: 'Internships List',
+      noInternships: 'No internships found.',
+      documentsTitle: 'Documents of All Internships',
+      documentCount: 'Document Count',
+      viewDocumentsBtn: 'Documents',
+      tableHeaders: {
+        student: 'Student',
+        year: 'Academic Year',
+        semester: 'Semester',
+        start: 'Start Date',
+        end: 'End Date',
+        status: 'Status',
+        documents: 'Documents',
+        actions: 'Actions'
+      },
+      actions: {
+        viewDocuments: 'View Documents'
+      },
+      filters: {
+        searchStudent: 'Search by student',
+        searchStudentPlaceholder: 'Enter student name...',
+        status: 'Filter by status',
+        allStatuses: 'All statuses',
+        clearAll: 'Clear Filters',
+        noResults: 'No internships match the selected filters.',
+        showing: 'Showing {count} of {total} internships'
+      }
+    },
+    companyDocuments: {
+      title: 'Internship Documents',
+      student: 'Student',
+      studentEmail: 'Email',
+      academyYear: 'Academic Year',
+      status: 'Internship Status',
+      tableHeaders: {
+        name: 'Name',
+        type: 'Type',
+        status: 'Status',
+        companyStatus: 'Company Validation',
+        created: 'Created',
+        actions: 'Actions'
+      },
+      notValidated: 'Not validated',
+      download: 'Download',
+      validate: 'Validate',
+      viewRejectionReason: 'View rejection reason',
+      noDocuments: 'No documents uploaded for this internship.',
+      loadError: 'Error loading documents',
+      types: {
+        agreement: 'Internship Agreement',
+        agreementSigned: 'Signed Agreement',
+        reportScan: 'Report Scan',
+        confirmation: 'Confirmation',
+        attendance: 'Attendance'
+      },
+      validateDocument: 'Validate Document',
+      documentName: 'Document',
+      documentType: 'Type',
+      selectAction: 'Select action',
+      approve: 'Approve',
+      reject: 'Reject',
+      rejectionReason: 'Rejection Reason',
+      rejectionReasonPlaceholder: 'Enter the reason for rejection...',
+      confirmApprove: 'Confirm Approval',
+      confirmReject: 'Confirm Rejection',
+      rejectionReasonRequired: 'Please enter a rejection reason.',
+      validateError: 'Error validating document',
+      documentApproved: 'Document has been approved.',
+      documentRejected: 'Document has been rejected.',
+      rejectionReasonTitle: 'Rejection Reason',
+      rejectedAt: 'Rejected at',
+      reason: 'Reason',
+      internshipReport: 'Internship Report',
+      reportStatus: 'Status',
+      reportSubmitted: 'Submitted',
+      reportSubmittedAt: 'Submitted at',
+      viewReport: 'View Report',
+      reportContent: 'Report Content',
+      report: {
+        studentName: 'Student Name',
+        studentProgram: 'Study Program',
+        companyName: 'Company',
+        tutorName: 'Tutor',
+        totalHours: 'Total Hours',
+        activities: 'Activities',
+        activityDate: 'Date',
+        activityDescription: 'Description',
+        activityHours: 'Hours',
+        evaluation: {
+          organizovanie: 'Organizing and Planning',
+          teamWork: 'Teamwork',
+          learning: 'Learning Ability',
+          digital: 'Digital Literacy',
+          expression: 'Expression',
+          terms: 'Use of Terms',
+          presentation: 'Presentation',
+          independence: 'Independence',
+          adaptability: 'Adaptability',
+          flexibility: 'Flexibility',
+          improvisation: 'Improvisation',
+          decisions: 'Decision Making',
+          responsibility: 'Responsibility',
+          ethics: 'Ethics',
+          communication: 'Communication'
+        }
+      }
     },
     unauthorized: {
       title: 'Access Denied',
@@ -237,6 +350,22 @@ const messages = {
       documentUploaded: {
         title: 'Document Uploaded',
         message: 'Student {studentName} uploaded a signed agreement for their internship.'
+      },
+      documentNeedsValidation: {
+        title: 'Document Needs Validation',
+        message: 'Student {studentName} uploaded a document. Please validate it.'
+      },
+      companyRequestCreated: {
+        title: 'New Company Request',
+        message: 'New request to add company "{companyName}".'
+      },
+      companyRequestApproved: {
+        title: 'Company Request Approved',
+        message: 'Your request to add company "{companyName}" has been approved.'
+      },
+      companyRequestRejected: {
+        title: 'Company Request Rejected',
+        message: 'Your request to add company "{companyName}" has been rejected. Reason: {reason}'
       }
     },
     editAnnouncement: {
@@ -480,7 +609,157 @@ const messages = {
       validationError: 'Validation error:',
       createError: 'Failed to create internship.',
       createSuccess: 'Internship has been successfully created!',
+      companyNotFound: 'Can\'t find your company?',
+      clickHere: 'Click here',
+      toAddNew: 'to add a new one.',
+      companyRequestSuccess: 'Company request has been submitted! You will be notified when a supervisor reviews your request.',
       footer: '© 2025 Professional Practice CRM'
+    },
+    companyRegistration: {
+      title: 'Request to Add Company',
+      description: 'Can\'t find your company in the list? Fill out the form below and a supervisor will review your request.',
+      successTitle: 'Request Submitted!',
+      successMessage: 'Your request has been successfully submitted. You will be notified when a supervisor reviews it.',
+      addAnother: 'Add Another Company',
+      backHome: 'Back to Home',
+      submitButton: 'Submit Request',
+      companyInfo: 'Company Information',
+      companyName: 'Company Name',
+      companyNamePlaceholder: 'e.g. Tech Solutions Ltd.',
+      state: 'State',
+      statePlaceholder: 'e.g. Slovakia',
+      region: 'Region',
+      regionPlaceholder: 'e.g. Bratislava Region',
+      city: 'City',
+      cityPlaceholder: 'e.g. Bratislava',
+      postalCode: 'Postal Code',
+      postalCodePlaceholder: 'e.g. 81101',
+      street: 'Street',
+      streetPlaceholder: 'e.g. Main Street',
+      houseNumber: 'House Number',
+      houseNumberPlaceholder: 'e.g. 123',
+      contactPerson: 'Contact Person',
+      contactPersonName: 'Name',
+      contactPersonNamePlaceholder: 'Enter name',
+      contactPersonSurname: 'Surname',
+      contactPersonSurnamePlaceholder: 'Enter surname',
+      contactPersonEmail: 'Email',
+      contactPersonEmailPlaceholder: 'contact@company.com',
+      contactPersonPhone: 'Phone',
+      contactPersonPhonePlaceholder: '+421 900 123 456',
+      contactPersonPosition: 'Position',
+      contactPersonPositionPlaceholder: 'e.g. HR Manager',
+      cancel: 'Cancel',
+      submitting: 'Submitting...',
+      submitRequest: 'Submit Request',
+      validationError: 'Please correct the errors in the form.',
+      submitError: 'Failed to submit the request.',
+      submitSuccess: 'Company registration request has been successfully submitted!',
+      unknownError: 'An error occurred while submitting the request. Please try again.'
+    },
+    companyRequestModal: {
+      title: 'Request to Add New Company',
+      info: 'Can\'t find your company in the list? Fill out the form below and a supervisor will review your request. Once approved, the company will automatically appear in the list.',
+      submitButton: 'Submit Request'
+    },
+    companyRequests: {
+      title: 'Company Requests Management',
+      filter: {
+        label: 'Filter:',
+        pending: 'Pending',
+        accepted: 'Accepted',
+        declined: 'Declined',
+        all: 'All',
+        titles: {
+          pending: 'Pending Requests',
+          accepted: 'Accepted Requests',
+          declined: 'Declined Requests',
+          all: 'All Requests',
+          default: 'Requests'
+        }
+      },
+      loadingAria: 'Loading',
+      loadingText: 'Loading requests...',
+      empty: {
+        pending: 'No pending requests.',
+        none: 'No requests.'
+      },
+      refresh: 'Refresh',
+      table: {
+        company: 'Company',
+        contactPerson: 'Contact Person',
+        source: 'Source',
+        requestedBy: 'Requested By',
+        date: 'Date',
+        status: 'Status',
+        actions: 'Actions'
+      },
+      source: {
+        public: 'Public',
+        student: 'Student',
+        publicRegistration: 'Public Registration',
+        studentRequest: 'Student Request'
+      },
+      actions: {
+        view: 'View details',
+        approve: 'Approve',
+        reject: 'Reject',
+        close: 'Close'
+      },
+      modal: {
+        title: 'Company Request Details',
+        sections: {
+          companyInfo: 'Company Information',
+          contact: 'Contact Person',
+          requestInfo: 'Request Information'
+        },
+        fields: {
+          companyName: 'Company Name:',
+          state: 'State:',
+          region: 'Region:',
+          city: 'City:',
+          postalCode: 'Postal Code:',
+          street: 'Street:',
+          houseNumber: 'House Number:',
+          contactName: 'Name:',
+          contactEmail: 'Email:',
+          contactPhone: 'Phone:',
+          contactPosition: 'Position:',
+          requestSource: 'Request Source:',
+          requestedBy: 'Requested By:',
+          createdAt: 'Date Created:',
+          status: 'Status:',
+          reviewedBy: 'Reviewed By:',
+          reviewedAt: 'Review Date:',
+          rejectionReason: 'Rejection Reason:',
+          companyId: 'Company ID:'
+        }
+      },
+      confirm: {
+        approve: 'Are you sure you want to approve this request? The company will be added to the system.'
+      },
+      alert: {
+        accepted: 'Request has been accepted! Company "{name}" has been added to the system.',
+        declined: 'Request has been declined.'
+      },
+      prompt: {
+        rejectionReason: 'Enter the reason for rejecting the request:'
+      },
+      error: {
+        approve: 'Failed to approve the request.',
+        approveUnexpected: 'An error occurred while approving the request.',
+        rejectionReasonRequired: 'Rejection reason is required.',
+        reject: 'Failed to reject the request.',
+        rejectUnexpected: 'An error occurred while rejecting the request.'
+      },
+      status: {
+        pending: 'Pending',
+        accepted: 'Accepted',
+        declined: 'Declined'
+      },
+      noAddress: 'Address not provided',
+      unknownCompany: 'Unknown company',
+      noContactPerson: 'No contact details provided'
     },
     aboutInternship: {
       title: 'What is Professional Practice?',
@@ -612,7 +891,8 @@ const messages = {
         overview: 'Overview',
         createInternship: 'New Internship',
         internships: 'All Internships',
-        documents: 'Documents'
+        documents: 'Documents',
+        companyRequests: 'Company Requests',
       },
       cards: {
         createInternship: 'Create Internship',
@@ -667,6 +947,19 @@ const messages = {
         commentError: 'Error saving comment',
         evaluationEmailSent: 'Evaluation email sent successfully!',
         evaluationEmailError: 'Error sending evaluation email. Please try again.'
+      },
+      filters: {
+        year: 'Year',
+        company: 'Company',
+        studyField: 'Study Field',
+        student: 'Student',
+        searchStudent: 'Search by student name...',
+        all: 'All',
+        selectAll: 'Select All',
+        selected: '{count} selected',
+        clearAll: 'Clear Filters',
+        noResults: 'No internships match the selected filters.',
+        showing: 'Showing {count} of {total} internships'
       }
     },
     garantDocuments: {
@@ -675,12 +968,54 @@ const messages = {
         name: 'Name',
         type: 'Type',
         status: 'Status',
+        companyStatus: 'Company Validation',
         created: 'Created',
         actions: 'Actions'
       },
       noDocuments: 'No documents',
       download: 'Download',
-      loadError: 'Error loading documents'
+      loadError: 'Error loading documents',
+      notValidated: 'Not validated',
+      viewRejectionReason: 'View rejection reason',
+      rejectionReasonTitle: 'Rejection Reason',
+      documentName: 'Document',
+      rejectedAt: 'Rejected at',
+      reason: 'Reason',
+      close: 'Close',
+      internshipReport: 'Internship Report',
+      reportStatus: 'Status',
+      reportSubmitted: 'Submitted',
+      reportSubmittedAt: 'Submitted at',
+      viewReport: 'View Report',
+      reportContent: 'Report Content',
+      report: {
+        studentName: 'Student Name',
+        studentProgram: 'Study Program',
+        companyName: 'Company',
+        tutorName: 'Tutor',
+        totalHours: 'Total Hours',
+        activities: 'Activities',
+        activityDate: 'Date',
+        activityDescription: 'Description',
+        activityHours: 'Hours',
+        evaluation: {
+          organizovanie: 'Organizing and Planning',
+          teamWork: 'Teamwork',
+          learning: 'Learning Ability',
+          digital: 'Digital Literacy',
+          expression: 'Expression',
+          terms: 'Use of Terms',
+          presentation: 'Presentation',
+          independence: 'Independence',
+          adaptability: 'Adaptability',
+          flexibility: 'Flexibility',
+          improvisation: 'Improvisation',
+          decisions: 'Decision Making',
+          responsibility: 'Responsibility',
+          ethics: 'Ethics',
+          communication: 'Communication'
+        }
+      }
     },
     studentComments: {
       title: 'Garant Comments',
@@ -745,7 +1080,12 @@ const messages = {
         registerCompany: 'registrácia firmy',
         requiredFields: 'Email a heslo sú povinné polia.',
         emailPlaceholder: "{'meno@priklad.sk'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Odoslať odkaz na reset',
+        backToLogin: 'Späť na prihlásenie',
+        resetEmailSent: 'Ak účet s týmto emailom existuje, odoslali sme odkaz na obnovenie hesla.',
+        emailRequired: 'Email je povinný.',
+        resetError: 'Pri odosielaní odkazu na reset nastala chyba. Skúste to znova.'
       },
       register: {
         studentTitle: 'Registrácia študenta',
@@ -836,20 +1176,128 @@ const messages = {
     },
     companyDashboard: {
       title: 'Dashboard firmy',
-      internships: 'Praxe',
-      internshipsDesc: 'Správa ponúkaných praxí',
-      addInternship: 'Pridať prax',
-      applications: 'Aplikácie',
-      applicationsDesc: 'Prehľad aplikácií študentov',
-      viewApplications: 'Zobraziť aplikácie',
-      companyProfile: 'Profil firmy',
-      companyProfileDesc: 'Správa profilu firmy',
-      editProfile: 'Upraviť profil',
-      roleInfo: 'Informácie o vašej roli',
-      role: 'Rola',
-      name: 'Meno',
-      email: 'Email',
-      permissions: 'Oprávnenia'
+      tabs: {
+        overview: 'Prehľad',
+        internships: 'Všetky praxe',
+        documents: 'Dokumenty'
+      },
+      cards: {
+        manageInternships: 'Správa praxí',
+        manageInternshipsDesc: 'Zobrazenie a správa všetkých praxí',
+        viewInternships: 'Zobraziť praxe',
+        documents: 'Dokumenty',
+        documentsDesc: 'Správa dokumentov a dohôd',
+        viewDocuments: 'Zobraziť dokumenty',
+        applications: 'Aplikácie',
+        applicationsDesc: 'Prehľad aplikácií študentov',
+        viewApplications: 'Zobraziť aplikácie'
+      },
+      internshipsList: 'Zoznam praxí',
+      noInternships: 'Nenašli sa žiadne praxe.',
+      documentsTitle: 'Dokumenty všetkých praxí',
+      documentCount: 'Počet dokumentov',
+      viewDocumentsBtn: 'Dokumenty',
+      tableHeaders: {
+        student: 'Študent',
+        year: 'Akademický rok',
+        semester: 'Semester',
+        start: 'Začiatok',
+        end: 'Koniec',
+        status: 'Stav',
+        documents: 'Dokumenty',
+        actions: 'Akcie'
+      },
+      actions: {
+        viewDocuments: 'Zobraziť dokumenty'
+      },
+      filters: {
+        searchStudent: 'Hľadať podľa študenta',
+        searchStudentPlaceholder: 'Zadajte meno študenta...',
+        status: 'Filtrovať podľa stavu',
+        allStatuses: 'Všetky stavy',
+        clearAll: 'Zrušiť filtre',
+        noResults: 'Žiadne praxe nezodpovedajú vybraným filtrom.',
+        showing: 'Zobrazuje sa {count} z {total} praxí'
+      }
+    },
+    companyDocuments: {
+      title: 'Dokumenty k praxi',
+      student: 'Študent',
+      studentEmail: 'Email',
+      academyYear: 'Akademický rok',
+      status: 'Stav praxe',
+      tableHeaders: {
+        name: 'Názov',
+        type: 'Typ',
+        status: 'Stav',
+        companyStatus: 'Validácia firmou',
+        created: 'Vytvorené',
+        actions: 'Akcie'
+      },
+      notValidated: 'Nevalidované',
+      download: 'Stiahnuť',
+      validate: 'Validovať',
+      viewRejectionReason: 'Zobraziť dôvod zamietnutia',
+      noDocuments: 'K tejto praxi neboli nahrané žiadne dokumenty.',
+      loadError: 'Chyba pri načítavaní dokumentov',
+      types: {
+        agreement: 'Dohoda o praxi',
+        agreementSigned: 'Podpísaná dohoda',
+        reportScan: 'Sken výkazu',
+        confirmation: 'Potvrdenie',
+        attendance: 'Dochádzka'
+      },
+      validateDocument: 'Validovať dokument',
+      documentName: 'Dokument',
+      documentType: 'Typ',
+      selectAction: 'Vyberte akciu',
+      approve: 'Schváliť',
+      reject: 'Zamietnuť',
+      rejectionReason: 'Dôvod zamietnutia',
+      rejectionReasonPlaceholder: 'Zadajte dôvod zamietnutia...',
+      confirmApprove: 'Potvrdiť schválenie',
+      confirmReject: 'Potvrdiť zamietnutie',
+      rejectionReasonRequired: 'Prosím zadajte dôvod zamietnutia.',
+      validateError: 'Chyba pri validácii dokumentu',
+      documentApproved: 'Dokument bol schválený.',
+      documentRejected: 'Dokument bol zamietnutý.',
+      rejectionReasonTitle: 'Dôvod zamietnutia',
+      rejectedAt: 'Zamietnuté',
+      reason: 'Dôvod',
+      internshipReport: 'Výkaz praxe',
+      reportStatus: 'Stav',
+      reportSubmitted: 'Odoslaný',
+      reportSubmittedAt: 'Odoslané',
+      viewReport: 'Zobraziť výkaz',
+      reportContent: 'Obsah výkazu',
+      report: {
+        studentName: 'Meno študenta',
+        studentProgram: 'Študijný program',
+        companyName: 'Firma',
+        tutorName: 'Školiteľ',
+        totalHours: 'Celkový počet hodín',
+        activities: 'Aktivity',
+        activityDate: 'Dátum',
+        activityDescription: 'Popis',
+        activityHours: 'Hodiny',
+        evaluation: {
+          organizovanie: 'Organizovanie a plánovanie práce',
+          teamWork: 'Schopnosť pracovať v tíme',
+          learning: 'Schopnosť učiť sa',
+          digital: 'Úroveň digitálnej gramotnosti',
+          expression: 'Kultivovanosť prejavu',
+          terms: 'Používanie zaužívaných výrazov',
+          presentation: 'Prezentovanie',
+          independence: 'Samostatnosť',
+          adaptability: 'Adaptabilita',
+          flexibility: 'Flexibilita',
+          improvisation: 'Schopnosť improvizovať',
+          decisions: 'Schopnosť prijímať rozhodnutia',
+          responsibility: 'Schopnosť niesť zodpovednosť',
+          ethics: 'Dodržovanie etických zásad',
+          communication: 'Schopnosť jednania s ľuďmi'
+        }
+      }
     },
     unauthorized: {
       title: 'Prístup zamietnutý',
@@ -927,6 +1375,22 @@ const messages = {
       documentUploaded: {
         title: 'Študent nahral dokument',
         message: 'Študent {studentName} nahral podpísanú dohodu k svojej praxi.'
+      },
+      documentNeedsValidation: {
+        title: 'Dokument čaká na validáciu',
+        message: 'Študent {studentName} nahral dokument. Prosíme o jeho validáciu.'
+      },
+      companyRequestCreated: {
+        title: 'Nová žiadosť o firmu',
+        message: 'Nová žiadosť o pridanie firmy "{companyName}".'
+      },
+      companyRequestApproved: {
+        title: 'Žiadosť o firmu bola schválená',
+        message: 'Vaša žiadosť o pridanie firmy "{companyName}" bola schválená.'
+      },
+      companyRequestRejected: {
+        title: 'Žiadosť o firmu bola zamietnutá',
+        message: 'Vaša žiadosť o pridanie firmy "{companyName}" bola zamietnutá. Důvod: {reason}'
       }
     },
     editAnnouncement: {
@@ -1096,7 +1560,8 @@ const messages = {
         overview: 'Prehľad',
         createInternship: 'Nová prax',
         internships: 'Všetky praxe',
-        documents: 'Dokumenty'
+        documents: 'Dokumenty',
+        companyRequests: 'Žiadosti firiem'
       },
       cards: {
         createInternship: 'Vytvoriť prax',
@@ -1184,6 +1649,19 @@ const messages = {
         commentError: 'Chyba pri ukladaní komentára',
         evaluationEmailSent: 'Hodnotiaci email bol úspešne odoslaný!',
         evaluationEmailError: 'Chyba pri odosielaní hodnotiaceho emailu. Skúste to znova.'
+      },
+      filters: {
+        year: 'Rok',
+        company: 'Firma',
+        studyField: 'Študijný odbor',
+        student: 'Študent',
+        searchStudent: 'Hľadať podľa mena študenta...',
+        all: 'Všetky',
+        selectAll: 'Vybrať všetky',
+        selected: '{count} vybraných',
+        clearAll: 'Zrušiť filtre',
+        noResults: 'Žiadne praxe nezodpovedajú vybraným filtrom.',
+        showing: 'Zobrazuje sa {count} z {total} praxí'
       }
     },
     studentInternship: {
@@ -1248,7 +1726,157 @@ const messages = {
       validationError: 'Chyba validácie:',
       createError: 'Nepodarilo sa vytvoriť prax.',
       createSuccess: 'Prax bola úspešne vytvorená!',
+      companyNotFound: 'Nenašli ste svoju firmu?',
+      clickHere: 'Kliknite sem',
+      toAddNew: 'pre pridanie novej.',
+      companyRequestSuccess: 'Žiadosť o pridanie firmy bola odoslaná! Budete upozornený, keď garant posúdi vašu žiadosť.',
       footer: '© 2025 Odborná prax CRM'
+    },
+    companyRegistration: {
+      title: 'Žiadosť o pridanie firmy',
+      description: 'Nenašli ste svoju firmu v zozname? Vyplňte formulár nižšie a garant posúdi vašu žiadosť.',
+      successTitle: 'Žiadosť odoslaná!',
+      successMessage: 'Vaša žiadosť bola úspešne odoslaná. Budete upozornený, keď ju garant posúdi.',
+      addAnother: 'Pridať ďalšiu firmu',
+      backHome: 'Späť na domov',
+      submitButton: 'Odoslať žiadosť',
+      companyInfo: 'Informácie o firme',
+      companyName: 'Názov firmy',
+      companyNamePlaceholder: 'Napr. Tech Solutions s.r.o.',
+      state: 'Štát',
+      statePlaceholder: 'Napr. Slovensko',
+      region: 'Región',
+      regionPlaceholder: 'Napr. Bratislavský kraj',
+      city: 'Mesto',
+      cityPlaceholder: 'Napr. Bratislava',
+      postalCode: 'PSČ',
+      postalCodePlaceholder: 'Napr. 81101',
+      street: 'Ulica',
+      streetPlaceholder: 'Napr. Hlavná',
+      houseNumber: 'Číslo domu',
+      houseNumberPlaceholder: 'Napr. 123',
+      contactPerson: 'Kontaktná osoba',
+      contactPersonName: 'Meno',
+      contactPersonNamePlaceholder: 'Zadajte meno',
+      contactPersonSurname: 'Priezvisko',
+      contactPersonSurnamePlaceholder: 'Zadajte priezvisko',
+      contactPersonEmail: 'Email',
+      contactPersonEmailPlaceholder: 'kontakt@firma.sk',
+      contactPersonPhone: 'Telefón',
+      contactPersonPhonePlaceholder: '+421 900 123 456',
+      contactPersonPosition: 'Pozícia',
+      contactPersonPositionPlaceholder: 'napr. HR manažér',
+      cancel: 'Zrušiť',
+      submitting: 'Odosiela sa...',
+      submitRequest: 'Odoslať žiadosť',
+      validationError: 'Prosím opravte chyby vo formulári.',
+      submitError: 'Nepodarilo sa odoslať žiadosť.',
+      submitSuccess: 'Žiadosť o registráciu firmy bola úspešne odoslaná!',
+      unknownError: 'Vyskytla sa chyba pri odosielaní žiadosti. Skúste to znova.'
+    },
+    companyRequestModal: {
+      title: 'Požiadať o pridanie novej firmy',
+      info: 'Nenašli ste svoju firmu v zozname? Vyplňte formulár nižšie a garant posúdi vašu žiadosť. Po schválení sa firma automaticky zobrazí v zozname.',
+      submitButton: 'Odoslať žiadosť'
+    },
+    companyRequests: {
+      title: 'Správa žiadostí o firmy',
+      filter: {
+        label: 'Filter:',
+        pending: 'Čakajúce',
+        accepted: 'Schválené',
+        declined: 'Zamietnuté',
+        all: 'Všetky',
+        titles: {
+          pending: 'Čakajúce žiadosti',
+          accepted: 'Schválené žiadosti',
+          declined: 'Zamietnuté žiadosti',
+          all: 'Všetky žiadosti',
+          default: 'Žiadosti'
+        }
+      },
+      loadingAria: 'Načítava sa',
+      loadingText: 'Načítavajú sa žiadosti...',
+      empty: {
+        pending: 'Žiadne čakajúce žiadosti.',
+        none: 'Žiadne žiadosti.'
+      },
+      refresh: 'Obnoviť',
+      table: {
+        company: 'Firma',
+        contactPerson: 'Kontaktná osoba',
+        source: 'Zdroj',
+        requestedBy: 'Požiadal',
+        date: 'Dátum',
+        status: 'Stav',
+        actions: 'Akcie'
+      },
+      source: {
+        public: 'Verejná',
+        student: 'Študent',
+        publicRegistration: 'Verejná registrácia',
+        studentRequest: 'Žiadosť študenta'
+      },
+      actions: {
+        view: 'Zobraziť detaily',
+        approve: 'Schváliť',
+        reject: 'Zamietnuť',
+        close: 'Zavrieť'
+      },
+      modal: {
+        title: 'Detail žiadosti o firmu',
+        sections: {
+          companyInfo: 'Informácie o firme',
+          contact: 'Kontaktná osoba',
+          requestInfo: 'Informácie o žiadosti'
+        },
+        fields: {
+          companyName: 'Názov firmy:',
+          state: 'Štát:',
+          region: 'Región:',
+          city: 'Mesto:',
+          postalCode: 'PSČ:',
+          street: 'Ulica:',
+          houseNumber: 'Číslo domu:',
+          contactName: 'Meno:',
+          contactEmail: 'Email:',
+          contactPhone: 'Telefón:',
+          contactPosition: 'Pozícia:',
+          requestSource: 'Zdroj žiadosti:',
+          requestedBy: 'Požiadal:',
+          createdAt: 'Dátum vytvorenia:',
+          status: 'Stav:',
+          reviewedBy: 'Posúdil:',
+          reviewedAt: 'Dátum posúdenia:',
+          rejectionReason: 'Dôvod zamietnutia:',
+          companyId: 'ID firmy:'
+        }
+      },
+      confirm: {
+        approve: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.'
+      },
+      alert: {
+        accepted: 'Žiadosť bola schválená! Firma "{name}" bola pridaná do systému.',
+        declined: 'Žiadosť bola zamietnutá.'
+      },
+      prompt: {
+        rejectionReason: 'Zadajte dôvod zamietnutia žiadosti:'
+      },
+      error: {
+        approve: 'Nepodarilo sa schváliť žiadosť.',
+        approveUnexpected: 'Vyskytla sa chyba pri schvaľovaní žiadosti.',
+        rejectionReasonRequired: 'Dôvod zamietnutia je povinný.',
+        reject: 'Nepodarilo sa zamietnuť žiadosť.',
+        rejectUnexpected: 'Vyskytla sa chyba pri zamietaní žiadosti.'
+      },
+      status: {
+        pending: 'Čaká',
+        accepted: 'Schválené',
+        declined: 'Zamietnuté'
+      },
+      noAddress: 'Adresa neuvedená',
+      unknownCompany: 'Neznáma firma',
+      noContactPerson: 'Kontaktné údaje neboli poskytnuté'
     },
     studentDocuments: {
       title: 'Odborná prax',
@@ -1357,12 +1985,19 @@ const messages = {
         name: 'Názov',
         type: 'Typ',
         status: 'Stav',
+        companyStatus: 'Validácia firmou',
         created: 'Vytvorené',
         actions: 'Akcie'
       },
       noDocuments: 'Žiadne dokumenty',
       download: 'Stiahnuť',
       loadError: 'Chyba načítania dokumentov',
+      notValidated: 'Nevalidované',
+      viewRejectionReason: 'Zobraziť dôvod zamietnutia',
+      rejectionReasonTitle: 'Dôvod zamietnutia',
+      documentName: 'Dokument',
+      rejectedAt: 'Zamietnuté',
+      reason: 'Dôvod',
       internshipReport: 'Výkaz praxe',
       reportStatus: 'Stav výkazu',
       reportSubmitted: 'Výkaz bol odoslaný',
@@ -1380,7 +2015,6 @@ const messages = {
         activityDate: 'Dátum',
         activityDescription: 'Popis činností',
         activityHours: 'Počet hodín',
-        evaluation: 'Hodnotenie od firmy',
         evaluation: {
           organizovanie: 'Organizovanie a plánovanie práce',
           teamWork: 'Schopnosť pracovať v tíme',

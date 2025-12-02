@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('internship_contact_person', function (Blueprint $table) {
-            $table->integer('internship_id');
-            $table->integer('contact_person_id')->index('icp_contact_fk');
-
-            $table->primary(['internship_id', 'contact_person_id']);
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
         });
     }
 
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('internship_contact_person');
+        Schema::dropIfExists('password_reset_tokens');
     }
 };

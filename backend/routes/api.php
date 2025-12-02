@@ -49,7 +49,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('/user/settings/email-notifications', [UserProfileController::class, 'updateEmailNotifications']);
     Route::put('/user/profile', [UserProfileController::class, 'updateProfile']);
     Route::put('/user/password', [UserProfileController::class, 'changePassword']);
-    
+
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
@@ -61,6 +61,10 @@ Route::middleware(['auth:api'])->group(function () {
 // Auth routes from develop
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+
+// Password reset - sends email with reset link (no auth required)
+Route::post('/password/forgot', [App\Http\Controllers\PasswordResetController::class, 'sendResetLinkApi']);
+
 
 // DEBUG: Check authentication status
 Route::get('/debug-auth', function (Request $request) {
@@ -128,14 +132,13 @@ Route::get('/debug-oauth', function (Request $request) {
 });
 
 // Public announcements endpoint from develop
-Route::get('/announcements/published', function() {
-    return response()->json(['message' => 'No announcements available']);
-});
+Route::get('/announcements/published', [AnnouncementController::class, 'published']);
+
 
 // Protected routes for Admin/Garant
 Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     Route::match(['GET', 'PUT'], '/announcement', [AnnouncementController::class, 'single']);
-    
+
     // Internship management routes
     Route::get('/internships', [InternshipController::class, 'index']);
     Route::post('/internships', [InternshipController::class, 'store']);
@@ -149,42 +152,51 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     // Internship email management
     Route::post('/internships/{id}/resend-approval-email', [InternshipController::class, 'resendApprovalEmail']);
     Route::post('/internships/{id}/send-evaluation-email', [InternshipController::class, 'sendEvaluationEmail']);
-    
+
     // Comment routes for internships (Garant only can create/update/delete)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
     Route::post('/internships/{internship}/comments', [CommentController::class, 'store']);
     Route::get('/internships/{internship}/comments/{comment}', [CommentController::class, 'show']);
     Route::put('/internships/{internship}/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/internships/{internship}/comments/{comment}', [CommentController::class, 'destroy']);
-    
+
     // Student routes - for dropdown selection
     Route::get('/students', [StudentController::class, 'index']);
     Route::get('/students/{id}', [StudentController::class, 'show']);
-    
+
     // Company routes - for dropdown selection
     Route::get('/companies', [CompanyController::class, 'index']);
     Route::get('/companies/{id}', [CompanyController::class, 'show']);
-    
+
     // Garant management routes
     Route::get('/garants', [GarantController::class, 'index']);
     Route::post('/garants', [GarantController::class, 'store']);
     Route::get('/garants/{id}', [GarantController::class, 'show']);
     Route::put('/garants/{id}', [GarantController::class, 'update']);
     Route::delete('/garants/{id}', [GarantController::class, 'destroy']);
+
+    // Company request management routes (garant only)
+    Route::get('/company-requests', [CompanyController::class, 'listRequests']);
+    Route::get('/company-requests/{id}', [CompanyController::class, 'show']);
+    Route::post('/company-requests/{id}/approve', [CompanyController::class, 'approve']);
+    Route::post('/company-requests/{id}/reject', [CompanyController::class, 'reject']);
 });
+
+// Company registration - accessible by both authenticated students and public (no auth required)
+Route::post('/companies/create', [CompanyController::class, 'createCompany']);
 
 // Student routes - accessible by students
 Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(function () {
     // Access to companies for dropdown - view only
     Route::get('/companies', [CompanyController::class, 'index']);
     Route::get('/companies/{id}', [CompanyController::class, 'show']);
-    
+
     // Internship management for students - view their own and create new
     Route::get('/internships', [InternshipController::class, 'studentIndex']);
     Route::get('/internships/{id}', [InternshipController::class, 'studentShow']);
     Route::post('/internships', [InternshipController::class, 'studentStore']);
     Route::post('/internships/{id}/send-report-to-company', [InternshipController::class, 'sendReportToCompany']);
-    
+
     // Students can view comments on their internships (read-only)
     Route::get('/internships/{internship}/comments', [CommentController::class, 'index']);
     Route::get('/internships/{internship}/comments/{comment}', [CommentController::class, 'show']);
@@ -196,15 +208,22 @@ Route::middleware(['auth:api', 'role:student'])->prefix('student')->group(functi
     Route::get('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'downloadSignedAgreement']);
     Route::delete('/internships/{internshipId}/documents/agreement-signed', [StudentDocumentController::class, 'deleteSignedAgreement']);
     Route::get('/internships/{internshipId}/documents/agreement-generated', [StudentDocumentController::class, 'downloadGeneratedAgreement']);
-    
+
     // Report scan documents
     Route::get('/internships/{internshipId}/documents/report-scan/meta', [StudentDocumentController::class, 'getReportScanMeta']);
     Route::post('/internships/{internshipId}/documents/report-scan', [StudentDocumentController::class, 'uploadReportScan']);
 });
 
 // Company routes
-Route::middleware(['auth:api', 'role:company'])->group(function () {
-    // Future company-specific routes
+Route::middleware(['auth:api', 'role:company'])->prefix('company')->group(function () {
+    // Internship management for companies - view internships assigned to them
+    Route::get('/internships', [InternshipController::class, 'companyIndex']);
+    Route::get('/internships/{id}', [InternshipController::class, 'companyShow']);
+    
+    // Documents for companies - view and validate
+    Route::get('/internships/{internship}/documents', [InternshipDocumentController::class, 'companyIndex']);
+    Route::get('/internships/{internship}/documents/{document}', [InternshipDocumentController::class, 'companyDownload']);
+    Route::post('/internships/{internship}/documents/{document}/validate', [InternshipDocumentController::class, 'companyValidate']);
 });
 
 

@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import StudentDocumentView from '../views/StudentDocumentView.vue'
 const GarantDocumentsView = () => import('../views/GarantDocumentsView.vue')
+const CompanyDocumentsView = () => import('../views/CompanyDocumentsView.vue')
 // Importy sú v poriadku, môžeme ich nechať
 const LandingView = () => import('../views/LandingView.vue')
 
@@ -18,7 +19,13 @@ const router = createRouter({
     {
       path: '/register',
       name: 'register',
-      component: () => import('../views/RegisterView.vue'),
+      component: () => import('../views/RegisterStudentView.vue'),
+      meta: { guest: true }
+    },
+    {
+      path: '/register-company',
+      name: 'register-company',
+      component: () => import('../views/RegisterCompanyView.vue'),
       meta: { guest: true }
     },
     {
@@ -90,6 +97,15 @@ const router = createRouter({
       name: 'company-dashboard',
       component: () => import('../views/CompanyDashboardView.vue'),
       meta: { 
+        requiresAuth: true,
+        roles: ['COMPANY']
+      }
+    },
+    {
+      path: '/company/internships/:id/documents',
+      name: 'company-internship-documents',
+      component: CompanyDocumentsView,
+      meta: {
         requiresAuth: true,
         roles: ['COMPANY']
       }

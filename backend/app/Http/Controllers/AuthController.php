@@ -47,7 +47,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:student,company',
+            'role' => 'required|in:student',
         ];
 
         // Additional validation rules for students
@@ -76,18 +76,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Additional validation rules for companies
-        if ($request->input('role') === 'company') {
-            $rules = array_merge($rules, [
-                'company_name' => 'required|string|max:255',
-                'state' => 'required|string|max:100',
-                'region' => 'required|string|max:100',
-                'city' => 'required|string|max:100',
-                'postal_code' => 'required|string|max:20',
-                'street' => 'required|string|max:100',
-                'house_number' => 'required|string|max:20',
-            ]);
-        }
+
 
         // Custom error messages
         $messages = [
@@ -108,6 +97,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $validated['name'],
+            'surname' => $validated['surname'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
@@ -133,19 +123,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Ak ide o firmu
-        if ($user->role === 'company') {
-            \App\Models\Company::create([
-                'user_id' => $user->id,
-                'name' => $request->input('company_name'),
-                'state' => $request->input('state'),
-                'region' => $request->input('region'),
-                'city' => $request->input('city'),
-                'postal_code' => $request->input('postal_code'),
-                'street' => $request->input('street'),
-                'house_number' => $request->input('house_number'),
-            ]);
-        }
+
 
         return response()->json([
             'message' => 'Registrácia prebehla úspešne.',
