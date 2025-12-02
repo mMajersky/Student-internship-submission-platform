@@ -36,12 +36,8 @@ if [ -f "composer.json" ]; then
   echo "Creating storage symlink..."
   php artisan storage:link || true
 
-  # Remove duplicate Passport migrations if they exist (keep only one set)
-  # Find and remove all but the first oauth migration set
-  OAUTH_FILES=$(ls -1 database/migrations/*_oauth_*.php 2>/dev/null | head -n 5)
-  if [ "$(echo "$OAUTH_FILES" | wc -l)" -gt 5 ]; then
-    ls database/migrations/*_oauth_*.php | tail -n +6 | xargs rm -f
-  fi
+  # Remove duplicate Passport migrations if they exist
+  rm -f database/migrations/2025_10_27_*oauth*.php
 
   # Run migrations
   echo "Running database migrations..."
@@ -53,12 +49,12 @@ if [ -f "composer.json" ]; then
     php artisan passport:install --force || true
   fi
 
-  # Set correct permissions for OAuth key files
+  # Set correct permissions for OAuth keys
   if [ -f "storage/oauth-private.key" ]; then
     chmod 600 storage/oauth-private.key
   fi
   if [ -f "storage/oauth-public.key" ]; then
-    chmod 600 storage/oauth-public.key
+    chmod 660 storage/oauth-public.key
   fi
 
   # Clear config and routes
