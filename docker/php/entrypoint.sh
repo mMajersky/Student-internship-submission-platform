@@ -49,6 +49,14 @@ if [ -f "composer.json" ]; then
     php artisan passport:install --force || true
   fi
 
+  # Set correct permissions for OAuth keys
+  if [ -f "storage/oauth-private.key" ]; then
+    chmod 600 storage/oauth-private.key
+  fi
+  if [ -f "storage/oauth-public.key" ]; then
+    chmod 660 storage/oauth-public.key
+  fi
+
   # Clear config and routes
   echo "Optimizing application..."
   php artisan config:clear || true
@@ -58,4 +66,3 @@ if [ -f "composer.json" ]; then
 fi
 
 exec "$@"
-
