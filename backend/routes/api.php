@@ -62,6 +62,10 @@ Route::middleware(['auth:api'])->group(function () {
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 
+// Password reset - sends email with reset link (no auth required)
+Route::post('/password/forgot', [App\Http\Controllers\PasswordResetController::class, 'sendResetLinkApi']);
+
+
 // DEBUG: Check authentication status
 Route::get('/debug-auth', function (Request $request) {
     try {
