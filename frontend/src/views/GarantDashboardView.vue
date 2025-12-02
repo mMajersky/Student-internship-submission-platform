@@ -190,7 +190,7 @@
               v-model:selected-years="selectedYears"
               v-model:selected-companies="selectedCompanies"
               v-model:selected-study-fields="selectedStudyFields"
-              v-model:selected-students="selectedStudents"
+              v-model:student-search-query="studentSearchQuery"
               id-prefix="internships-"
             />
 
@@ -294,7 +294,7 @@
               v-model:selected-years="selectedYears"
               v-model:selected-companies="selectedCompanies"
               v-model:selected-study-fields="selectedStudyFields"
-              v-model:selected-students="selectedStudents"
+              v-model:student-search-query="studentSearchQuery"
               id-prefix="documents-"
             />
 
@@ -422,7 +422,7 @@ const internshipToDelete = ref(null)
 const selectedYears = ref([])
 const selectedCompanies = ref([])
 const selectedStudyFields = ref([])
-const selectedStudents = ref([])
+const studentSearchQuery = ref('')
 
 // Statistics
 const stats = ref({
@@ -532,9 +532,11 @@ const filteredInternships = computed(() => {
       if (!internship.student || !selectedStudyFields.value.includes(internship.student.study_field)) return false
     }
     
-    // Student filter
-    if (selectedStudents.value.length > 0) {
-      if (!internship.student || !selectedStudents.value.includes(internship.student.id)) return false
+    // Student search filter
+    if (studentSearchQuery.value.trim()) {
+      if (!internship.student) return false
+      const fullName = `${internship.student.name} ${internship.student.surname}`.toLowerCase()
+      if (!fullName.includes(studentSearchQuery.value.toLowerCase().trim())) return false
     }
     
     return true
@@ -545,14 +547,14 @@ const clearAllFilters = () => {
   selectedYears.value = []
   selectedCompanies.value = []
   selectedStudyFields.value = []
-  selectedStudents.value = []
+  studentSearchQuery.value = ''
 }
 
 const hasActiveFilters = computed(() => {
   return selectedYears.value.length > 0 ||
     selectedCompanies.value.length > 0 ||
     selectedStudyFields.value.length > 0 ||
-    selectedStudents.value.length > 0
+    studentSearchQuery.value.trim().length > 0
 })
 
 // Load data when component is mounted
