@@ -20,26 +20,33 @@ class AuthController extends Controller
         // Manually authenticate user (don't use session guard)
         $user = User::where('email', $credentials['email'])->first();
 
-        if ($user && Hash::check($credentials['password'], $user->password)) {
-            // Create token with 24-hour expiration for security balance
-            $token = $user->createToken('authToken')->accessToken;
-
+        if (!$user) {
             return response()->json([
-                'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role, // priamo string z DB
-                    'role_display_name' => ucfirst($user->role), // napr. 'Admin'
-                    'permissions' => $this->getPermissionsForRole($user->role)
-                ]
-            ]);
+                'message' => 'User with this email does not exist.'
+            ], 404);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
-    }
+        // STEP 2 — check password
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Incorrect password.'
+            ], 401);
+        }
+        // Create token with 24-hour expiration for security balance
+        $token = $user->createToken('authToken')->accessToken;
 
+        return response()->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role, // priamo string z DB
+                'role_display_name' => ucfirst($user->role), // napr. 'Admin'
+                'permissions' => $this->getPermissionsForRole($user->role)
+            ]
+        ], 200);
+    }
     public function register(Request $request)
     {
         // Base validation rules
@@ -54,7 +61,7 @@ class AuthController extends Controller
         if ($request->input('role') === 'student') {
             $allowedDomains = config('services.university.allowed_email_domains', []);
             $domainPattern = implode('|', array_map('preg_quote', $allowedDomains));
-            
+
             $rules = array_merge($rules, [
                 'surname' => 'required|string|max:100',
                 'email' => [
