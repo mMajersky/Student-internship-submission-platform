@@ -10,6 +10,7 @@
               <th>{{ $t('garantDocuments.tableHeaders.name') }}</th>
               <th>{{ $t('garantDocuments.tableHeaders.type') }}</th>
               <th>{{ $t('garantDocuments.tableHeaders.status') }}</th>
+              <th>{{ $t('garantDocuments.tableHeaders.companyStatus') }}</th>
               <th>{{ $t('garantDocuments.tableHeaders.created') }}</th>
               <th class="text-end">{{ $t('garantDocuments.tableHeaders.actions') }}</th>
             </tr>
@@ -19,6 +20,20 @@
               <td>{{ doc.name || '-' }}</td>
               <td>{{ doc.type }}</td>
               <td>{{ doc.status || '-' }}</td>
+              <td>
+                <span v-if="doc.company_status" class="badge" :class="getCompanyStatusClass(doc.company_status)">
+                  {{ doc.company_status }}
+                </span>
+                <span v-else class="badge bg-secondary">{{ $t('garantDocuments.notValidated') }}</span>
+                <button 
+                  v-if="doc.company_status === 'zamietnutý'" 
+                  @click="showRejectionReason(doc)" 
+                  class="btn btn-sm btn-link text-danger p-0 ms-1"
+                  :title="$t('garantDocuments.viewRejectionReason')"
+                >
+                  <i class="bi bi-info-circle"></i>
+                </button>
+              </td>
               <td>{{ formatDate(doc.created_at) }}</td>
               <td class="text-end">
                 <button @click="download(doc)" class="btn btn-sm btn-outline-primary">
@@ -27,12 +42,37 @@
               </td>
             </tr>
             <tr v-if="!documents.length">
-              <td colspan="5" class="text-center text-muted py-4">{{ $t('garantDocuments.noDocuments') }}</td>
+              <td colspan="6" class="text-center text-muted py-4">{{ $t('garantDocuments.noDocuments') }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- Rejection Reason Modal -->
+    <div v-if="showRejectionModal" class="modal fade show" style="display: block;" tabindex="-1" role="dialog" aria-modal="true" @click.self="showRejectionModal = false">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">{{ $t('garantDocuments.rejectionReasonTitle') }}</h5>
+            <button type="button" class="btn-close btn-close-white" @click="showRejectionModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>{{ $t('garantDocuments.documentName') }}:</strong> {{ selectedDocument?.name }}</p>
+            <p><strong>{{ $t('garantDocuments.rejectedAt') }}:</strong> {{ formatDate(selectedDocument?.company_validated_at) }}</p>
+            <hr>
+            <p><strong>{{ $t('garantDocuments.reason') }}:</strong></p>
+            <p class="text-muted">{{ selectedDocument?.company_rejection_reason }}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="showRejectionModal = false">
+              {{ $t('garantDocuments.close') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showRejectionModal" class="modal-backdrop fade show"></div>
 
     <!-- Výkaz praxe sekcia -->
     <div class="card p-3 mb-3" v-if="internshipInfo && internshipInfo.internship_report && internshipInfo.internship_report.submitted_at">
@@ -157,6 +197,8 @@ const internshipId = route.params.id
 const documents = ref([])
 const internshipInfo = ref(null)
 const showReportModal = ref(false)
+const showRejectionModal = ref(false)
+const selectedDocument = ref(null)
 
 const formatDate = (iso) => {
   if (!iso) return '-'
@@ -187,6 +229,17 @@ function getEvaluationCriterionLabel(key) {
     'schopnost_jednania_s_ludmi': t('garantDocuments.report.evaluation.communication')
   };
   return labels[key] || key;
+}
+
+const getCompanyStatusClass = (status) => {
+  if (status === 'schválený') return 'bg-success'
+  if (status === 'zamietnutý') return 'bg-danger'
+  return 'bg-secondary'
+}
+
+const showRejectionReason = (doc) => {
+  selectedDocument.value = doc
+  showRejectionModal.value = true
 }
 
 const load = async () => {

@@ -84,8 +84,8 @@ class StudentDocumentController extends Controller
                 ]
             ]);
 
-            // Load garant relationship
-            $internship->load('garant.user');
+            // Load garant and company relationships
+            $internship->load(['garant.user', 'company.user']);
 
             $file = $request->file('file');
             
@@ -137,6 +137,38 @@ class StudentDocumentController extends Controller
                     'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' nahral podpísanú dohodu k praxi.',
                     ['internship_id' => $internshipId, 'document_id' => $signedDoc->id]
                 );
+            }
+
+            // Create notification for company about uploaded document (needs validation)
+            if ($internship->company && $internship->company->user) {
+                $studentName = $internship->student->name . ' ' . $internship->student->surname;
+                
+                // Always create system notification
+                // If email notifications enabled, also send email
+                if ($internship->company->user->email_notifications) {
+                    NotificationService::createAndNotify(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral dokument na validáciu',
+                        'Študent ' . $studentName . ' nahral podpísanú dohodu k praxi. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $signedDoc->id],
+                        \App\Mail\DocumentUploadedNotification::class,
+                        [
+                            'studentName' => $studentName,
+                            'companyName' => $internship->company->name,
+                            'academyYear' => $internship->academy_year,
+                            'documentType' => 'Podpísaná dohoda',
+                        ]
+                    );
+                } else {
+                    NotificationService::create(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral dokument na validáciu',
+                        'Študent ' . $studentName . ' nahral podpísanú dohodu k praxi. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $signedDoc->id]
+                    );
+                }
             }
 
             return response()->json([
@@ -388,8 +420,8 @@ class StudentDocumentController extends Controller
                 ]
             ]);
 
-            // Load garant relationship
-            $internship->load('garant.user');
+            // Load garant and company relationships
+            $internship->load(['garant.user', 'company.user']);
 
             $file = $request->file('file');
             
@@ -430,6 +462,49 @@ class StudentDocumentController extends Controller
                     'file_path' => $path,
                     'name' => $file->getClientOriginalName(),
                 ]);
+            }
+
+            // Create notification for garant about uploaded report scan
+            if ($internship->garant && $internship->garant->user) {
+                NotificationService::create(
+                    $internship->garant->user->id,
+                    Notification::TYPE_DOCUMENT_UPLOADED,
+                    'Študent nahral výkaz praxe',
+                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' nahral sken výkazu praxe.',
+                    ['internship_id' => $internshipId, 'document_id' => $reportDoc->id]
+                );
+            }
+
+            // Create notification for company about uploaded report scan (needs validation)
+            if ($internship->company && $internship->company->user) {
+                $studentName = $internship->student->name . ' ' . $internship->student->surname;
+                
+                // Always create system notification
+                // If email notifications enabled, also send email
+                if ($internship->company->user->email_notifications) {
+                    NotificationService::createAndNotify(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral výkaz praxe na validáciu',
+                        'Študent ' . $studentName . ' nahral sken výkazu praxe. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $reportDoc->id],
+                        \App\Mail\DocumentUploadedNotification::class,
+                        [
+                            'studentName' => $studentName,
+                            'companyName' => $internship->company->name,
+                            'academyYear' => $internship->academy_year,
+                            'documentType' => 'Sken výkazu praxe',
+                        ]
+                    );
+                } else {
+                    NotificationService::create(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral výkaz praxe na validáciu',
+                        'Študent ' . $studentName . ' nahral sken výkazu praxe. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $reportDoc->id]
+                    );
+                }
             }
 
             return response()->json([

@@ -1520,4 +1520,149 @@ class InternshipController extends Controller
             return null;
         }
     }
+
+    /**
+     * Get internships for the authenticated company (company-specific method).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyIndex()
+    {
+        try {
+            $user = Auth::user();
+            
+            // Get company profile from user
+            $company = Company::where('user_id', $user->id)->first();
+            
+            if (!$company) {
+                return response()->json([
+                    'message' => 'Company profile not found for this user.'
+                ], 403);
+            }
+            
+            // Get only the company's own internships with document count
+            $internships = Internship::with(['student', 'company', 'garant'])
+                ->withCount('documents')
+                ->where('company_id', $company->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'data' => $internships->map(function ($internship) {
+                    return [
+                        'id' => $internship->id,
+                        'student_id' => $internship->student_id,
+                        'student' => $internship->student ? [
+                            'id' => $internship->student->id,
+                            'name' => $internship->student->name,
+                            'surname' => $internship->student->surname,
+                            'student_email' => $internship->student->student_email,
+                        ] : null,
+                        'company_id' => $internship->company_id,
+                        'company' => $internship->company ? [
+                            'id' => $internship->company->id,
+                            'name' => $internship->company->name,
+                        ] : null,
+                        'garant_id' => $internship->garant_id,
+                        'garant' => $internship->garant ? [
+                            'id' => $internship->garant->id,
+                            'name' => $internship->garant->name ?? null,
+                            'surname' => $internship->garant->surname ?? null,
+                        ] : null,
+                        'status' => $internship->status,
+                        'academy_year' => $internship->academy_year,
+                        'start_date' => $internship->start_date?->format('Y-m-d'),
+                        'end_date' => $internship->end_date?->format('Y-m-d'),
+                        'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                        'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                        'documents_count' => $internship->documents_count,
+                        'created_at' => $internship->created_at?->toIso8601String(),
+                        'updated_at' => $internship->updated_at?->toIso8601String(),
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching company internships: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching internships.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get internship details for company (company-specific method).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyShow($id)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Get company profile from user
+            $company = Company::where('user_id', $user->id)->first();
+            
+            if (!$company) {
+                return response()->json([
+                    'message' => 'Company profile not found for this user.'
+                ], 403);
+            }
+            
+            // Get internship and verify it belongs to the company
+            $internship = Internship::with(['student', 'company', 'garant', 'documents'])
+                ->where('id', $id)
+                ->where('company_id', $company->id)
+                ->firstOrFail();
+
+            return response()->json([
+                'data' => [
+                    'id' => $internship->id,
+                    'student_id' => $internship->student_id,
+                    'student' => $internship->student ? [
+                        'id' => $internship->student->id,
+                        'name' => $internship->student->name,
+                        'surname' => $internship->student->surname,
+                        'student_email' => $internship->student->student_email,
+                    ] : null,
+                    'company_id' => $internship->company_id,
+                    'company' => $internship->company ? [
+                        'id' => $internship->company->id,
+                        'name' => $internship->company->name,
+                    ] : null,
+                    'garant_id' => $internship->garant_id,
+                    'garant' => $internship->garant ? [
+                        'id' => $internship->garant->id,
+                        'name' => $internship->garant->name ?? null,
+                        'surname' => $internship->garant->surname ?? null,
+                    ] : null,
+                    'status' => $internship->status,
+                    'academy_year' => $internship->academy_year,
+                    'start_date' => $internship->start_date?->format('Y-m-d'),
+                    'end_date' => $internship->end_date?->format('Y-m-d'),
+                    'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                    'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                    'evaluation' => $internship->evaluation,
+                    'internship_report' => $internship->internship_report,
+                    'created_at' => $internship->created_at?->toIso8601String(),
+                    'updated_at' => $internship->updated_at?->toIso8601String(),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found or access denied.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching company internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
 }

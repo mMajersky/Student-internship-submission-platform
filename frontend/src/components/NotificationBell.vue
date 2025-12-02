@@ -198,6 +198,9 @@ const handleNotificationClick = async (notification) => {
     } else {
       router.push(`/dashboard`);
     }
+  } else if (notification.type === 'company_request_created' && authStore.isGarant) {
+    // Navigate to company requests page for garants
+    router.push('/garant-dashboard?tab=companyRequests');
   }
 };
 
@@ -232,6 +235,12 @@ const getTranslatedTitle = (notification) => {
       return t('notifications.internshipCreated.title');
     case 'document_uploaded':
       return t('notifications.documentUploaded.title');
+    case 'company_request_created':
+      return t('notifications.companyRequestCreated.title');
+    case 'company_request_approved':
+      return t('notifications.companyRequestApproved.title');
+    case 'company_request_rejected':
+      return t('notifications.companyRequestRejected.title');
     default:
       return notification.title; // Fallback to original title
   }
@@ -273,6 +282,25 @@ const getTranslatedMessage = (notification) => {
       const docStudentMatch = notification.message.match(/Študent (.+?) nahral/);
       const docStudentName = docStudentMatch ? docStudentMatch[1] : 'Unknown';
       return t('notifications.documentUploaded.message', { studentName: docStudentName });
+
+    case 'company_request_created':
+      // Extract company name from message: "A new company registration request for 'Company Name' has been submitted via student."
+      const reqMatch = notification.message.match(/for '(.+?)' has been submitted/);
+      const reqCompanyName = reqMatch ? reqMatch[1] : 'Unknown';
+      return t('notifications.companyRequestCreated.message', { companyName: reqCompanyName });
+
+    case 'company_request_approved':
+      // Extract company name from message: "Your company request for 'Company Name' has been approved..."
+      const approvedMatch = notification.message.match(/for '(.+?)' has been approved/);
+      const approvedCompanyName = approvedMatch ? approvedMatch[1] : 'Unknown';
+      return t('notifications.companyRequestApproved.message', { companyName: approvedCompanyName });
+
+    case 'company_request_rejected':
+      // Extract company name and reason from message: "Your company request for 'Company Name' has been rejected. Reason: ..."
+      const rejectedMatch = notification.message.match(/for '(.+?)' has been rejected\. Reason: (.+)/);
+      const rejectedCompanyName = rejectedMatch ? rejectedMatch[1] : 'Unknown';
+      const reason = rejectedMatch ? rejectedMatch[2] : 'No reason provided';
+      return t('notifications.companyRequestRejected.message', { companyName: rejectedCompanyName, reason });
 
     default:
       return notification.message; // Fallback to original message

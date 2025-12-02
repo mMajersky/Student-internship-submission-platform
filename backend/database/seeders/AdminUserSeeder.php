@@ -16,55 +16,47 @@ class AdminUserSeeder extends Seeder{
      */
     public function run()
     {
-        DB::table('users')->insert([
-            // Admin používateľ
+        $users = [
             [
                 'name' => 'Admin',
                 'surname' => 'Adminovič',
                 'role' => 'admin',
-                'password' => Hash::make('password'), // Nezabudnite zmeniť heslo na bezpečné
                 'email' => 'admin@example.com',
-                'email_verified_at' => Carbon::now(),
-                'remember_token' => Str::random(10),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
-            // Študent používateľ
             [
                 'name' => 'Peter',
                 'surname' => 'Hudec',
                 'role' => 'student',
-                'password' => Hash::make('password'),
                 'email' => 'student@example.com',
-                'email_verified_at' => Carbon::now(),
-                'remember_token' => Str::random(10),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
-            // Garant používateľ
             [
                 'name' => 'Peter',
                 'surname' => 'Zodpovedný',
                 'role' => 'garant',
-                'password' => Hash::make('password'),
                 'email' => 'garant@example.com',
-                'email_verified_at' => Carbon::now(),
-                'remember_token' => Str::random(10),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
-            // Zástupca spoločnosti používateľ
             [
                 'name' => 'Eva',
                 'surname' => 'Podnikavá',
                 'role' => 'company',
-                'password' => Hash::make('password'),
                 'email' => 'company@example.com',
-                'email_verified_at' => Carbon::now(),
-                'remember_token' => Str::random(10),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
-        ]);
+        ];
+
+        foreach ($users as $userData) {
+            DB::table('users')->updateOrInsert(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'surname' => $userData['surname'],
+                    'role' => $userData['role'],
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => Carbon::now(),
+                    'remember_token' => Str::random(10),
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]
+            );
+        }
     }
 }
