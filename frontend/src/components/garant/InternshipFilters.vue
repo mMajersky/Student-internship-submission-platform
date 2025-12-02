@@ -1,6 +1,6 @@
 <template>
   <div class="row mb-4 g-3">
-    <div v-for="filter in filters" :key="filter.key" class="col-md-3">
+    <div v-for="filter in dropdownFilters" :key="filter.key" class="col-md-3">
       <label class="form-label fw-semibold">
         <i :class="`bi ${filter.icon} me-1`"></i>
         {{ $t(filter.label) }}
@@ -49,11 +49,29 @@
         </ul>
       </div>
     </div>
+
+    <!-- Student Search -->
+    <div class="col-md-3">
+      <label class="form-label fw-semibold">
+        <i class="bi bi-person me-1"></i>
+        {{ $t('garantDashboard.filters.student') }}
+      </label>
+      <div class="position-relative">
+        <input 
+          type="text"
+          class="form-control"
+          :placeholder="$t('garantDashboard.filters.searchStudent')"
+          v-model="studentSearchQuery"
+          @input="handleStudentSearch"
+        >
+        <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted"></i>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   availableYears: { type: Array, required: true },
@@ -63,7 +81,7 @@ const props = defineProps({
   selectedYears: { type: Array, default: () => [] },
   selectedCompanies: { type: Array, default: () => [] },
   selectedStudyFields: { type: Array, default: () => [] },
-  selectedStudents: { type: Array, default: () => [] },
+  studentSearchQuery: { type: String, default: '' },
   idPrefix: { type: String, default: '' }
 })
 
@@ -71,11 +89,16 @@ const emit = defineEmits([
   'update:selectedYears',
   'update:selectedCompanies',
   'update:selectedStudyFields',
-  'update:selectedStudents'
+  'update:studentSearchQuery'
 ])
 
-// Data-driven filter configuration
-const filters = computed(() => [
+const studentSearchQuery = computed({
+  get: () => props.studentSearchQuery,
+  set: (value) => emit('update:studentSearchQuery', value)
+})
+
+// Data-driven filter configuration (only dropdown filters)
+const dropdownFilters = computed(() => [
   {
     key: 'Years',
     icon: 'bi-calendar3',
@@ -108,17 +131,6 @@ const filters = computed(() => [
     getValue: (item) => item,
     getLabel: (item) => item,
     getSingleLabel: (item) => item
-  },
-  {
-    key: 'Students',
-    icon: 'bi-person',
-    label: 'garantDashboard.filters.student',
-    available: props.availableStudents,
-    selected: props.selectedStudents,
-    emit: 'update:selectedStudents',
-    getValue: (item) => item.id,
-    getLabel: (item) => item.name,
-    getSingleLabel: (item) => props.availableStudents.find(s => s.id === item)?.name
   }
 ])
 
@@ -143,5 +155,9 @@ const toggleItem = (filter, value) => {
     ? filter.selected.filter(v => v !== value)
     : [...filter.selected, value]
   emit(filter.emit, newSelected)
+}
+
+const handleStudentSearch = () => {
+  // Emitting happens automatically via v-model
 }
 </script>
