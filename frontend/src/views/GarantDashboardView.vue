@@ -168,7 +168,38 @@
       <div v-if="activeTab === 'internships'" class="tab-pane fade show active">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">{{ $t('garantDashboard.internshipsList') }}</h5>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="card-title mb-0">{{ $t('garantDashboard.internshipsList') }}</h5>
+              <button 
+                v-if="hasActiveFilters" 
+                class="btn btn-sm btn-outline-secondary"
+                @click="clearAllFilters"
+              >
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
+              </button>
+            </div>
+
+            <!-- Filters Section -->
+            <InternshipFilters
+              v-if="internships.length > 0"
+              :available-years="availableYears"
+              :available-companies="availableCompanies"
+              :available-study-fields="availableStudyFields"
+              :available-students="availableStudents"
+              v-model:selected-years="selectedYears"
+              v-model:selected-companies="selectedCompanies"
+              v-model:selected-study-fields="selectedStudyFields"
+              v-model:student-search-query="studentSearchQuery"
+              id-prefix="internships-"
+            />
+
+            <!-- Results count -->
+            <div v-if="internships.length > 0 && hasActiveFilters" class="mb-3">
+              <span class="text-muted">
+                {{ $t('garantDashboard.filters.showing', { count: filteredInternships.length, total: internships.length }) }}
+              </span>
+            </div>
 
             <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
@@ -176,6 +207,15 @@
               <button class="btn btn-primary" @click="activeTab = 'create-internship'">
                 <i class="bi bi-plus me-2"></i>
                 {{ $t('garantDashboard.createFirstInternship') }}
+              </button>
+            </div>
+
+            <div v-else-if="filteredInternships.length === 0" class="text-center py-5">
+              <i class="bi bi-funnel fs-1 text-muted"></i>
+              <p class="text-muted mt-3">{{ $t('garantDashboard.filters.noResults') }}</p>
+              <button class="btn btn-outline-secondary" @click="clearAllFilters">
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
               </button>
             </div>
 
@@ -194,7 +234,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="internship in internships" :key="internship.id">
+                  <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
                     <td>{{ getYear(internship.start_date) }}</td>
@@ -232,11 +272,51 @@
       <div v-if="activeTab === 'documents'" class="tab-pane fade show active">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title mb-4">{{ $t('garantDashboard.documentsTitle') }}</h5>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="card-title mb-0">{{ $t('garantDashboard.documentsTitle') }}</h5>
+              <button 
+                v-if="hasActiveFilters" 
+                class="btn btn-sm btn-outline-secondary"
+                @click="clearAllFilters"
+              >
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
+              </button>
+            </div>
+
+            <!-- Filters Section -->
+            <InternshipFilters
+              v-if="internships.length > 0"
+              :available-years="availableYears"
+              :available-companies="availableCompanies"
+              :available-study-fields="availableStudyFields"
+              :available-students="availableStudents"
+              v-model:selected-years="selectedYears"
+              v-model:selected-companies="selectedCompanies"
+              v-model:selected-study-fields="selectedStudyFields"
+              v-model:student-search-query="studentSearchQuery"
+              id-prefix="documents-"
+            />
+
+            <!-- Results count -->
+            <div v-if="internships.length > 0 && hasActiveFilters" class="mb-3">
+              <span class="text-muted">
+                {{ $t('garantDashboard.filters.showing', { count: filteredInternships.length, total: internships.length }) }}
+              </span>
+            </div>
 
             <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
               <p class="text-muted mt-3">{{ $t('garantDashboard.noInternships') }}</p>
+            </div>
+
+            <div v-else-if="filteredInternships.length === 0" class="text-center py-5">
+              <i class="bi bi-funnel fs-1 text-muted"></i>
+              <p class="text-muted mt-3">{{ $t('garantDashboard.filters.noResults') }}</p>
+              <button class="btn btn-outline-secondary" @click="clearAllFilters">
+                <i class="bi bi-x-circle me-1"></i>
+                {{ $t('garantDashboard.filters.clearAll') }}
+              </button>
             </div>
 
             <div v-else class="table-responsive">
@@ -253,7 +333,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="internship in internships" :key="internship.id">
+                  <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
                     <td>{{ getYear(internship.start_date) }}</td>
@@ -306,17 +386,19 @@
       @confirm="confirmDeleteInternship"
       @cancel="cancelDeleteInternship"
     />
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
+import InternshipFilters from '@/components/garant/InternshipFilters.vue'
 
 const { t } = useI18n()
 
@@ -335,6 +417,12 @@ const selectedInternshipForComment = ref(null)
 // Delete confirmation state
 const showDeleteConfirmation = ref(false)
 const internshipToDelete = ref(null)
+
+// Filter state
+const selectedYears = ref([])
+const selectedCompanies = ref([])
+const selectedStudyFields = ref([])
+const studentSearchQuery = ref('')
 
 // Statistics
 const stats = ref({
@@ -378,6 +466,96 @@ const updateStatistics = () => {
   stats.value.completed = internships.value.filter(i => i.status === 'completed').length
   stats.value.planned = internships.value.filter(i => i.status === 'pending').length
 }
+
+// Computed: unique years from internships
+const availableYears = computed(() => {
+  const years = new Set()
+  internships.value.forEach(i => {
+    if (i.academy_year) years.add(i.academy_year)
+    else if (i.start_date) years.add(getYear(i.start_date))
+  })
+  return Array.from(years).sort().reverse()
+})
+
+// Computed: unique companies from internships
+const availableCompanies = computed(() => {
+  const companies = new Map()
+  internships.value.forEach(i => {
+    if (i.company && i.company.id) {
+      companies.set(i.company.id, { id: i.company.id, name: i.company.name })
+    }
+  })
+  return Array.from(companies.values()).sort((a, b) => a.name.localeCompare(b.name))
+})
+
+// Computed: unique study fields from internships (via student)
+const availableStudyFields = computed(() => {
+  const fields = new Set()
+  internships.value.forEach(i => {
+    if (i.student && i.student.study_field) {
+      fields.add(i.student.study_field)
+    }
+  })
+  return Array.from(fields).sort()
+})
+
+// Computed: unique students from internships
+const availableStudents = computed(() => {
+  const students = new Map()
+  internships.value.forEach(i => {
+    if (i.student && i.student.id) {
+      students.set(i.student.id, {
+        id: i.student.id,
+        name: `${i.student.name} ${i.student.surname}`
+      })
+    }
+  })
+  return Array.from(students.values()).sort((a, b) => a.name.localeCompare(b.name))
+})
+
+// Computed: filtered internships based on selected filters
+const filteredInternships = computed(() => {
+  return internships.value.filter(internship => {
+    // Year filter
+    if (selectedYears.value.length > 0) {
+      const internshipYear = internship.academy_year || getYear(internship.start_date)
+      if (!selectedYears.value.includes(internshipYear)) return false
+    }
+    
+    // Company filter
+    if (selectedCompanies.value.length > 0) {
+      if (!internship.company || !selectedCompanies.value.includes(internship.company.id)) return false
+    }
+    
+    // Study field filter
+    if (selectedStudyFields.value.length > 0) {
+      if (!internship.student || !selectedStudyFields.value.includes(internship.student.study_field)) return false
+    }
+    
+    // Student search filter
+    if (studentSearchQuery.value.trim()) {
+      if (!internship.student) return false
+      const fullName = `${internship.student.name} ${internship.student.surname}`.toLowerCase()
+      if (!fullName.includes(studentSearchQuery.value.toLowerCase().trim())) return false
+    }
+    
+    return true
+  })
+})
+
+const clearAllFilters = () => {
+  selectedYears.value = []
+  selectedCompanies.value = []
+  selectedStudyFields.value = []
+  studentSearchQuery.value = ''
+}
+
+const hasActiveFilters = computed(() => {
+  return selectedYears.value.length > 0 ||
+    selectedCompanies.value.length > 0 ||
+    selectedStudyFields.value.length > 0 ||
+    studentSearchQuery.value.trim().length > 0
+})
 
 // Load data when component is mounted
 onMounted(() => {
@@ -497,6 +675,7 @@ const cancelDeleteInternship = () => {
   showDeleteConfirmation.value = false
   internshipToDelete.value = null
 }
+
 
 const getStudentFullName = (internship) => {
   if (internship.student) {
@@ -625,4 +804,5 @@ const handleSubmitComment = async (commentData) => {
 const openDocuments = (internship) => {
   router.push({ name: 'garant-internship-documents', params: { id: internship.id } })
 }
+
 </script>

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Mail\InternshipCreatedNotification;
 use App\Mail\InternshipCreatedForGarant;
 use App\Mail\InternshipStatusChanged;
+use App\Mail\EvaluationRequest;
 use App\Services\EmailService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
@@ -283,6 +284,8 @@ class InternshipController extends Controller
                     'end_date' => $internship->end_date?->format('Y-m-d'),
                     'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
                     'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                    'evaluation' => $internship->evaluation,
+                    'internship_report' => $internship->internship_report,
                     'created_at' => $internship->created_at?->toIso8601String(),
                     'updated_at' => $internship->updated_at?->toIso8601String(),
                 ]
@@ -386,6 +389,13 @@ class InternshipController extends Controller
             $oldStatus = $internship->status;
             $statusChanged = isset($validated['status']) && $oldStatus !== $validated['status'];
             $statusChangedToPotvrdena = $statusChanged && $validated['status'] === Internship::STATUS_POTVRDENA;
+            
+            // Check if internship has ended (end_date is today or in the past) and evaluation email hasn't been sent yet
+            $oldEndDate = $internship->end_date;
+            $newEndDate = isset($validated['end_date']) ? Carbon::parse($validated['end_date']) : $oldEndDate;
+            $today = Carbon::today();
+            $internshipEnded = $newEndDate && $newEndDate->lte($today);
+            $endDateChanged = $oldEndDate != $newEndDate;
 
             // Update the internship
             $internship->update($validated);
@@ -428,6 +438,43 @@ class InternshipController extends Controller
                 // Always send email to company when garant approves (regardless of email_notifications setting)
                 // Company needs to approve/reject via email buttons
                 EmailService::send(InternshipCreatedNotification::class, $internship->company->user->email, $emailData);
+            }
+
+            // Send evaluation email to company when internship ends (end_date is today or in the past)
+            // Only send if evaluation doesn't exist yet and end_date changed to a past/today date
+            if ($internshipEnded && $endDateChanged 
+                && $internship->company && $internship->company->user && $internship->company->user->email) {
+                
+                // Reload internship to get updated data
+                $internship->refresh();
+                
+                // Only send if evaluation email hasn't been sent yet and evaluation hasn't been submitted
+                $evaluation = $internship->evaluation ?: [];
+                if (!isset($evaluation['email_sent_at']) && !isset($evaluation['submitted_at'])) {
+                    // Generate secure token for evaluation form
+                    $evaluationToken = $this->generateEvaluationToken($internship->id);
+
+                    $evaluationEmailData = [
+                        'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                        'companyName' => $internship->company->name,
+                        'academyYear' => $internship->academy_year,
+                        'startDate' => $internship->start_date?->format('Y-m-d'),
+                        'endDate' => $internship->end_date?->format('Y-m-d'),
+                        'status' => $internship->status,
+                        'evaluationUrl' => config('app.url') . '/internships/evaluation?token=' . $evaluationToken,
+                        'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    ];
+
+                    // Always send evaluation email (critical email)
+                    $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $evaluationEmailData);
+                    
+                    if ($emailSent) {
+                        // Mark email as sent in evaluation JSON
+                        $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
+                        $internship->evaluation = $evaluation;
+                        $internship->save();
+                    }
+                }
             }
 
             // If garant changed status: send emails to student and company (for any status change)
@@ -810,6 +857,51 @@ class InternshipController extends Controller
             // NO EMAIL TO COMPANY when student creates internship
             // Email with approve/reject buttons will be sent only when garant approves it
 
+            // Check if internship has already ended (end_date is today or in the past)
+            // If yes, automatically send evaluation email to company (if no PDF report scan exists)
+            if ($internship->end_date && Carbon::parse($internship->end_date)->lte(Carbon::today())
+                && $internship->company && $internship->company->user && $internship->company->user->email) {
+                
+                // Check if student has uploaded a PDF report scan
+                $reportScanDoc = \App\Models\Document::where('internship_id', $internship->id)
+                    ->where('type', 'vykaz_praxe_scan')
+                    ->first();
+                
+                // Only send if no PDF report scan exists and email hasn't been sent yet
+                $report = $internship->internship_report ?: [];
+                if (!$reportScanDoc && !isset($report['email_sent_at']) && !isset($report['submitted_at'])) {
+                    // Generate secure token for evaluation form
+                    $evaluationToken = $this->generateEvaluationToken($internship->id);
+
+                    $evaluationEmailData = [
+                        'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                        'companyName' => $internship->company->name,
+                        'academyYear' => $internship->academy_year,
+                        'startDate' => $internship->start_date?->format('Y-m-d'),
+                        'endDate' => $internship->end_date?->format('Y-m-d'),
+                        'status' => $internship->status,
+                        'evaluationUrl' => config('app.url') . '/internships/evaluation?token=' . $evaluationToken,
+                        'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+                    ];
+
+                    // Send evaluation email to company
+                    $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $evaluationEmailData);
+                    
+                    if ($emailSent) {
+                        // Mark email as sent in internship_report JSON
+                        $report['email_sent_at'] = Carbon::now()->toIso8601String();
+                        $internship->internship_report = $report;
+                        
+                        // Also mark in evaluation for backward compatibility
+                        $evaluation = $internship->evaluation ?: [];
+                        $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
+                        $internship->evaluation = $evaluation;
+                        
+                        $internship->save();
+                    }
+                }
+            }
+
             // Prepare email data for garant notification (using new internship_created_for_garant.blade.php template)
             $emailData = [
                 'internshipId' => $internship->id,
@@ -1120,6 +1212,282 @@ class InternshipController extends Controller
     }
 
     /**
+     * Send evaluation request email to company (garant only).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendEvaluationEmail($id)
+    {
+        try {
+            $internship = Internship::with(['company.user', 'student', 'garant.user'])->findOrFail($id);
+
+            // Check if company exists and has a user with email
+            if (!$internship->company || !$internship->company->user || !$internship->company->user->email) {
+                return response()->json([
+                    'message' => 'Company email not found.'
+                ], 400);
+            }
+
+            // Check if evaluation already exists (company has already submitted evaluation)
+            $evaluation = $internship->evaluation ?: [];
+            if (isset($evaluation['submitted_at'])) {
+                return response()->json([
+                    'message' => 'Company has already submitted the evaluation. Email cannot be sent.'
+                ], 400);
+            }
+
+            // Generate secure token for evaluation form
+            $evaluationToken = $this->generateEvaluationToken($internship->id);
+
+            $data = [
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'companyName' => $internship->company->name,
+                'academyYear' => $internship->academy_year,
+                'startDate' => $internship->start_date?->format('Y-m-d'),
+                'endDate' => $internship->end_date?->format('Y-m-d'),
+                'status' => $internship->status,
+                'evaluationUrl' => config('app.url') . '/internships/evaluation?token=' . $evaluationToken,
+                'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+            ];
+
+            $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $data);
+
+            if ($emailSent) {
+                // Mark email as sent in internship_report JSON
+                $report = $internship->internship_report ?: [];
+                $report['email_sent_at'] = Carbon::now()->toIso8601String();
+                $internship->internship_report = $report;
+                
+                // Also mark in evaluation for backward compatibility
+                $evaluation = $internship->evaluation ?: [];
+                $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
+                $internship->evaluation = $evaluation;
+                
+                $internship->save();
+
+                return response()->json([
+                    'message' => 'Evaluation email sent successfully to ' . $internship->company->user->email,
+                    'email' => $internship->company->user->email
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Failed to send email. Please try again or contact system administrator.'
+                ], 500);
+            }
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error sending evaluation email: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while sending the email.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get internship details for student (including evaluation).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function studentShow($id)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Check if user has a student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'Student profile not found for this user.'
+                ], 403);
+            }
+            
+            // Get internship and verify it belongs to the student
+            $internship = Internship::with(['student', 'company.user', 'garant.user'])
+                ->where('id', $id)
+                ->where('student_id', $user->student->id)
+                ->firstOrFail();
+
+            return response()->json([
+                'data' => [
+                    'id' => $internship->id,
+                    'student_id' => $internship->student_id,
+                    'company_id' => $internship->company_id,
+                    'garant_id' => $internship->garant_id,
+                    'status' => $internship->status,
+                    'academy_year' => $internship->academy_year,
+                    'start_date' => $internship->start_date?->format('Y-m-d'),
+                    'end_date' => $internship->end_date?->format('Y-m-d'),
+                    'evaluation' => $internship->evaluation,
+                    'internship_report' => $internship->internship_report,
+                    'company' => $internship->company ? [
+                        'id' => $internship->company->id,
+                        'name' => $internship->company->name,
+                    ] : null,
+                    'created_at' => $internship->created_at?->toIso8601String(),
+                    'updated_at' => $internship->updated_at?->toIso8601String(),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Send report to company via email (student only).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendReportToCompany($id)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Check if user has a student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'Student profile not found for this user.'
+                ], 403);
+            }
+            
+            // Get internship and verify it belongs to the student
+            $internship = Internship::with(['student', 'company.user', 'garant.user'])
+                ->where('id', $id)
+                ->where('student_id', $user->student->id)
+                ->firstOrFail();
+
+            // Check if company exists and has email
+            if (!$internship->company || !$internship->company->user || !$internship->company->user->email) {
+                return response()->json([
+                    'message' => 'Company email not found.'
+                ], 400);
+            }
+
+            // Check if report already exists (company has already submitted report)
+            $report = $internship->internship_report ?: [];
+            if (isset($report['submitted_at'])) {
+                return response()->json([
+                    'message' => 'Company has already submitted the report. Email cannot be sent.'
+                ], 400);
+            }
+
+            // Check if email was already sent
+            if (isset($report['email_sent_at'])) {
+                return response()->json([
+                    'message' => 'Report email has already been sent. Please wait for company response.'
+                ], 400);
+            }
+
+            // Check if internship has ended
+            if (!$internship->end_date || Carbon::parse($internship->end_date)->gt(Carbon::today())) {
+                return response()->json([
+                    'message' => 'Internship has not ended yet.'
+                ], 400);
+            }
+
+            // Generate secure token for evaluation form
+            $evaluationToken = $this->generateEvaluationToken($internship->id);
+
+            $emailData = [
+                'studentName' => $internship->student->name . ' ' . $internship->student->surname,
+                'companyName' => $internship->company->name,
+                'academyYear' => $internship->academy_year,
+                'startDate' => $internship->start_date?->format('Y-m-d'),
+                'endDate' => $internship->end_date?->format('Y-m-d'),
+                'status' => $internship->status,
+                'evaluationUrl' => config('app.url') . '/internships/evaluation?token=' . $evaluationToken,
+                'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
+            ];
+
+            // Send evaluation email
+            $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $emailData);
+
+            if ($emailSent) {
+                try {
+                    // Mark email as sent in internship_report JSON
+                    $report = $internship->internship_report ?: [];
+                    $report['email_sent_at'] = Carbon::now()->toIso8601String();
+                    $internship->internship_report = $report;
+                    
+                    // Also mark in evaluation for backward compatibility
+                    $evaluation = $internship->evaluation ?: [];
+                    $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
+                    $internship->evaluation = $evaluation;
+                    
+                    $internship->save();
+                    
+                    // Refresh the internship to get latest data
+                    $internship->refresh();
+
+                    return response()->json([
+                        'message' => 'Report email sent successfully to ' . $internship->company->user->email,
+                        'email' => $internship->company->user->email
+                    ], 200);
+                } catch (\Exception $saveException) {
+                    \Log::error('Error saving internship after sending email: ' . $saveException->getMessage());
+                    // Email was sent but saving failed - return success but log the error
+                    return response()->json([
+                        'message' => 'Email sent successfully, but there was an error updating the status. Please refresh the page.',
+                        'email' => $internship->company->user->email,
+                        'warning' => 'Status may not be updated correctly.'
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'message' => 'Failed to send email. Please try again or contact system administrator.'
+                ], 500);
+            }
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error sending report to company: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while sending the report.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate secure token for evaluation form.
+     *
+     * @param  int  $internshipId
+     * @return string
+     */
+    private function generateEvaluationToken($internshipId)
+    {
+        $data = [
+            'internship_id' => $internshipId,
+            'action' => 'evaluation',
+            'timestamp' => Carbon::now()->timestamp,
+            'expires_at' => Carbon::now()->addDays(30)->timestamp, // Token expires in 30 days
+        ];
+
+        return Crypt::encrypt($data);
+    }
+
+    /**
      * Validate and decrypt a secure token.
      *
      * @param  string  $token
@@ -1150,6 +1518,151 @@ class InternshipController extends Controller
         } catch (\Exception $e) {
             \Log::warning('Failed to decrypt token: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Get internships for the authenticated company (company-specific method).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyIndex()
+    {
+        try {
+            $user = Auth::user();
+            
+            // Get company profile from user
+            $company = Company::where('user_id', $user->id)->first();
+            
+            if (!$company) {
+                return response()->json([
+                    'message' => 'Company profile not found for this user.'
+                ], 403);
+            }
+            
+            // Get only the company's own internships with document count
+            $internships = Internship::with(['student', 'company', 'garant'])
+                ->withCount('documents')
+                ->where('company_id', $company->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'data' => $internships->map(function ($internship) {
+                    return [
+                        'id' => $internship->id,
+                        'student_id' => $internship->student_id,
+                        'student' => $internship->student ? [
+                            'id' => $internship->student->id,
+                            'name' => $internship->student->name,
+                            'surname' => $internship->student->surname,
+                            'student_email' => $internship->student->student_email,
+                        ] : null,
+                        'company_id' => $internship->company_id,
+                        'company' => $internship->company ? [
+                            'id' => $internship->company->id,
+                            'name' => $internship->company->name,
+                        ] : null,
+                        'garant_id' => $internship->garant_id,
+                        'garant' => $internship->garant ? [
+                            'id' => $internship->garant->id,
+                            'name' => $internship->garant->name ?? null,
+                            'surname' => $internship->garant->surname ?? null,
+                        ] : null,
+                        'status' => $internship->status,
+                        'academy_year' => $internship->academy_year,
+                        'start_date' => $internship->start_date?->format('Y-m-d'),
+                        'end_date' => $internship->end_date?->format('Y-m-d'),
+                        'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                        'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                        'documents_count' => $internship->documents_count,
+                        'created_at' => $internship->created_at?->toIso8601String(),
+                        'updated_at' => $internship->updated_at?->toIso8601String(),
+                    ];
+                })
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching company internships: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching internships.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get internship details for company (company-specific method).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyShow($id)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Get company profile from user
+            $company = Company::where('user_id', $user->id)->first();
+            
+            if (!$company) {
+                return response()->json([
+                    'message' => 'Company profile not found for this user.'
+                ], 403);
+            }
+            
+            // Get internship and verify it belongs to the company
+            $internship = Internship::with(['student', 'company', 'garant', 'documents'])
+                ->where('id', $id)
+                ->where('company_id', $company->id)
+                ->firstOrFail();
+
+            return response()->json([
+                'data' => [
+                    'id' => $internship->id,
+                    'student_id' => $internship->student_id,
+                    'student' => $internship->student ? [
+                        'id' => $internship->student->id,
+                        'name' => $internship->student->name,
+                        'surname' => $internship->student->surname,
+                        'student_email' => $internship->student->student_email,
+                    ] : null,
+                    'company_id' => $internship->company_id,
+                    'company' => $internship->company ? [
+                        'id' => $internship->company->id,
+                        'name' => $internship->company->name,
+                    ] : null,
+                    'garant_id' => $internship->garant_id,
+                    'garant' => $internship->garant ? [
+                        'id' => $internship->garant->id,
+                        'name' => $internship->garant->name ?? null,
+                        'surname' => $internship->garant->surname ?? null,
+                    ] : null,
+                    'status' => $internship->status,
+                    'academy_year' => $internship->academy_year,
+                    'start_date' => $internship->start_date?->format('Y-m-d'),
+                    'end_date' => $internship->end_date?->format('Y-m-d'),
+                    'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
+                    'approved_date' => $internship->approved_date?->format('Y-m-d'),
+                    'evaluation' => $internship->evaluation,
+                    'internship_report' => $internship->internship_report,
+                    'created_at' => $internship->created_at?->toIso8601String(),
+                    'updated_at' => $internship->updated_at?->toIso8601String(),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Internship not found or access denied.'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching company internship: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while fetching the internship.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
         }
     }
 }

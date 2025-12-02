@@ -84,8 +84,8 @@ class StudentDocumentController extends Controller
                 ]
             ]);
 
-            // Load garant relationship
-            $internship->load('garant.user');
+            // Load garant and company relationships
+            $internship->load(['garant.user', 'company.user']);
 
             $file = $request->file('file');
             
@@ -137,6 +137,38 @@ class StudentDocumentController extends Controller
                     'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' nahral podpísanú dohodu k praxi.',
                     ['internship_id' => $internshipId, 'document_id' => $signedDoc->id]
                 );
+            }
+
+            // Create notification for company about uploaded document (needs validation)
+            if ($internship->company && $internship->company->user) {
+                $studentName = $internship->student->name . ' ' . $internship->student->surname;
+                
+                // Always create system notification
+                // If email notifications enabled, also send email
+                if ($internship->company->user->email_notifications) {
+                    NotificationService::createAndNotify(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral dokument na validáciu',
+                        'Študent ' . $studentName . ' nahral podpísanú dohodu k praxi. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $signedDoc->id],
+                        \App\Mail\DocumentUploadedNotification::class,
+                        [
+                            'studentName' => $studentName,
+                            'companyName' => $internship->company->name,
+                            'academyYear' => $internship->academy_year,
+                            'documentType' => 'Podpísaná dohoda',
+                        ]
+                    );
+                } else {
+                    NotificationService::create(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral dokument na validáciu',
+                        'Študent ' . $studentName . ' nahral podpísanú dohodu k praxi. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $signedDoc->id]
+                    );
+                }
             }
 
             return response()->json([
@@ -305,6 +337,190 @@ class StudentDocumentController extends Controller
 
             return response()->json([
                 'message' => 'An error occurred while deleting the document.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get metadata about uploaded report scan (check if exists)
+     */
+    public function getReportScanMeta($internshipId)
+    {
+        try {
+            $user = Auth::user();
+            $internship = Internship::with('student')->findOrFail($internshipId);
+
+            // Check authorization
+            if ($internship->student_id !== $user->student->id) {
+                return response()->json([
+                    'message' => 'Unauthorized.'
+                ], 403);
+            }
+
+            // Find report scan document
+            $reportDoc = Document::where('internship_id', $internshipId)
+                ->where('type', 'vykaz_praxe_scan')
+                ->first();
+
+            if (!$reportDoc) {
+                return response()->json([
+                    'document' => null,
+                    'message' => 'Výkaz praxe nebol ešte nahraný.'
+                ], 200);
+            }
+
+            return response()->json([
+                'document' => [
+                    'id' => $reportDoc->id,
+                    'name' => $reportDoc->name,
+                    'created_at' => $reportDoc->created_at->toIso8601String(),
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error getting report scan meta: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An error occurred.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload report scan (student only) - STORES IN PRIVATE STORAGE
+     */
+    public function uploadReportScan(Request $request, $internshipId)
+    {
+        try {
+            $user = Auth::user();
+            $internship = Internship::with('student')->findOrFail($internshipId);
+
+            // Check authorization
+            if ($internship->student_id !== $user->student->id) {
+                return response()->json([
+                    'message' => 'Unauthorized to upload documents for this internship.'
+                ], 403);
+            }
+
+            // Check if report has already been submitted by company
+            $report = $internship->internship_report ?: [];
+            if (isset($report['submitted_at'])) {
+                return response()->json([
+                    'message' => 'Company has already submitted the report. You cannot upload a new one.'
+                ], 400);
+            }
+
+            $validated = $request->validate([
+                'file' => [
+                    'required',
+                    'file',
+                    'mimes:pdf,jpg,jpeg,png',
+                    'max:10240' // 10MB max
+                ]
+            ]);
+
+            // Load garant and company relationships
+            $internship->load(['garant.user', 'company.user']);
+
+            $file = $request->file('file');
+            
+            // Generate unique filename
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'vykaz_praxe_scan_' . time() . '_' . uniqid() . '.' . $extension;
+            
+            // IMPORTANT: Store in PRIVATE storage (local disk) for security
+            $path = $file->storeAs(
+                'documents/internship_' . $internshipId,
+                $filename,
+                'local' // Uses private storage (storage/app/private)
+            );
+
+            // Check if report scan already exists, update or create
+            $reportDoc = Document::where('internship_id', $internshipId)
+                ->where('type', 'vykaz_praxe_scan')
+                ->first();
+
+            if ($reportDoc) {
+                // Delete old file
+                if (Storage::disk('local')->exists($reportDoc->file_path)) {
+                    Storage::disk('local')->delete($reportDoc->file_path);
+                }
+                
+                // Update document record
+                $reportDoc->update([
+                    'file_path' => $path,
+                    'name' => $file->getClientOriginalName(),
+                    'status' => 'uploaded',
+                ]);
+            } else {
+                // Create new document record
+                $reportDoc = Document::create([
+                    'internship_id' => $internshipId,
+                    'type' => 'vykaz_praxe_scan',
+                    'status' => 'uploaded',
+                    'file_path' => $path,
+                    'name' => $file->getClientOriginalName(),
+                ]);
+            }
+
+            // Create notification for garant about uploaded report scan
+            if ($internship->garant && $internship->garant->user) {
+                NotificationService::create(
+                    $internship->garant->user->id,
+                    Notification::TYPE_DOCUMENT_UPLOADED,
+                    'Študent nahral výkaz praxe',
+                    'Študent ' . $internship->student->name . ' ' . $internship->student->surname . ' nahral sken výkazu praxe.',
+                    ['internship_id' => $internshipId, 'document_id' => $reportDoc->id]
+                );
+            }
+
+            // Create notification for company about uploaded report scan (needs validation)
+            if ($internship->company && $internship->company->user) {
+                $studentName = $internship->student->name . ' ' . $internship->student->surname;
+                
+                // Always create system notification
+                // If email notifications enabled, also send email
+                if ($internship->company->user->email_notifications) {
+                    NotificationService::createAndNotify(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral výkaz praxe na validáciu',
+                        'Študent ' . $studentName . ' nahral sken výkazu praxe. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $reportDoc->id],
+                        \App\Mail\DocumentUploadedNotification::class,
+                        [
+                            'studentName' => $studentName,
+                            'companyName' => $internship->company->name,
+                            'academyYear' => $internship->academy_year,
+                            'documentType' => 'Sken výkazu praxe',
+                        ]
+                    );
+                } else {
+                    NotificationService::create(
+                        $internship->company->user->id,
+                        Notification::TYPE_DOCUMENT_UPLOADED,
+                        'Študent nahral výkaz praxe na validáciu',
+                        'Študent ' . $studentName . ' nahral sken výkazu praxe. Prosíme o validáciu dokumentu.',
+                        ['internship_id' => $internshipId, 'document_id' => $reportDoc->id]
+                    );
+                }
+            }
+
+            return response()->json([
+                'message' => 'Výkaz praxe bol úspešne nahraný.',
+                'document' => [
+                    'id' => $reportDoc->id,
+                    'name' => $reportDoc->name,
+                    'created_at' => $reportDoc->created_at->toIso8601String(),
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            \Log::error('Error uploading report scan: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while uploading the document.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
         }
