@@ -14,6 +14,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\GarantController;
+use App\Http\Controllers\ExternalInternshipController;
 
 
 // PDF generation routes from feature/Generate_PDF_template
@@ -162,4 +163,13 @@ Route::get('/internships/company-action', [InternshipController::class, 'company
 // Admin-only routes
 Route::middleware(['auth:api', 'role:admin'])->group(function () {
     // Future admin-only routes
+});
+
+// External third-party API routes - OAuth client authenticated only (no user JWTs, no role restrictions)
+Route::middleware(['oauth'])->prefix('external')->group(function () {
+    // Get all internships as objects
+    Route::get('/internships', [ExternalInternshipController::class, 'index']);
+
+    // Defend internship - change status from 'schválená' to 'obhájená'
+    Route::post('/internships/{id}/defend', [ExternalInternshipController::class, 'defend']);
 });
