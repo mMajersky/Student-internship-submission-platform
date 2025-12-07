@@ -56,7 +56,7 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                  <router-link to="/dashboard" class="dropdown-item">
+                  <router-link :to="dashboardRoute" class="dropdown-item">
                     <i class="bi bi-speedometer2 me-2"></i>
                     {{ $t('nav.dashboard') }}
                   </router-link>
@@ -132,4 +132,12 @@ onBeforeUnmount(() => {
 watch(() => router.currentRoute.value, () => {
   authStore.initializeAuth()
 })
+// Computed property for dashboard route based on user role
+const dashboardRoute = computed(() => {
+  if (authStore.isAdmin || authStore.isGarant) return '/dashboard'
+  if (authStore.isStudent) return '/student-dashboard'
+  if (authStore.isCompany) return '/company-dashboard'
+  return '/'
+})
+
 </script>
