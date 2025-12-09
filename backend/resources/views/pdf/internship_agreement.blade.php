@@ -1,183 +1,249 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-    <meta charset="UTF-8">
+     <meta charset="UTF-8">
+     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Dohoda o odbornej praxi študenta</title>
     <style>
         @page {
-            margin: 40px;
+            size: A4;
+            margin: 2cm 2cm 2cm 2cm;
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
+            font-family: "Calibri", sans-serif;
+            font-size: 11pt;
+            line-height: 1.15;
+            margin: 0;
+            padding: 0;
+            text-align: justify;
         }
 
-        h1 {
+        p {
+            margin-top: 3pt;
+            margin-bottom: 0;
+            text-align: justify;
+        }
+
+        .center {
             text-align: center;
-            font-size: 18px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
         }
 
-        .subtitle {
-            text-align: center;
-            margin-bottom: 20px;
+        .left {
+            text-align: left;
         }
 
-        .section {
-            margin-bottom: 15px;
+        .right {
+            text-align: right;
         }
 
-        .article-title {
+        b {
             font-weight: bold;
-            margin-top: 20px;
         }
 
-        ul {
-            margin-left: 20px;
-            margin-top: 5px;
-            list-style-type: '- ';
+        .text-upper {
+            text-transform: uppercase;
         }
 
-        ol {
-            margin-left: 20px;
+        .indent-1 {
+            text-indent: 1cm;
         }
 
-        .signature-table {
-            width: 100%;
-            margin-top: 50px;
-            text-align: center;
+        .margin-left-18 {
+            margin-left: 18pt;
         }
 
-        .signature-table td {
-            width: 33%;
-            vertical-align: top;
+        .margin-left-21 {
+            margin-left: 21.3pt;
         }
 
-        .signature-line {
+        .margin-left-36 {
+            margin-left: 36pt;
+        }
+
+        .margin-left-48 {
+            margin-left: 48pt;
+        }
+
+        .no-margin-top {
+            margin-top: 0;
+        }
+
+        .dotted-line {
+            border: none;
+            border-bottom: 1px dotted #000;
             display: inline-block;
-            width: 80%;
-            border-bottom: 1px solid #000;
-            margin-bottom: 3px;
+            min-width: 100px;
         }
 
-        footer {
-            position: fixed;
-            bottom: -20px; /* Posunutie pätičky mierne nižšie */
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 10px;
+        a {
+            color: blue;
+            text-decoration: underline;
+        }
+        
+        .header-note {
+            font-size: 9pt;
+            text-align: right;
+            margin-bottom: 20pt;
+        }
+        
+        .signature-block {
+            margin-top: 40pt;
+        }
+        
+        .signature-line {
+            border: none;
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 200px;
+            margin-bottom: 5pt;
         }
     </style>
 </head>
 <body>
 
-    <h1>DOHODA O ODBORNEJ PRAXI ŠTUDENTA</h1>
-    <div class="subtitle">
-        uzatvorená v zmysle § 51 Občianskeho zákonníka a Zákona č. 131/2002 Z.z. o vysokých školách
-    </div>
+<div class="header-note"><i>Platnosť tlačiva od 1.10.2022 (aplikovaná informatika)</i></div>
 
-    <div class="section">
-        <strong>Univerzita Konštantína Filozofa v Nitre</strong><br>
-        Fakulta prírodných vied a informatiky<br>
-        Trieda A. Hlinku 1, 949 01 Nitra<br>
-        v zastúpení prof. RNDr. František Petrovič, PhD. – dekan fakulty<br>
-        e-mail: fpetrovic@ukf.sk,&nbsp;&nbsp;tel. 037/6408 555
-    </div>
+<p class="center no-margin-top"><b class="text-upper">Dohoda o odbornej praxi študenta</b></p>
 
-    <div class="section">
-        <strong>Poskytovateľ odbornej praxe (organizácia, resp. inštitúcia)</strong><br>
-        Plný názov: {{ $company_name ?? '..............................................................' }}<br>
-        Adresa: {{ $company_address ?? '..............................................................' }}<br>
-        v zastúpení: {{ $company_contact ?? '.............................................................. (meno, pozícia)' }}
-    </div>
+<p class="center no-margin-top">uzatvorená v zmysle § 51 Občianskeho zákonníka a Zákona č. 131/2002 Z.z. o vysokých školách</p>
 
-    <div class="section">
-        <strong>Študent:</strong><br>
-        Meno a priezvisko: {{ $student_name ?? '..............................................................' }}<br>
-        Adresa trvalého bydliska: {{ $student_address ?? '..............................................................' }}<br>
-        Kontakt študenta FPVaI UKF v Nitre: {{ $student_contact ?? '..............................................................' }}<br>
-        Študijný program: {{ $study_program ?? '..............................................................' }}
-    </div>
+<p class="left no-margin-top">&nbsp;</p>
 
-    <p>uzatvárajú túto dohodu o odbornej praxi študenta.</p>
+<p class="left no-margin-top"><b>Univerzita Konštantína Filozofa v Nitre</b></p>
 
-    <div class="article-title">I. Predmet dohody</div>
-    <p>
-        Predmetom tejto dohody je vykonanie odbornej praxe študenta v rozsahu 150 hodín,
-        v termíne od <strong>{{ $start_date ?? '....................' }}</strong> do <strong>{{ $end_date ?? '....................' }}</strong> bezodplatne.
-    </p>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fakulta prírodných vied a informatiky</p>
 
-    <div class="article-title">II. Práva a povinnosti účastníkov dohody</div>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trieda A. Hlinku 1, 949 01 Nitra</p>
 
-    <p><strong>1. Fakulta prírodných vied a informatiky Univerzity Konštantína Filozofa v Nitre:</strong></p>
-    <p>
-        1.1 Poverí svojho zamestnanca: Mgr. Martin Vozár, PhD. (mvozar@ukf.sk) za 1. stupeň,
-        PaedDr. Peter Švec, Ph.D. (psvec@ukf.sk) za 2. stupeň
-        (ďalej garant odbornej praxe) garanciou odbornej praxe.
-    </p>
-    <p>
-        1.2 Prostredníctvom garanta odbornej praxe:
-    </p>
-    <ul>
-        <li>poskytne študentovi informácie o organizácii praxe, o podmienkach dojednania dohody o odbornej praxi, o obsahovom zameraní odbornej praxe a o požiadavkách na obsahovú náplň správy z odbornej praxe,</li>
-        <li>poskytne návrh dohody o odbornej praxi študenta,</li>
-        <li>rozhodne o udelení hodnotenia „ABS“ (absolvoval) študentovi na základe dokladu „Výkaz o vykonanej odbornej praxi“, vydaného poskytovateľom odbornej praxe a na základe študentom vypracovanej správy o odbornej praxi, ktorej súčasťou je verejná obhajoba výsledkov odbornej praxe,</li>
-        <li>spravuje vyplnenú a účastníkmi podpísanú dohodu o odbornej praxi.</li>
-    </ul>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v zastúpení prof. RNDr. František Petrovič, PhD. – dekan fakulty</p>
 
-    <p><strong>2. Poskytovateľ odbornej praxe:</strong></p>
-    <ul>
-        <li>poverí svojho zamestnanca (tútor - zodpovedný za odbornú prax v organizácii) <strong>{{ $tutor_name ?? '.....................................' }}</strong>, ktorý bude dohliadať na dodržiavanie dohody o odbornej praxi, plnenie obsahovej náplne odbornej praxe a bude nápomocný pri získavaní potrebných údajov pre vypracovanie správy z odbornej praxe,</li>
-        <li>na začiatku praxe vykoná poučenie o bezpečnosti a ochrane zdravia pri práci v zmysle platných predpisov,</li>
-        <li>vzniknuté organizačné problémy súvisiace s plnením dohody rieši spolu s garantom odbornej praxe,</li>
-        <li>po ukončení odbornej praxe vydá študentovi „Výkaz o vykonanej odbornej praxi“, ktorý obsahuje popis vykonávaných činností a stručné hodnotenie študenta a je jedným z predpokladov úspešného ukončenia predmetu Odborná prax,</li>
-        <li>umožní garantovi odbornej praxe a garantovi študijného predmetu kontrolu študentom plnených úloh.</li>
-    </ul>
-    <br>
-    <p><strong>3. Študent FPVaI UKF v Nitre:</strong></p>
-    <ul>
-        <li>osobne zabezpečí podpísanie tejto dohody o odbornej praxi študenta,</li>
-        <li>zodpovedne vykonáva činnosti pridelené tútorom odbornej praxe,</li>
-        <li>zabezpečí doručenie dokladu „Výkaz o vykonanej odbornej praxi“ najneskôr v termínoch predpísaných garantom pre daný semester,</li>
-        <li>okamžite, bez zbytočného odkladu informuje garanta odbornej praxe o problémoch, ktoré bránia plneniu odbornej praxe.</li>
-    </ul>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e-mail: <a href="mailto:fpetrovic@ukf.sk">fpetrovic@ukf.sk</a>, tel. 037/6408 555</p>
 
-    <div class="article-title">III. Všeobecné a záverečné ustanovenia</div>
-    <ol>
-        <li>Dohoda sa uzatvára na dobu určitú. Dohoda nadobúda platnosť a účinnosť dňom podpísania obidvomi zmluvnými stranami. Obsah dohody sa môže meniť písomne len po súhlase jej zmluvných strán.</li>
-        <li>Dohoda sa uzatvára v 3 vyhotoveniach, každá zmluvná strana obdrží jedno vyhotovenie dohody.</li>
-    </ol>
+<p class="left no-margin-top">&nbsp;</p>
 
-    <div style="margin-top:30px;">
-        V Nitre, dňa {{ $generation_date ?? '....................' }} &nbsp;&nbsp;&nbsp;&nbsp;
-    </div>
-<br>
-    <table class="signature-table">
+<p class="left no-margin-top"><b>Poskytovateľ odbornej praxe (organizácia, resp. inštitúcia)</b></p>
+
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plný názov: <span class="dotted-line" style="width: 350px;">{{ $company_name }}</span></p>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Adresa: <span class="dotted-line" style="width: 400px;">{{ $company_full_address }}</span></p>
+
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v zastúpení <span class="dotted-line" style="width: 350px;">{{ $company_contact }}</span> (meno, pozícia)</p>
+
+<p class="left no-margin-top">&nbsp;</p>
+
+<p class="left no-margin-top"><b>Študent:</b></p>
+
+<p class="left no-margin-top indent-1">Meno a priezvisko:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $student_name }}</p>
+
+<p class="left no-margin-top indent-1">Adresa trvalého bydliska:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $student_address }}</p>
+
+<p class="left no-margin-top indent-1">Kontakt študenta FPVaI UKF v Nitre:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $student_contact }}</p>
+
+<p class="left no-margin-top indent-1">Študijný program:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aplikovaná informatika</p>
+
+<p class="left no-margin-top">&nbsp;</p>
+
+<p class="left no-margin-top">uzatvárajú túto dohodu o odbornej praxi študenta.</p>
+
+<p class="left no-margin-top">&nbsp;</p>
+
+<p class="center no-margin-top"><b>I. Predmet dohody</b></p>
+
+<p class="no-margin-top">&nbsp;</p>
+
+<p class="no-margin-top">Predmetom tejto dohody je vykonanie odbornej praxe študenta v rozsahu 150 hodín, v termíne od <span class="dotted-line" style="width: 150px;">{{ $start_date }}</span> do <span class="dotted-line" style="width: 150px;">{{ $end_date }}</span> bezodplatne.</p>
+
+<p class="no-margin-top">&nbsp;</p>
+
+<p class="center no-margin-top"><b>II. Práva a povinnosti účastníkov dohody</b></p>
+
+<p class="center no-margin-top">&nbsp;</p>
+
+<p class="no-margin-top"><b>1. Fakulta prírodných vied a informatiky Univerzity Konštantína Filozofa v Nitre:</b></p>
+
+<p class="no-margin-top margin-left-18">1.1 Poverí svojho zamestnanca: Mgr. Martin Vozár, PhD. (<a href="mailto:mvozar@ukf.sk">mvozar@ukf.sk</a>) za 1. stupeň, PaedDr. Peter Švec, Ph.D. (<a href="mailto:psvec@ukf.sk">psvec@ukf.sk</a>) za 2. stupeň (ďalej garant odbornej praxe) garanciou odbornej praxe.</p>
+
+<p class="no-margin-top">1.2 Prostredníctvom garanta odbornej praxe:</p>
+
+<p class="no-margin-top margin-left-36">a) poskytne študentovi:</p>
+
+<p class="no-margin-top margin-left-48">- informácie o organizácii praxe, o podmienkach dojednania dohody o odbornej praxi, o obsahovom zameraní odbornej praxe a o požiadavkách na obsahovú náplň správy z odbornej praxe,</p>
+<p class="no-margin-top margin-left-48">- návrh dohody o odbornej praxi študenta,</p>
+
+<p class="no-margin-top margin-left-36">b) rozhodne o udelení hodnotenia „ABS" (absolvoval) študentovi na základe dokladu „Výkaz o vykonanej odbornej praxi", vydaného poskytovateľom odbornej praxe a na základe študentom vypracovanej správy o odbornej praxi, ktorej súčasťou je verejná obhajoba výsledkov odbornej praxe,</p>
+
+<p class="no-margin-top margin-left-36">c) spravuje vyplnenú a účastníkmi podpísanú dohodu o odbornej praxi.</p>
+
+<p class="no-margin-top">&nbsp;</p>
+
+<p class="no-margin-top"><b>2. Poskytovateľ odbornej praxe:</b></p>
+
+<p class="no-margin-top margin-left-21">2.1 poverí svojho zamestnanca (tútor - zodpovedný za odbornú prax v organizácii) <span class="dotted-line" style="width: 300px;">{{ $tutor_name }}</span>, ktorý bude dohliadať na dodržiavanie dohody o odbornej praxi, plnenie obsahovej náplne odbornej praxe a bude nápomocný pri získavaní potrebných údajov pre vypracovanie správy z odbornej praxe,</p>
+
+<p class="no-margin-top margin-left-21">2.2 na začiatku praxe vykoná poučenie o bezpečnosti a ochrane zdravia pri práci v zmysle platných predpisov,</p>
+
+<p class="no-margin-top margin-left-21">2.3 vzniknuté organizačné problémy súvisiace s plnením dohody rieši spolu s garantom odbornej praxe,</p>
+
+<p class="no-margin-top margin-left-21">2.4 po ukončení odbornej praxe vydá študentovi „Výkaz o vykonanej odbornej praxi", ktorý obsahuje popis vykonávaných činností a stručné hodnotenie študenta a je jedným z predpokladov úspešného ukončenia predmetu Odborná prax,</p>
+
+<p class="no-margin-top margin-left-21">2.5 umožní garantovi odbornej praxe a garantovi študijného predmetu kontrolu študentom plnených úloh.</p>
+
+<p class="no-margin-top">&nbsp;</p>
+
+<p class="no-margin-top"><b>3. Študent FPVaI UKF v Nitre:</b></p>
+
+<p class="no-margin-top margin-left-18">3.1 osobne zabezpečí podpísanie tejto dohody o odbornej praxi študenta,</p>
+<p class="no-margin-top margin-left-18">3.2 zodpovedne vykonáva činnosti pridelené tútorom odbornej praxe,</p>
+<p class="no-margin-top margin-left-18">3.3 zabezpečí doručenie dokladu „Výkaz o vykonanej odbornej praxi" najneskôr v termínoch predpísaných garantom pre daný semester,</p>
+<p class="no-margin-top margin-left-18">3.4 okamžite, bez zbytočného odkladu informuje garanta odbornej praxe o problémoch, ktoré bránia plneniu odbornej praxe.</p>
+
+<p class="no-margin-top">&nbsp;</p>
+
+<p class="center no-margin-top"><b>III. Všeobecné a záverečné ustanovenia</b></p>
+
+<p class="no-margin-top">&nbsp;</p>
+
+<p class="no-margin-top margin-left-18">1. Dohoda sa uzatvára na dobu určitú. Dohoda nadobúda platnosť a účinnosť dňom podpísania obidvomi zmluvnými stranami. Obsah dohody sa môže meniť písomne len po súhlase jej zmluvných strán.</p>
+
+<p class="no-margin-top margin-left-18">2. Dohoda sa uzatvára v 3 vyhotoveniach, každá zmluvná strana obdrží jedno vyhotovenie dohody.</p>
+
+<div class="signature-block">
+    <p class="no-margin-top">V Nitre, dňa <span class="dotted-line" style="width: 100px;">{{ $date_nitra }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V <span class="dotted-line" style="width: 80px;">{{ $city_company }}</span>, dňa <span class="dotted-line" style="width: 100px;">{{ $date_company }}</span></p>
+
+    <p class="no-margin-top">&nbsp;</p>
+    <p class="no-margin-top">&nbsp;</p>
+    <p class="no-margin-top">&nbsp;</p>
+
+    <table width="100%">
         <tr>
-            <td>
-                <div class="signature-line"></div><br>
-                prof. RNDr. František Petrovič, PhD.<br>
-                <small>dekan FPVaI UKF v Nitre</small>
+            <td width="45%" style="vertical-align: top;">
+                <p class="no-margin-top"><span class="signature-line" style="width: 300px;"></span></p>
+                <p class="no-margin-top">prof. RNDr. František Petrovič, PhD.</p>
+                <p class="no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dekan FPVaI UKF v Nitre</p>
             </td>
-            <td>
-                <div class="signature-line"></div><br>
-                {{ $company_contact ?? '..............................................................' }}<br>
-                <small>štatutárny zástupca pracoviska odb. praxe</small>
-            </td>
-            <td>
-                <div class="signature-line"></div><br>
-                {{ $student_name ?? '..............................................................' }}<br>
-                <small>meno a priezvisko študenta</small>
+            <td width="10%">&nbsp;</td>
+            <td width="45%" style="vertical-align: top;">
+                <p class="no-margin-top"><span class="signature-line" style="width: 300px;"></span></p>
+                <p class="no-margin-top">{{ $company_contact }}</p>
+                <p class="no-margin-top">štatutárny zástupca pracoviska odb. praxe</p>
             </td>
         </tr>
     </table>
 
-    <footer>
-        Vygenerované: {{ $generation_date ?? now()->format('d.m.Y') }}
-    </footer>
+    <p class="no-margin-top">&nbsp;</p>
+    <p class="no-margin-top">&nbsp;</p>
+    <p class="no-margin-top">&nbsp;</p>
+
+    <table width="100%">
+        <tr>
+            <td width="100%" style="text-align: right;">
+                <p class="no-margin-top"><span class="signature-line" style="width: 300px;"></span></p>
+                <p class="no-margin-top">{{ $student_name }}</p>
+            </td>
+        </tr>
+    </table>
+</div>
 
 </body>
 </html>
