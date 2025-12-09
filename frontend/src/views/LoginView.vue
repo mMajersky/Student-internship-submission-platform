@@ -70,16 +70,22 @@
                 </button>
               </div>
             </form>
-
-            <div class="text-center mt-4">
-              <p class="text-muted small">
-                {{ $t('auth.login.noAccount') }}
-
-                <a href="#">{{ $t('auth.login.registerStudent') }}</a> alebo
-
-                <a href="#">{{ $t('auth.login.registerCompany') }}</a>.
-              </p>
-            </div>
+              <div class="text-center mt-4">
+                <p class="text-muted small">
+                  {{ $t('auth.login.noAccount') }}
+                  <router-link
+                    to="/register"
+                    class="text-primary fw-semibold text-decoration-none">
+                    {{ $t('auth.login.registerStudent') }}
+                  </router-link>
+                  {{ $t('auth.login.or') }}
+                  <router-link
+                    to="/register-company"
+                    class="text-primary fw-semibold text-decoration-none">
+                    {{ $t('auth.login.registerCompany') }}
+                  </router-link>.
+                </p>
+              </div>
           </div>
         </div>
       </div>
