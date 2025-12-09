@@ -4,6 +4,7 @@ import NotificationBar from '@/components/landing/NotificationBar.vue'
 import InfoCardsSection from '@/components/landing/InfoCardsSection.vue'
 import TheFooter from '@/components/landing/TheFooter.vue'
 import AboutInternship from '@/components/landing/AboutInternship.vue'
+import StatsSection from '@/components/charts/StatsSection.vue'
 
 const { t } = useI18n()
 </script>
@@ -42,7 +43,7 @@ const { t } = useI18n()
             </p>
           </div>
           <div class="col-lg-6">
-            <img src="/images/landing-page-art.png" :alt="$t('landing.officeWork')" class="img-fluid rounded shadow" width="786" height="524" />
+            <StatsSection />
           </div>
         </div>
       </div>

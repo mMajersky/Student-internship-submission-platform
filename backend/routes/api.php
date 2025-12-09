@@ -219,7 +219,7 @@ Route::middleware(['auth:api', 'role:company'])->prefix('company')->group(functi
     // Internship management for companies - view internships assigned to them
     Route::get('/internships', [InternshipController::class, 'companyIndex']);
     Route::get('/internships/{id}', [InternshipController::class, 'companyShow']);
-    
+
     // Documents for companies - view and validate
     Route::get('/internships/{internship}/documents', [InternshipDocumentController::class, 'companyIndex']);
     Route::get('/internships/{internship}/documents/{document}', [InternshipDocumentController::class, 'companyDownload']);
@@ -230,4 +230,13 @@ Route::middleware(['auth:api', 'role:company'])->prefix('company')->group(functi
 // Admin-only routes
 Route::middleware(['auth:api', 'role:admin'])->group(function () {
     // Future admin-only routes
+});
+
+//charts
+use App\Http\Controllers\StatsController;
+
+Route::prefix('stats')->group(function () {
+    Route::get('/students-trend', [StatsController::class, 'studentsTrend']);
+    Route::get('/internship-types', [StatsController::class, 'internshipTypes']);
+    Route::get('/top-companies', [StatsController::class, 'topCompanies']);
 });
