@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordResetController;
 use App\Models\User;
 use App\Models\Internship;
 use App\Models\Notification;
@@ -15,6 +16,10 @@ use Carbon\Carbon;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Password Reset Routes
+Route::get('/password/reset', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword'])->name('password.reset.update');
 
 // Ensure auth middleware redirects don't break API usage
 Route::get('/login', function () {

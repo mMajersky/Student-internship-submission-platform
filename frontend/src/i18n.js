@@ -55,7 +55,12 @@ const messages = {
         registerCompany: 'company registration',
         requiredFields: 'Email and password are required fields.',
         emailPlaceholder: "{'your.email@example.com'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Send Reset Link',
+        backToLogin: 'Back to Login',
+        resetEmailSent: 'If an account with that email exists, we have sent a password reset link.',
+        emailRequired: 'Email is required.',
+        resetError: 'An error occurred while sending the reset link. Please try again.'
       },
       register: {
         studentTitle: 'Student Registration',
@@ -146,36 +151,49 @@ const messages = {
     },
     companyDashboard: {
       title: 'Company Dashboard',
-      internships: 'Internships',
-      internshipsDesc: 'Management of offered internships',
-      addInternship: 'Add Internship',
-      viewInternships: 'View Internships',
-      applications: 'Applications',
-      applicationsDesc: 'Overview of student applications',
-      viewApplications: 'View Applications',
-      documents: 'Documents',
-      documentsDesc: 'View and validate student documents',
-      viewDocuments: 'View Documents',
-      companyProfile: 'Company Profile',
-      companyProfileDesc: 'Manage company profile',
-      editProfile: 'Edit Profile',
-      roleInfo: 'Your role information',
-      role: 'Role',
-      name: 'Name',
-      email: 'Email',
-      permissions: 'Permissions',
+      tabs: {
+        overview: 'Overview',
+        internships: 'All Internships',
+        documents: 'Documents'
+      },
+      cards: {
+        manageInternships: 'Manage Internships',
+        manageInternshipsDesc: 'View and manage all internships',
+        viewInternships: 'View Internships',
+        documents: 'Documents',
+        documentsDesc: 'Manage documents and agreements',
+        viewDocuments: 'View Documents',
+        applications: 'Applications',
+        applicationsDesc: 'Overview of student applications',
+        viewApplications: 'View Applications'
+      },
       internshipsList: 'Internships List',
       noInternships: 'No internships found.',
+      documentsTitle: 'Documents of All Internships',
+      documentCount: 'Document Count',
+      viewDocumentsBtn: 'Documents',
       tableHeaders: {
         student: 'Student',
         year: 'Academic Year',
+        semester: 'Semester',
         start: 'Start Date',
         end: 'End Date',
         status: 'Status',
         documents: 'Documents',
         actions: 'Actions'
       },
-      viewDocumentsBtn: 'Documents'
+      actions: {
+        viewDocuments: 'View Documents'
+      },
+      filters: {
+        searchStudent: 'Search by student',
+        searchStudentPlaceholder: 'Enter student name...',
+        status: 'Filter by status',
+        allStatuses: 'All statuses',
+        clearAll: 'Clear Filters',
+        noResults: 'No internships match the selected filters.',
+        showing: 'Showing {count} of {total} internships'
+      }
     },
     companyDocuments: {
       title: 'Internship Documents',
@@ -935,6 +953,7 @@ const messages = {
         company: 'Company',
         studyField: 'Study Field',
         student: 'Student',
+        searchStudent: 'Search by student name...',
         all: 'All',
         selectAll: 'Select All',
         selected: '{count} selected',
@@ -1061,7 +1080,12 @@ const messages = {
         registerCompany: 'registrácia firmy',
         requiredFields: 'Email a heslo sú povinné polia.',
         emailPlaceholder: "{'meno@priklad.sk'}",
-        passwordPlaceholder: '********'
+        passwordPlaceholder: '********',
+        sendResetLink: 'Odoslať odkaz na reset',
+        backToLogin: 'Späť na prihlásenie',
+        resetEmailSent: 'Ak účet s týmto emailom existuje, odoslali sme odkaz na obnovenie hesla.',
+        emailRequired: 'Email je povinný.',
+        resetError: 'Pri odosielaní odkazu na reset nastala chyba. Skúste to znova.'
       },
       register: {
         studentTitle: 'Registrácia študenta',
@@ -1152,36 +1176,49 @@ const messages = {
     },
     companyDashboard: {
       title: 'Dashboard firmy',
-      internships: 'Praxe',
-      internshipsDesc: 'Správa ponúkaných praxí',
-      addInternship: 'Pridať prax',
-      viewInternships: 'Zobraziť praxe',
-      applications: 'Aplikácie',
-      applicationsDesc: 'Prehľad aplikácií študentov',
-      viewApplications: 'Zobraziť aplikácie',
-      documents: 'Dokumenty',
-      documentsDesc: 'Zobrazenie a validácia dokumentov študentov',
-      viewDocuments: 'Zobraziť dokumenty',
-      companyProfile: 'Profil firmy',
-      companyProfileDesc: 'Správa profilu firmy',
-      editProfile: 'Upraviť profil',
-      roleInfo: 'Informácie o vašej roli',
-      role: 'Rola',
-      name: 'Meno',
-      email: 'Email',
-      permissions: 'Oprávnenia',
+      tabs: {
+        overview: 'Prehľad',
+        internships: 'Všetky praxe',
+        documents: 'Dokumenty'
+      },
+      cards: {
+        manageInternships: 'Správa praxí',
+        manageInternshipsDesc: 'Zobrazenie a správa všetkých praxí',
+        viewInternships: 'Zobraziť praxe',
+        documents: 'Dokumenty',
+        documentsDesc: 'Správa dokumentov a dohôd',
+        viewDocuments: 'Zobraziť dokumenty',
+        applications: 'Aplikácie',
+        applicationsDesc: 'Prehľad aplikácií študentov',
+        viewApplications: 'Zobraziť aplikácie'
+      },
       internshipsList: 'Zoznam praxí',
       noInternships: 'Nenašli sa žiadne praxe.',
+      documentsTitle: 'Dokumenty všetkých praxí',
+      documentCount: 'Počet dokumentov',
+      viewDocumentsBtn: 'Dokumenty',
       tableHeaders: {
         student: 'Študent',
         year: 'Akademický rok',
+        semester: 'Semester',
         start: 'Začiatok',
         end: 'Koniec',
         status: 'Stav',
         documents: 'Dokumenty',
         actions: 'Akcie'
       },
-      viewDocumentsBtn: 'Dokumenty'
+      actions: {
+        viewDocuments: 'Zobraziť dokumenty'
+      },
+      filters: {
+        searchStudent: 'Hľadať podľa študenta',
+        searchStudentPlaceholder: 'Zadajte meno študenta...',
+        status: 'Filtrovať podľa stavu',
+        allStatuses: 'Všetky stavy',
+        clearAll: 'Zrušiť filtre',
+        noResults: 'Žiadne praxe nezodpovedajú vybraným filtrom.',
+        showing: 'Zobrazuje sa {count} z {total} praxí'
+      }
     },
     companyDocuments: {
       title: 'Dokumenty k praxi',
@@ -1618,6 +1655,7 @@ const messages = {
         company: 'Firma',
         studyField: 'Študijný odbor',
         student: 'Študent',
+        searchStudent: 'Hľadať podľa mena študenta...',
         all: 'Všetky',
         selectAll: 'Vybrať všetky',
         selected: '{count} vybraných',
