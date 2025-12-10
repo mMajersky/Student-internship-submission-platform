@@ -1,7 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Bar } from 'vue-chartjs'
-
 import {
   Chart as ChartJS,
   Title,
@@ -17,16 +16,8 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 const labels = ref([])
 const values = ref([])
 
-function shortenLabel(name, max = 18) {
-  return name.length > max ? name.substring(0, max) + '…' : name
-}
-
-const formattedLabels = computed(() =>
-  labels.value.map(name => shortenLabel(name))
-)
-
 onMounted(async () => {
-  const res = await fetch('/api/stats/top-companies')
+  const res = await fetch('/api/stats/all-companies')
   const data = await res.json()
 
   labels.value = data.map(i => i.company_name)
@@ -35,33 +26,26 @@ onMounted(async () => {
 
 const options = {
   responsive: true,
-  indexAxis: 'y',
+  indexAxis: 'y', // HORIZONTAL BAR CHART
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
   scales: {
-    y: {
-      ticks: {
-        font: { size: 12 }
-      }
-    }
-  },
-  plugins: {
-    legend: { display: false }
+    x: { beginAtZero: true }
   }
 }
 </script>
 
 <template>
-  <Bar
-    :data="{
-      labels: formattedLabels,
+  <div style="height: 500px;">
+    <Bar :data="{
+      labels,
       datasets: [
         {
           label: 'Počet praxí',
           data: values,
-          backgroundColor: '#4C9AFF',
-          borderRadius: 6
+          backgroundColor: '#4C9AFF'
         }
       ]
-    }"
-    :options="options"
-  />
+    }" :options="options" />
+  </div>
 </template>

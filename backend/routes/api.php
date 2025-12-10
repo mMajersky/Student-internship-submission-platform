@@ -239,4 +239,6 @@ Route::prefix('stats')->group(function () {
     Route::get('/students-trend', [StatsController::class, 'studentsTrend']);
     Route::get('/internship-types', [StatsController::class, 'internshipTypes']);
     Route::get('/top-companies', [StatsController::class, 'topCompanies']);
+    Route::get('/all-companies', [StatsController::class, 'allCompanies']);
+
 });

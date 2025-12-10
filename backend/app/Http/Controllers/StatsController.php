@@ -32,20 +32,31 @@ class StatsController extends Controller
     // 3) Top firmy podľa počtu praxí (bar chart)
     public function topCompanies()
     {
-        return Internship::with('company') // ← very important
-        ->selectRaw('company_id, COUNT(*) as total')
-            ->whereNotNull('company_id')
-            ->groupBy('company_id')
-            ->orderByDesc('total')
-            ->take(3)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'company_name' => $item->company->company_name ?? 'Neznáma firma',
-                    'count' => $item->total,
-                ];
-            });
+        return Internship::query()
+            ->join('companies', 'internships.company_id', '=', 'companies.id')
+            ->select('companies.name as company_name')
+            ->selectRaw('COUNT(internships.id) as count')
+            ->groupBy('companies.name')
+            ->orderByDesc('count')
+            ->limit(3)
+            ->get();
     }
+    public function allCompanies()
+    {
+        $data = Internship::select('company_id', DB::raw('COUNT(*) as count'))
+            ->with('company:id,name')
+            ->groupBy('company_id')
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn($row) => [
+                'company_name' => $row->company->name ?? 'Neznáma firma',
+                'count' => $row->count
+            ]);
+
+        return response()->json($data);
+    }
+
+
 
 
 }
