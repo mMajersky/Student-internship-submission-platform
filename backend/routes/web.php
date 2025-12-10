@@ -99,10 +99,9 @@ Route::get('/internships/company-action', function (Request $request) {
             ]);
         }
 
-        // Check if internship is still in "potvrdená" status (pending company action)
-        // Company can only confirm/reject after garant has confirmed (status "potvrdená")
-        // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
-        if ($internship->status !== \App\Models\Internship::STATUS_POTVRDENA) {
+        // Check if internship is still in "approved by garant" status (pending company action)
+        // Company can only confirm/reject after garant has approved
+        if ($internship->status !== \App\Models\Internship::STATUS_APPROVED) {
             // Load relationships for the resolved view
             $internship->load(['student', 'company', 'garant.user']);
             return view('emails.internship-resolved', [
@@ -114,11 +113,11 @@ Route::get('/internships/company-action', function (Request $request) {
         $oldStatus = $internship->status;
 
         // Update status based on action
-        // After garant confirmed (status "potvrdená"), company confirms → "schválená" (Approved)
-        // Company rejects → "zamietnutá"
+        // After garant approves, company confirms → "confirmed by company"
+        // Company rejects → "not confirmed by company"
         $newStatus = $data['action'] === 'confirm'
-            ? \App\Models\Internship::STATUS_SCHVALENA // Company confirmed - status "schválená" (Approved)
-            : \App\Models\Internship::STATUS_ZAMIETNUTA; // Company rejected
+            ? \App\Models\Internship::STATUS_CONFIRMED
+            : \App\Models\Internship::STATUS_NOT_CONFIRMED;
 
         $internship->update(['status' => $newStatus]);
 

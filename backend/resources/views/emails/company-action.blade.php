@@ -26,7 +26,7 @@
                                             <tr>
                                                 <td style="color: #155724;">
                                                     <h3 style="margin: 0 0 10px 0;">Akcia bola úspešne dokončená!</h3>
-                                                    <p style="margin: 0; font-size: 14px;">Stáž bola úspešne {{ $action === 'confirm' ? 'schválená' : 'zamietnutá' }}.</p>
+                                                    <p style="margin: 0; font-size: 14px;">Stáž bola úspešne {{ $action === 'confirm' ? 'potvrdená spoločnosťou' : 'nepotvrdená spoločnosťou' }}.</p>
                                                 </td>
                                             </tr>
                                         </table>
@@ -49,7 +49,7 @@
                                         <table width="100%" border="0" cellpadding="15" cellspacing="0" bgcolor="#d1ecf1" style="border: 1px solid #bee5eb; border-radius: 4px; margin: 20px 0;">
                                             <tr>
                                                 <td style="color: #0c5460;">
-                                                    <p style="margin: 0; font-size: 14px;">Môžete teraz zatvoriť toto okno. Stáž bola {{ $action === 'confirm' ? 'schválená' : 'zamietnutá' }} a študent bude informovaný.</p>
+                                                    <p style="margin: 0; font-size: 14px;">Môžete teraz zatvoriť toto okno. Stáž bola {{ $action === 'confirm' ? 'potvrdená spoločnosťou' : 'nepotvrdená spoločnosťou' }} a študent bude informovaný.</p>
                                                 </td>
                                             </tr>
                                         </table>
@@ -117,7 +117,19 @@
                                                                     <p style="margin: 5px 0;"><strong>Student:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
                                                                     <p style="margin: 5px 0;"><strong>Company:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
                                                                     <p style="margin: 5px 0;"><strong>Academic Year:</strong> {{ $internship->academy_year }}</p>
-                                                                    <p style="margin: 5px 0;"><strong>Status:</strong> @if($internship->status == 'vytvorená') Created @elseif($internship->status == 'potvrdená') Confirmed @elseif($internship->status == 'schválená') Approved @elseif($internship->status == 'zamietnutá') Rejected @elseif($internship->status == 'obhájená') Defended @elseif($internship->status == 'neobhájená') Not defended @else {{ ucfirst($internship->status) }} @endif</p>
+                                                                    @php
+                                                                        $statusEn = match($internship->status) {
+                                                                            'created' => 'Created',
+                                                                            'approved by garant' => 'Approved by garant',
+                                                                            'rejected by garant' => 'Rejected by garant',
+                                                                            'defended by student' => 'Defended by student',
+                                                                            'not defended by student' => 'Not defended by student',
+                                                                            'confirmed by company' => 'Confirmed by company',
+                                                                            'not confirmed by company' => 'Not confirmed by company',
+                                                                            default => ucfirst($internship->status)
+                                                                        };
+                                                                    @endphp
+                                                                    <p style="margin: 5px 0;"><strong>Status:</strong> {{ $statusEn }}</p>
                                                                     <p style="margin: 5px 0;"><strong>Action:</strong> {{ ucfirst($action) }}</p>
                                                                 </td>
                                                             </tr>
