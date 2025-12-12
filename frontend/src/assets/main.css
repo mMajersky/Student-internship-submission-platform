@@ -8,8 +8,8 @@
 
 /* Color Palette - Consolidated */
 :root {
-  --primary-blue: #0d6efd;
-  --primary-blue-hover: #0b5ed7;
+  --primary-blue: #198754;
+  --primary-blue-hover: #157347;
   --secondary-gray: #6c757d;
   --light-gray: #f8f9fa;
   --dark-gray: #495057;
@@ -125,7 +125,7 @@
 .nav-tabs .nav-link:hover {
   color: var(--primary-blue);
   border-color: transparent;
-  background-color: rgba(13, 110, 253, 0.1);
+  background-color: rgba(25, 135, 84, 0.1);
 }
 
 .nav-tabs .nav-link.active {
@@ -194,8 +194,8 @@
 }
 
 .form-select:focus {
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  border-color: #75b798;
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
 }
 
 .form-select option {
@@ -203,8 +203,8 @@
 }
 
 .form-control:focus {
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  border-color: #75b798;
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
 }
 
 /* ===============================================
@@ -285,7 +285,7 @@
    =============================================== */
 
 .company-approval-info .info-box {
-  background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.02) 100%);
+  background: linear-gradient(135deg, rgba(25, 135, 84, 0.05) 0%, rgba(25, 135, 84, 0.02) 100%);
   border: 1px solid var(--info-border, #b3d9ff);
   box-shadow: var(--shadow-xs);
 }
@@ -387,3 +387,101 @@ footer a:hover {
 
 /* Flex utilities */
 .flex-grow-1 { flex-grow: 1; }
+
+/* ===============================================
+   BOOTSTRAP PRIMARY COLOR OVERRIDE - GREEN
+   =============================================== */
+
+/* Primary buttons */
+.btn-primary {
+  background-color: #198754;
+  border-color: #198754;
+  color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: #157347;
+  border-color: #146c43;
+  color: #fff;
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+  background-color: #198754;
+  border-color: #198754;
+  opacity: 0.65;
+}
+
+/* Primary background */
+.bg-primary {
+  background-color: #198754 !important;
+}
+
+/* Primary text */
+.text-primary {
+  color: #198754 !important;
+}
+
+/* Primary border */
+.border-primary {
+  border-color: #198754 !important;
+}
+
+/* Primary outline buttons */
+.btn-outline-primary {
+  color: #198754;
+  border-color: #198754;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background-color: #198754;
+  border-color: #198754;
+  color: #fff;
+}
+
+/* Primary links */
+a.text-primary:hover,
+a.text-primary:focus {
+  color: #157347 !important;
+}
+
+/* Primary badges */
+.badge.bg-primary {
+  background-color: #198754 !important;
+}
+
+/* Primary spinner */
+.spinner-border-primary {
+  color: #198754;
+}
+
+/* Primary pagination */
+.page-link {
+  color: #198754;
+}
+
+.page-link:hover {
+  color: #157347;
+  background-color: rgba(25, 135, 84, 0.1);
+}
+
+.page-item.active .page-link {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+/* Primary dropdown */
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: #198754;
+}
+
+/* Primary list group */
+.list-group-item.active {
+  background-color: #198754;
+  border-color: #198754;
+}

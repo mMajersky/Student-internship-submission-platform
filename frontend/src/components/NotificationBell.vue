@@ -4,7 +4,7 @@
       class="btn btn-link text-decoration-none position-relative p-0"
       @click="toggleDropdown"
       type="button">
-      <i class="bi bi-bell fs-5" :class="{ 'text-warning': unreadCount > 0 }"></i>
+      <i class="bi bi-bell fs-5" :class="{ 'text-warning': unreadCount > 0, 'text-success': unreadCount === 0 }"></i>
       <span 
         v-if="unreadCount > 0" 
         class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -59,7 +59,7 @@
               </small>
             </div>
             <div>
-              <span v-if="!notification.is_read" class="badge bg-primary">{{ $t('notifications.new') }}</span>
+              <span v-if="!notification.is_read" class="badge" style="background-color: #198754;">{{ $t('notifications.new') }}</span>
               <button
                 @click.stop="deleteNotification(notification.id)"
                 class="btn btn-sm btn-link text-danger p-0 ms-2"

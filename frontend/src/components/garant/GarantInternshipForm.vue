@@ -142,7 +142,7 @@
       </div>
 
       <!-- Info message for new internships -->
-      <div class="alert alert-info mb-4" v-if="!isEditMode">
+      <div class="alert mb-4" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;" v-if="!isEditMode">
         <i class="bi bi-info-circle me-2"></i>
         {{ $t('garantInternshipForm.infoMessage') }}
         <strong>{{ $t('garantInternshipForm.statusCreatedBold') }}</strong>.

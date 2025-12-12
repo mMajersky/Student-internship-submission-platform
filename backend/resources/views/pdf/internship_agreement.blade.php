@@ -78,7 +78,7 @@
         }
 
         a {
-            color: blue;
+            color: green;
             text-decoration: underline;
         }
         

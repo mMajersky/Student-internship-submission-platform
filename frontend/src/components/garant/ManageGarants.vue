@@ -90,7 +90,7 @@
           </div>
 
           <!-- Info message -->
-          <div class="alert alert-info mb-3">
+          <div class="alert mb-3" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;">
             <i class="bi bi-info-circle me-2"></i>
             {{ editingGarant ? $t('manageGarants.infoMessageEdit') : $t('manageGarants.infoMessageCreate') }}
           </div>

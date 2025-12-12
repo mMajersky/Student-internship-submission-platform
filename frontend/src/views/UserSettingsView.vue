@@ -24,7 +24,7 @@
             </label>
           </div>
 
-          <div class="alert alert-info mt-3 mb-0">
+          <div class="alert mt-3 mb-0" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;">
             <small>
               <i class="bi bi-info-circle me-2"></i>
               <strong>{{ $t('common.note') }}:</strong> {{ $t('settings.emailNote') }}
