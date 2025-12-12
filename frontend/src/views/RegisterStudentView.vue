@@ -58,11 +58,16 @@
                 <input
                   type="email"
                   class="form-control"
+                  :class="{ 'is-invalid': errors.email }"
                   id="email"
                   v-model="formData.email"
+                  @input="validateEmail"
                   required
                   :placeholder="$t('auth.register.universityEmailPlaceholder')"
                 />
+                <div v-if="errors.email" class="invalid-feedback">
+                  {{ errors.email }}
+                </div>
                 <small class="form-text text-muted">
                   {{ $t('auth.register.universityEmailHelp') }}
                 </small>
@@ -76,11 +81,20 @@
                 <input
                   type="password"
                   class="form-control"
+                  :class="{ 'is-invalid': errors.password }"
                   id="password"
                   v-model="formData.password"
+                  @input="validatePassword"
                   required
+                  minlength="8"
                   :placeholder="$t('auth.register.passwordPlaceholder')"
                 />
+                <div v-if="errors.password" class="invalid-feedback">
+                  {{ errors.password }}
+                </div>
+                <small v-if="formData.password && !errors.password" class="form-text text-muted">
+                  {{ $t('auth.register.passwordMinLength') }}
+                </small>
               </div>
 
               <!-- Alternative Email -->
@@ -89,10 +103,15 @@
                 <input
                   type="email"
                   class="form-control"
+                  :class="{ 'is-invalid': errors.alternative_email }"
                   id="alternative_email"
                   v-model="formData.alternative_email"
+                  @input="validateAlternativeEmail"
                   :placeholder="$t('auth.register.alternativeEmailPlaceholder')"
                 />
+                <div v-if="errors.alternative_email" class="invalid-feedback">
+                  {{ errors.alternative_email }}
+                </div>
                 <small class="form-text text-muted">
                   {{ $t('auth.register.alternativeEmailHelp') }}
                 </small>
@@ -102,12 +121,20 @@
               <div class="mb-3">
                 <label for="phone_number" class="form-label">{{ $t('auth.register.phoneNumber') }}</label>
                 <input
-                  type="text"
+                  type="tel"
                   class="form-control"
+                  :class="{ 'is-invalid': errors.phone_number }"
                   id="phone_number"
                   v-model="formData.phone_number"
                   :placeholder="$t('auth.register.phonePlaceholder')"
+                  pattern="[0-9+\s\-()]+"
                 />
+                <div v-if="errors.phone_number" class="invalid-feedback">
+                  {{ errors.phone_number }}
+                </div>
+                <small v-if="formData.phone_number && !errors.phone_number" class="form-text text-muted">
+                  {{ $t('auth.register.phoneFormat') }}
+                </small>
               </div>
 
               <!-- Study Level and Field -->
@@ -197,11 +224,21 @@
                   <input
                     type="text"
                     class="form-control"
+                    :class="{ 'is-invalid': errors.postal_code }"
                     id="postal_code"
                     v-model="formData.postal_code"
+                    @input="validatePostalCode"
                     required
                     :placeholder="$t('auth.register.postalCodePlaceholder')"
+                    pattern="[0-9]{5}"
+                    maxlength="5"
                   />
+                  <div v-if="errors.postal_code" class="invalid-feedback">
+                    {{ errors.postal_code }}
+                  </div>
+                  <small v-if="formData.postal_code && !errors.postal_code" class="form-text text-muted">
+                    {{ $t('auth.register.postalCodeFormat') }}
+                  </small>
                 </div>
               </div>
 
@@ -294,33 +331,183 @@ const formData = reactive({
 
 const isLoading = computed(() => authStore.isLoading)
 const errorMessage = ref(null)
+const errors = reactive({})
 
-const handleRegister = async () => {
-  // Basic client-side validation
-  if (!formData.name || !formData.surname || !formData.email || !formData.password) {
-    errorMessage.value = t('auth.register.validation.requiredFields')
+// Validation functions
+const validatePostalCode = () => {
+  if (!formData.postal_code) {
+    errors.postal_code = null
     return
+  }
+  const postalCodeRegex = /^[0-9]{5}$/
+  if (!postalCodeRegex.test(formData.postal_code)) {
+    errors.postal_code = t('auth.register.validation.postalCodeInvalid')
+  } else {
+    errors.postal_code = null
+  }
+}
+
+const validateEmail = () => {
+  if (!formData.email) {
+    errors.email = null
+    return
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(formData.email)) {
+    errors.email = t('auth.register.validation.emailInvalid')
+  } else {
+    const emailDomain = formData.email.split('@')[1]?.toLowerCase()
+    if (!emailDomain || emailDomain !== 'student.ukf.sk') {
+      errors.email = t('auth.register.validation.universityEmailRequired')
+    } else {
+      errors.email = null
+    }
+  }
+}
+
+const validateAlternativeEmail = () => {
+  if (!formData.alternative_email) {
+    errors.alternative_email = null
+    return
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(formData.alternative_email)) {
+    errors.alternative_email = t('auth.register.validation.emailInvalid')
+  } else {
+    errors.alternative_email = null
+  }
+}
+
+const validatePassword = () => {
+  if (!formData.password) {
+    errors.password = null
+    return
+  }
+  if (formData.password.length < 8) {
+    errors.password = t('auth.register.validation.passwordTooShort')
+  } else {
+    errors.password = null
+  }
+}
+
+const validatePhone = () => {
+  if (!formData.phone_number) {
+    errors.phone_number = null
+    return
+  }
+  const phoneRegex = /^[+]?[0-9\s\-()]{9,}$/
+  if (!phoneRegex.test(formData.phone_number.replace(/\s/g, ''))) {
+    errors.phone_number = t('auth.register.validation.phoneInvalid')
+  } else {
+    errors.phone_number = null
+  }
+}
+
+const validateForm = () => {
+  // Clear previous errors
+  Object.keys(errors).forEach(key => errors[key] = null)
+  
+  // Validate required fields
+  if (!formData.name || !formData.name.trim()) {
+    errorMessage.value = t('auth.register.validation.nameRequired')
+    return false
+  }
+
+  if (!formData.surname || !formData.surname.trim()) {
+    errorMessage.value = t('auth.register.validation.surnameRequired')
+    return false
+  }
+
+  if (!formData.email) {
+    errorMessage.value = t('auth.register.validation.emailRequired')
+    return false
+  }
+
+  validateEmail()
+  if (errors.email) {
+    errorMessage.value = errors.email
+    return false
+  }
+
+  if (!formData.password) {
+    errorMessage.value = t('auth.register.validation.passwordRequired')
+    return false
+  }
+
+  validatePassword()
+  if (errors.password) {
+    errorMessage.value = errors.password
+    return false
+  }
+
+  if (formData.alternative_email) {
+    validateAlternativeEmail()
+    if (errors.alternative_email) {
+      errorMessage.value = errors.alternative_email
+      return false
+    }
+  }
+
+  if (formData.phone_number) {
+    validatePhone()
+    if (errors.phone_number) {
+      errorMessage.value = errors.phone_number
+      return false
+    }
   }
 
   if (!formData.study_level) {
     errorMessage.value = t('auth.register.validation.studyLevelRequired')
-    return
+    return false
   }
 
-  if (!formData.study_field) {
+  if (!formData.study_field || !formData.study_field.trim()) {
     errorMessage.value = t('auth.register.validation.studyFieldRequired')
-    return
+    return false
   }
 
-  if (!formData.state || !formData.city || !formData.postal_code || !formData.street || !formData.house_number) {
-    errorMessage.value = t('auth.register.validation.addressRequired')
-    return
+  if (!formData.state || !formData.state.trim()) {
+    errorMessage.value = t('auth.register.validation.stateRequired')
+    return false
   }
 
-  // Validate university email
-  const emailDomain = formData.email.split('@')[1]?.toLowerCase()
-  if (!emailDomain || emailDomain !== 'student.ukf.sk') {
-    errorMessage.value = t('auth.register.validation.universityEmailRequired')
+  if (!formData.region || !formData.region.trim()) {
+    errorMessage.value = t('auth.register.validation.regionRequired')
+    return false
+  }
+
+  if (!formData.city || !formData.city.trim()) {
+    errorMessage.value = t('auth.register.validation.cityRequired')
+    return false
+  }
+
+  if (!formData.postal_code) {
+    errorMessage.value = t('auth.register.validation.postalCodeRequired')
+    return false
+  }
+
+  validatePostalCode()
+  if (errors.postal_code) {
+    errorMessage.value = errors.postal_code
+    return false
+  }
+
+  if (!formData.street || !formData.street.trim()) {
+    errorMessage.value = t('auth.register.validation.streetRequired')
+    return false
+  }
+
+  if (!formData.house_number || !formData.house_number.trim()) {
+    errorMessage.value = t('auth.register.validation.houseNumberRequired')
+    return false
+  }
+
+  return true
+}
+
+const handleRegister = async () => {
+  // Validate form
+  if (!validateForm()) {
     return
   }
 
