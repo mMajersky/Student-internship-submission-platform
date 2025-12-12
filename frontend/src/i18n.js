@@ -1099,7 +1099,7 @@ const messages = {
     },
     landing: {
       title: 'Evidencia a správa odbornej praxe',
-      subtitle: 'Lorem ipsum dolor sit amet consectetur. Blandit felis sed feugiat sapien imperdiet quam suspendisse enim nec.',
+      subtitle: 'Komplexný systém na správu a sledovanie umiestnení a aplikácií študentov na odbornú prax.',
       registerStudent: 'Registrovať študenta',
       registerCompany: 'Registrovať firmu',
       loginLink: 'Alebo sa',

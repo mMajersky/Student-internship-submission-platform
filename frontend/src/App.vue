@@ -14,7 +14,10 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
-            <li class="nav-item">
+            <li class="nav-item" v-if="authStore.isAuthenticated">
+              <router-link :to="dashboardLink" class="nav-link" :class="{ active: isDashboardRoute }">{{ $t('nav.home') }}</router-link>
+            </li>
+            <li class="nav-item" v-if="!authStore.isAuthenticated">
               <router-link to="/" class="nav-link" :class="{ active: $route.path === '/' }">{{ $t('nav.home') }}</router-link>
             </li>
             <li class="nav-item" v-if="authStore.isAuthenticated && authStore.canManageAnnouncements">
@@ -56,7 +59,7 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                  <router-link to="/dashboard" class="dropdown-item">
+                  <router-link :to="dashboardLink" class="dropdown-item">
                     <i class="bi bi-speedometer2 me-2"></i>
                     {{ $t('nav.dashboard') }}
                   </router-link>
@@ -101,6 +104,32 @@ const { t, locale } = useI18n()
 // Computed properties for language switcher
 const currentLanguageFlag = computed(() => locale.value === 'sk' ? 'SK' : 'EN')
 const currentLanguageIcon = computed(() => locale.value === 'sk' ? 'bi bi-flag' : 'bi bi-flag-fill')
+
+// Computed property for dashboard link based on user role
+const dashboardLink = computed(() => {
+  if (!authStore.isAuthenticated) {
+    return '/'
+  }
+  if (authStore.isAdmin) {
+    return '/dashboard'
+  } else if (authStore.isGarant) {
+    return '/garant-dashboard'
+  } else if (authStore.isStudent) {
+    return '/student-dashboard'
+  } else if (authStore.isCompany) {
+    return '/company-dashboard'
+  }
+  return '/'
+})
+
+// Computed property to check if current route is dashboard
+const isDashboardRoute = computed(() => {
+  const path = router.currentRoute.value.path
+  return path === '/dashboard' || 
+         path === '/student-dashboard' || 
+         path === '/company-dashboard' || 
+         path === '/garant-dashboard'
+})
 
 // Methods
 const logout = () => {
