@@ -29,7 +29,14 @@ const messages = {
       export: 'Export',
       import: 'Import',
       language: 'Switch Language',
-      note: 'Note'
+      note: 'Note',
+      ok: 'OK',
+      confirm: 'Confirm',
+      message: 'Message',
+      warning: 'Warning',
+      info: 'Information',
+      value: 'Value',
+      input: 'Input'
     },
     landing: {
       title: 'Student Internship Management System',
@@ -1081,7 +1088,14 @@ const messages = {
       export: 'Exportovať',
       import: 'Importovať',
       language: 'Prepnúť jazyk',
-      note: 'Poznámka'
+      note: 'Poznámka',
+      ok: 'OK',
+      confirm: 'Potvrdiť',
+      message: 'Správa',
+      warning: 'Varovanie',
+      info: 'Informácia',
+      value: 'Hodnota',
+      input: 'Vstup'
     },
     landing: {
       title: 'Evidencia a správa odbornej praxe',

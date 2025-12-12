@@ -68,7 +68,7 @@
                 <div v-if="errors.email" class="invalid-feedback">
                   {{ errors.email }}
                 </div>
-                <small class="form-text text-muted">
+                <small v-else class="form-text text-muted">
                   {{ $t('auth.register.universityEmailHelp') }}
                 </small>
               </div>
