@@ -341,6 +341,9 @@ const messages = {
     notifications: {
       title: 'Notifications',
       markAllAsRead: 'Mark all as read',
+      deleteAll: 'Delete all',
+      deleteAllTitle: 'Delete All Notifications',
+      deleteAllConfirm: 'Are you sure you want to delete all notifications? This action cannot be undone.',
       loading: 'Loading...',
       noNotifications: 'No notifications',
       new: 'New',
@@ -1404,6 +1407,9 @@ const messages = {
     notifications: {
       title: 'Notifikácie',
       markAllAsRead: 'Označiť všetko',
+      deleteAll: 'Vymazať všetky',
+      deleteAllTitle: 'Vymazať všetky notifikácie',
+      deleteAllConfirm: 'Naozaj chcete vymazať všetky notifikácie? Táto akcia sa nedá vrátiť späť.',
       loading: 'Načítavam...',
       noNotifications: 'Žiadne notifikácie',
       new: 'Nové',

@@ -22,10 +22,11 @@
       <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
         <h6 class="mb-0 fw-semibold">{{ $t('notifications.title') }}</h6>
         <button
-          v-if="unreadCount > 0"
-          @click="markAllAsRead"
-          class="btn btn-sm btn-link text-decoration-none p-0">
-          {{ $t('notifications.markAllAsRead') }}
+          v-if="notifications.length > 0"
+          @click="deleteAllNotifications"
+          class="btn btn-sm btn-link text-danger text-decoration-none p-0">
+          <i class="bi bi-trash me-1"></i>
+          {{ $t('notifications.deleteAll') }}
         </button>
       </div>
 
@@ -71,12 +72,6 @@
         </div>
       </div>
 
-      <!-- Footer -->
-      <div class="p-2 border-top text-center">
-        <router-link to="/notifications" class="btn btn-sm btn-link text-decoration-none" @click="showDropdown = false">
-          {{ $t('notifications.viewAll') }}
-        </router-link>
-      </div>
     </div>
 
     <!-- Backdrop -->
@@ -85,6 +80,18 @@
       class="notification-backdrop position-fixed top-0 start-0 w-100 h-100"
       style="z-index: 1040;"
       @click="showDropdown = false"></div>
+
+    <!-- Delete All Confirmation Dialog -->
+    <ConfirmationDialog
+      :is-visible="showDeleteAllConfirm"
+      :title="$t('notifications.deleteAllTitle')"
+      :message="$t('notifications.deleteAllConfirm')"
+      :confirm-text="$t('notifications.deleteAll')"
+      :cancel-text="$t('common.cancel')"
+      type="danger"
+      @confirm="confirmDeleteAll"
+      @cancel="cancelDeleteAll"
+    />
   </div>
 </template>
 
@@ -93,6 +100,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue';
 
 const { t } = useI18n();
 
@@ -103,6 +111,7 @@ const showDropdown = ref(false);
 const notifications = ref([]);
 const unreadCount = ref(0);
 const loading = ref(false);
+const showDeleteAllConfirm = ref(false);
 let pollInterval = null;
 
 const toggleDropdown = async () => {
@@ -151,23 +160,37 @@ const loadUnreadCount = async () => {
   }
 };
 
-const markAllAsRead = async () => {
-  try {
-    const response = await fetch('/api/notifications/mark-all-read', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`,
-        'Accept': 'application/json',
-      }
-    });
+const deleteAllNotifications = () => {
+  showDeleteAllConfirm.value = true;
+};
 
-    if (response.ok) {
-      await loadNotifications();
-      await loadUnreadCount();
-    }
+const confirmDeleteAll = async () => {
+  showDeleteAllConfirm.value = false;
+  
+  try {
+    // Delete all notifications one by one
+    const deletePromises = notifications.value.map(notification =>
+      fetch(`/api/notifications/${notification.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authStore.token}`,
+          'Accept': 'application/json',
+        }
+      })
+    );
+
+    await Promise.all(deletePromises);
+    
+    // Reload notifications and count
+    await loadNotifications();
+    await loadUnreadCount();
   } catch (error) {
-    console.error('Error marking all as read:', error);
+    console.error('Error deleting all notifications:', error);
   }
+};
+
+const cancelDeleteAll = () => {
+  showDeleteAllConfirm.value = false;
 };
 
 const handleNotificationClick = async (notification) => {
@@ -188,19 +211,39 @@ const handleNotificationClick = async (notification) => {
     }
   }
 
-  // Navigate based on notification type
+  // Navigate based on notification type and user role
   showDropdown.value = false;
   
-  if (notification.data && notification.data.internship_id) {
-    // Navigate to internship documents or details
-    if (authStore.isStudent) {
-      router.push(`/upload-documents?internshipId=${notification.data.internship_id}`);
+  // Extract internship_id from notification data
+  const internshipId = notification.data?.internship_id || null;
+  
+  if (authStore.isStudent) {
+    // For students, always navigate to upload documents if internship_id exists
+    if (internshipId) {
+      router.push(`/upload-documents?internshipId=${internshipId}`);
     } else {
-      router.push(`/dashboard`);
+      // Fallback to upload documents page without specific internship
+      router.push('/upload-documents');
     }
-  } else if (notification.type === 'company_request_created' && authStore.isGarant) {
-    // Navigate to company requests page for garants
-    router.push('/garant-dashboard?tab=companyRequests');
+  } else if (authStore.isCompany) {
+    // For companies, navigate to company dashboard or specific internship documents
+    if (internshipId) {
+      router.push(`/company/internships/${internshipId}/documents`);
+    } else {
+      router.push('/company-dashboard');
+    }
+  } else if (authStore.isGarant) {
+    // For garants, navigate based on notification type
+    if (notification.type === 'company_request_created') {
+      router.push('/garant-dashboard?tab=companyRequests');
+    } else if (internshipId) {
+      router.push(`/garant/internships/${internshipId}/documents`);
+    } else {
+      router.push('/garant-dashboard');
+    }
+  } else if (authStore.isAdmin) {
+    // For admins, navigate to dashboard
+    router.push('/dashboard');
   }
 };
 
