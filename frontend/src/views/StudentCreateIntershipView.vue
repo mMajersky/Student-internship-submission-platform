@@ -40,7 +40,14 @@
 
           <div class="form-group">
             <label for="datumKonca" class="label">{{ $t('createInternship.endDate') }}<span class="required">*</span></label>
-            <input id="datumKonca" v-model="formData.end_date" type="date" class="input" required />
+            <input 
+              id="datumKonca" 
+              v-model="formData.end_date" 
+              type="date" 
+              class="input" 
+              :min="formData.start_date"
+              required 
+            />
           </div>
         </div>
 
