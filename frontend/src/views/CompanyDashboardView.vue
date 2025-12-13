@@ -133,14 +133,13 @@
                   <label class="form-label">{{ $t('companyDashboard.filters.status') }}</label>
                   <select class="form-select" v-model="selectedStatus">
                     <option value="">{{ $t('companyDashboard.filters.allStatuses') }}</option>
-                    <option value="vytvorená">{{ $t('studentInternship.status.vytvorena') }}</option>
-                    <option value="potvrdená">{{ $t('studentInternship.status.potvrdena') }}</option>
-                    <option value="schválená">{{ $t('studentInternship.status.schvalena') }}</option>
-                    <option value="prebieha">{{ $t('studentInternship.status.prebieha') }}</option>
-                    <option value="obhájená">{{ $t('studentInternship.status.obhajena') }}</option>
-                    <option value="ukončená">{{ $t('studentInternship.status.ukoncena') }}</option>
-                    <option value="zamietnutá">{{ $t('studentInternship.status.zamietnuta') }}</option>
-                    <option value="zrušená">{{ $t('studentInternship.status.zrusena') }}</option>
+                    <option value="created">{{ $t('studentInternship.status.created') }}</option>
+                    <option value="approved by garant">{{ $t('studentInternship.status.approvedByGarant') }}</option>
+                    <option value="rejected by garant">{{ $t('studentInternship.status.rejectedByGarant') }}</option>
+                    <option value="confirmed by company">{{ $t('studentInternship.status.confirmedByCompany') }}</option>
+                    <option value="not confirmed by company">{{ $t('studentInternship.status.notConfirmedByCompany') }}</option>
+                    <option value="defended by student">{{ $t('studentInternship.status.defendedByStudent') }}</option>
+                    <option value="not defended by student">{{ $t('studentInternship.status.notDefendedByStudent') }}</option>
                   </select>
                 </div>
               </div>
@@ -247,14 +246,13 @@
                   <label class="form-label">{{ $t('companyDashboard.filters.status') }}</label>
                   <select class="form-select" v-model="selectedStatusDocs">
                     <option value="">{{ $t('companyDashboard.filters.allStatuses') }}</option>
-                    <option value="vytvorená">{{ $t('studentInternship.status.vytvorena') }}</option>
-                    <option value="potvrdená">{{ $t('studentInternship.status.potvrdena') }}</option>
-                    <option value="schválená">{{ $t('studentInternship.status.schvalena') }}</option>
-                    <option value="prebieha">{{ $t('studentInternship.status.prebieha') }}</option>
-                    <option value="obhájená">{{ $t('studentInternship.status.obhajena') }}</option>
-                    <option value="ukončená">{{ $t('studentInternship.status.ukoncena') }}</option>
-                    <option value="zamietnutá">{{ $t('studentInternship.status.zamietnuta') }}</option>
-                    <option value="zrušená">{{ $t('studentInternship.status.zrusena') }}</option>
+                    <option value="created">{{ $t('studentInternship.status.created') }}</option>
+                    <option value="approved by garant">{{ $t('studentInternship.status.approvedByGarant') }}</option>
+                    <option value="rejected by garant">{{ $t('studentInternship.status.rejectedByGarant') }}</option>
+                    <option value="confirmed by company">{{ $t('studentInternship.status.confirmedByCompany') }}</option>
+                    <option value="not confirmed by company">{{ $t('studentInternship.status.notConfirmedByCompany') }}</option>
+                    <option value="defended by student">{{ $t('studentInternship.status.defendedByStudent') }}</option>
+                    <option value="not defended by student">{{ $t('studentInternship.status.notDefendedByStudent') }}</option>
                   </select>
                 </div>
               </div>
@@ -466,46 +464,30 @@ const formatDate = (dateString) => {
 
 const getStatusClass = (status) => {
   const statusClasses = {
-    'vytvorená': 'bg-secondary',
-    'potvrdená': 'bg-info',
-    'schválená': 'bg-success',
-    'obhájená': 'bg-primary',
-    'neobhájená': 'bg-danger',
-    'ukončená': 'bg-primary',
-    'prebieha': 'bg-warning text-dark',
-    'zamietnutá': 'bg-danger',
-    'zrušená': 'bg-danger',
-    'pending': 'bg-secondary',
-    'confirmed': 'bg-info',
-    'approved': 'bg-success',
-    'in_progress': 'bg-warning text-dark',
-    'completed': 'bg-success',
-    'rejected': 'bg-danger',
-    'cancelled': 'bg-danger'
+    // New statuses
+    'created': 'bg-secondary',
+    'approved by garant': 'bg-info',
+    'rejected by garant': 'bg-danger',
+    'confirmed by company': 'bg-success',
+    'not confirmed by company': 'bg-danger',
+    'defended by student': 'bg-primary',
+    'not defended by student': 'bg-danger'
   }
   return statusClasses[status] || 'bg-secondary'
 }
 
 const getTranslatedStatus = (status) => {
   const statusMap = {
-    'vytvorená': 'studentInternship.status.vytvorena',
-    'potvrdená': 'studentInternship.status.potvrdena',
-    'schválená': 'studentInternship.status.schvalena',
-    'obhájená': 'studentInternship.status.obhajena',
-    'neobhájená': 'studentInternship.status.neobhajena',
-    'ukončená': 'studentInternship.status.ukoncena',
-    'prebieha': 'studentInternship.status.prebieha',
-    'zamietnutá': 'studentInternship.status.zamietnuta',
-    'zrušená': 'studentInternship.status.zrusena',
-    'pending': 'studentInternship.status.vytvorena',
-    'confirmed': 'studentInternship.status.potvrdena',
-    'approved': 'studentInternship.status.schvalena',
-    'in_progress': 'studentInternship.status.prebieha',
-    'completed': 'studentInternship.status.obhajena',
-    'rejected': 'studentInternship.status.zamietnuta',
-    'cancelled': 'studentInternship.status.zrusena'
+    // New statuses
+    'created': 'studentInternship.status.created',
+    'approved by garant': 'studentInternship.status.approvedByGarant',
+    'rejected by garant': 'studentInternship.status.rejectedByGarant',
+    'confirmed by company': 'studentInternship.status.confirmedByCompany',
+    'not confirmed by company': 'studentInternship.status.notConfirmedByCompany',
+    'defended by student': 'studentInternship.status.defendedByStudent',
+    'not defended by student': 'studentInternship.status.notDefendedByStudent'
   }
-  const translationKey = statusMap[status] || 'studentInternship.status.vytvorena'
+  const translationKey = statusMap[status] || 'studentInternship.status.created'
   return t(translationKey)
 }
 

@@ -52,12 +52,13 @@
             <span style="color: #666;">
                 @php
                     $oldStatusEn = match($oldStatus ?? '') {
-                        'vytvorená' => 'Created',
-                        'potvrdená' => 'Confirmed',
-                        'schválená' => 'Approved',
-                        'zamietnutá' => 'Rejected',
-                        'obhájená' => 'Defended',
-                        'neobhájená' => 'Not defended',
+                        'created' => 'Created',
+                        'approved by garant' => 'Approved by garant',
+                        'rejected by garant' => 'Rejected by garant',
+                        'defended by student' => 'Defended by student',
+                        'not defended by student' => 'Not defended by student',
+                        'confirmed by company' => 'Confirmed by company',
+                        'not confirmed by company' => 'Not confirmed by company',
                         default => $oldStatus ?? 'N/A'
                     };
                 @endphp
@@ -67,12 +68,13 @@
             <span style="color: #28a745; font-weight: bold;">
                 @php
                     $newStatusEn = match($newStatus ?? '') {
-                        'vytvorená' => 'Created',
-                        'potvrdená' => 'Confirmed',
-                        'schválená' => 'Approved',
-                        'zamietnutá' => 'Rejected',
-                        'obhájená' => 'Defended',
-                        'neobhájená' => 'Not defended',
+                        'created' => 'Created',
+                        'approved by garant' => 'Approved by garant',
+                        'rejected by garant' => 'Rejected by garant',
+                        'defended by student' => 'Defended by student',
+                        'not defended by student' => 'Not defended by student',
+                        'confirmed by company' => 'Confirmed by company',
+                        'not confirmed by company' => 'Not confirmed by company',
                         default => $newStatus ?? 'N/A'
                     };
                 @endphp
