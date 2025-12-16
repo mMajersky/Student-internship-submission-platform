@@ -118,8 +118,8 @@ class InternshipController extends Controller
                     'startDate' => $internship->start_date?->format('Y-m-d'),
                     'endDate' => $internship->end_date?->format('Y-m-d'),
                     'status' => $internship->status,
-                    'confirmUrl' => config('app.frontend_url') . '/internships/company-action?token=' . $confirmToken,
-                    'rejectUrl' => config('app.frontend_url') . '/internships/company-action?token=' . $rejectToken,
+                    'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                    'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
                     'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
                     'showButtons' => true, // Show buttons for company emails
                 ];
@@ -430,8 +430,8 @@ class InternshipController extends Controller
                     'startDate' => $internship->start_date?->format('Y-m-d'),
                     'endDate' => $internship->end_date?->format('Y-m-d'),
                     'status' => $internship->status,
-                    'confirmUrl' => config('app.frontend_url') . '/internships/company-action?token=' . $confirmToken,
-                    'rejectUrl' => config('app.frontend_url') . '/internships/company-action?token=' . $rejectToken,
+                    'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                    'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
                     'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
                     'showButtons' => true, // Show buttons for company emails
                 ];
@@ -1188,8 +1188,8 @@ class InternshipController extends Controller
                 'startDate' => $internship->start_date?->format('Y-m-d'),
                 'endDate' => $internship->end_date?->format('Y-m-d'),
                 'status' => $internship->status,
-                'confirmUrl' => config('app.frontend_url') . '/internships/company-action?token=' . $confirmToken,
-                'rejectUrl' => config('app.frontend_url') . '/internships/company-action?token=' . $rejectToken,
+                'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
                 'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
                 'showButtons' => true, // Show buttons for company emails
             ];
@@ -1257,7 +1257,7 @@ class InternshipController extends Controller
                 'startDate' => $internship->start_date?->format('Y-m-d'),
                 'endDate' => $internship->end_date?->format('Y-m-d'),
                 'status' => $internship->status,
-                'evaluationUrl' => config('app.frontend_url') . '/internships/evaluation?token=' . $evaluationToken,
+                'evaluationUrl' => config('app.url') . '/internships/evaluation?token=' . $evaluationToken,
                 'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
             ];
 
@@ -1422,7 +1422,7 @@ class InternshipController extends Controller
                 'startDate' => $internship->start_date?->format('Y-m-d'),
                 'endDate' => $internship->end_date?->format('Y-m-d'),
                 'status' => $internship->status,
-                'evaluationUrl' => config('app.frontend_url') . '/internships/evaluation?token=' . $evaluationToken,
+                'evaluationUrl' => config('app.url') . '/internships/evaluation?token=' . $evaluationToken,
                 'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
             ];
 
