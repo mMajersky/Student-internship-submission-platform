@@ -150,25 +150,35 @@ const normalize = (text) =>
     ? text.toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     : '';
 
+const statusTranslationMap = {
+  'created': 'studentInternship.status.created',
+  'approved by garant': 'studentInternship.status.approvedByGarant',
+  'rejected by garant': 'studentInternship.status.rejectedByGarant',
+  'confirmed by company': 'studentInternship.status.confirmedByCompany',
+  'not confirmed by company': 'studentInternship.status.notConfirmedByCompany',
+  'defended by student': 'studentInternship.status.defendedByStudent',
+  'not defended by student': 'studentInternship.status.notDefendedByStudent'
+};
+
 // Pekné zobrazenie statusu
 const formatStatus = (text) => {
   if (!text) return '';
-  const normalized = text.toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  return t(`studentInternship.status.${normalized}`, text);
+  const translationKey = statusTranslationMap[text] || 'studentInternship.status.created';
+  return t(translationKey, text);
 };
 
 const getStatusBadgeClass = (status) => {
-  const normalized = normalize(status);
   const classes = {
-    'vytvorena': 'bg-secondary',
-    'schvalena': 'bg-success',
-    'obhajena': 'bg-primary',
-    'ukoncena': 'bg-primary',
-    'prebieha': 'bg-warning text-dark',
-    'zamietnuta': 'bg-danger',
-    'zrusena': 'bg-danger'
+    'created': 'bg-secondary',
+    'approved by garant': 'bg-info',
+    'rejected by garant': 'bg-danger',
+    'confirmed by company': 'bg-success',
+    'not confirmed by company': 'bg-danger',
+    'defended by student': 'bg-primary',
+    'not defended by student': 'bg-danger'
   };
-  return classes[normalized] || 'bg-secondary';
+  const normalized = normalize(status);
+  return classes[normalized] || classes[status] || 'bg-secondary';
 };
 
 const loadPraxe = async () => {
@@ -200,18 +210,15 @@ const loadPraxe = async () => {
       const internships = responseData.data;
       praxe.value = internships;
 
-      // VÝPOČET ŠTATISTÍK – normalizované porovnanie
+      // VÝPOČET ŠTATISTÍK – nové hodnoty
       stats.aktivne = internships.filter((p) => {
         const status = normalize(p.status);
-        return status === 'vytvorena' || status === 'prebieha';
+        return status === 'created' || status === 'approved by garant' || status === 'confirmed by company';
       }).length;
 
-      stats.schvalene = internships.filter((p) => normalize(p.status) === 'schvalena').length;
+      stats.schvalene = internships.filter((p) => normalize(p.status) === 'confirmed by company').length;
 
-      stats.obhajene = internships.filter((p) => {
-        const status = normalize(p.status);
-        return status === 'obhajena' || status === 'ukoncena';
-      }).length;
+      stats.obhajene = internships.filter((p) => normalize(p.status) === 'defended by student').length;
     }
   } catch (error) {
     console.error('Chyba pri načítaní praxí:', error.message);
