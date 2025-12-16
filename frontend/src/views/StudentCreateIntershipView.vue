@@ -140,7 +140,7 @@ const handleSubmit = async () => {
   const payload = {
     ...formData,
     student_id: studentId,
-    status: 'vytvorená'
+    status: 'created'
   }
 
   try {

@@ -108,13 +108,21 @@
               </div>
             </form>
 
+            <!-- REGISTRATION LINKS -->
             <div class="text-center mt-4">
               <p class="text-muted small">
                 {{ $t('auth.login.noAccount') }}
-
-                <a href="#">{{ $t('auth.login.registerStudent') }}</a> alebo
-
-                <a href="#">{{ $t('auth.login.registerCompany') }}</a>.
+                <router-link
+                  to="/register"
+                  class="text-primary fw-semibold text-decoration-none">
+                  {{ $t('auth.login.registerStudent') }}
+                </router-link>
+                {{ $t('auth.login.or') }}
+                <router-link
+                  to="/register-company"
+                  class="text-primary fw-semibold text-decoration-none">
+                  {{ $t('auth.login.registerCompany') }}
+                </router-link>.
               </p>
             </div>
           </div>

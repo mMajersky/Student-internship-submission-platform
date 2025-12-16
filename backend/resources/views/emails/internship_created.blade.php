@@ -74,7 +74,19 @@
         <li><strong>Academic Year:</strong> {{ $academyYear ?? 'N/A' }}</li>
         <li><strong>Start Date:</strong> {{ $startDate ?? 'N/A' }}</li>
         <li><strong>End Date:</strong> {{ $endDate ?? 'N/A' }}</li>
-        <li><strong>Status:</strong> @if($status == 'vytvorená') Created @elseif($status == 'potvrdená') Confirmed @elseif($status == 'schválená') Approved @elseif($status == 'zamietnutá') Rejected @elseif($status == 'obhájená') Defended @elseif($status == 'neobhájená') Not defended @else {{ $status ?? 'N/A' }} @endif</li>
+        @php
+            $statusEn = match($status ?? '') {
+                'created' => 'Created',
+                'approved by garant' => 'Approved by garant',
+                'rejected by garant' => 'Rejected by garant',
+                'defended by student' => 'Defended by student',
+                'not defended by student' => 'Not defended by student',
+                'confirmed by company' => 'Confirmed by company',
+                'not confirmed by company' => 'Not confirmed by company',
+                default => $status ?? 'N/A'
+            };
+        @endphp
+        <li><strong>Status:</strong> {{ $statusEn }}</li>
     </ul>
 
     <p>Please review the application and make a decision:</p>

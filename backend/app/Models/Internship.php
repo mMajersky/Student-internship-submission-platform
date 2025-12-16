@@ -10,12 +10,13 @@ class Internship extends Model
     use HasFactory;
 
     // Status constants
-    const STATUS_VYTVORENA = 'vytvorená';
-    const STATUS_POTVRDENA = 'potvrdená';
-    const STATUS_SCHVALENA = 'schválená';
-    const STATUS_ZAMIETNUTA = 'zamietnutá';
-    const STATUS_OBHAJENA = 'obhájená';
-    const STATUS_NEOBHAJENA = 'neobhájená';
+    const STATUS_CREATED = 'created';
+    const STATUS_APPROVED = 'approved by garant';
+    const STATUS_REJECTED = 'rejected by garant';
+    const STATUS_DEFENDED = 'defended by student';
+    const STATUS_NOT_DEFENDED = 'not defended by student';
+    const STATUS_CONFIRMED = 'confirmed by company';
+    const STATUS_NOT_CONFIRMED = 'not confirmed by company';
 
     protected $table = 'internships';
 
@@ -52,12 +53,13 @@ class Internship extends Model
     public static function getStatuses()
     {
         return [
-            self::STATUS_VYTVORENA,
-            self::STATUS_POTVRDENA,
-            self::STATUS_SCHVALENA,
-            self::STATUS_ZAMIETNUTA,
-            self::STATUS_OBHAJENA,
-            self::STATUS_NEOBHAJENA,
+            self::STATUS_CREATED,
+            self::STATUS_APPROVED,
+            self::STATUS_REJECTED,
+            self::STATUS_DEFENDED,
+            self::STATUS_NOT_DEFENDED,
+            self::STATUS_CONFIRMED,
+            self::STATUS_NOT_CONFIRMED,
         ];
     }
 
