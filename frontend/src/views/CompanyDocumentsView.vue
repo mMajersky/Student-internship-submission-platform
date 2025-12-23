@@ -316,26 +316,30 @@ const getDocumentTypeLabel = (type) => {
 
 const getStatusClass = (status) => {
   const statusClasses = {
-    'vytvorená': 'bg-secondary',
-    'potvrdená': 'bg-info',
-    'schválená': 'bg-success',
-    'obhájená': 'bg-primary',
-    'neobhájená': 'bg-danger',
-    'zamietnutá': 'bg-danger',
+    // New statuses
+    'created': 'bg-secondary',
+    'approved by garant': 'bg-info',
+    'rejected by garant': 'bg-danger',
+    'confirmed by company': 'bg-success',
+    'not confirmed by company': 'bg-danger',
+    'defended by student': 'bg-primary',
+    'not defended by student': 'bg-danger'
   }
   return statusClasses[status] || 'bg-secondary'
 }
 
 const getTranslatedStatus = (status) => {
   const statusMap = {
-    'vytvorená': 'studentInternship.status.vytvorena',
-    'potvrdená': 'studentInternship.status.potvrdena',
-    'schválená': 'studentInternship.status.schvalena',
-    'obhájená': 'studentInternship.status.obhajena',
-    'neobhájená': 'studentInternship.status.neobhajena',
-    'zamietnutá': 'studentInternship.status.zamietnuta',
+    // New statuses
+    'created': 'studentInternship.status.created',
+    'approved by garant': 'studentInternship.status.approvedByGarant',
+    'rejected by garant': 'studentInternship.status.rejectedByGarant',
+    'confirmed by company': 'studentInternship.status.confirmedByCompany',
+    'not confirmed by company': 'studentInternship.status.notConfirmedByCompany',
+    'defended by student': 'studentInternship.status.defendedByStudent',
+    'not defended by student': 'studentInternship.status.notDefendedByStudent'
   }
-  const translationKey = statusMap[status] || 'studentInternship.status.vytvorena'
+  const translationKey = statusMap[status] || 'studentInternship.status.created'
   return t(translationKey)
 }
 

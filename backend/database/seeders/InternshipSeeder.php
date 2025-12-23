@@ -38,7 +38,7 @@ class InternshipSeeder extends Seeder
             'student_id' => $student1->id,
             'company_id' => $company1->id,
             'garant_id' => null, // Garant ešte nie je priradený
-            'status' => 'vytvorena', // Stav zodpovedá tomu, že prax je len vytvorená
+            'status' => 'created', // Prax je len vytvorená
             'academy_year' => '2025/2026',
             'start_date' => Carbon::now()->addMonths(2),
             'end_date' => Carbon::now()->addMonths(5),
@@ -66,7 +66,7 @@ class InternshipSeeder extends Seeder
                     'student_id' => $student2->id,
                     'company_id' => $company2->id,
                     'garant_id' => $garant->id, // Garant je priradený
-                    'status' => 'schvalena', // Stav je "schvalena"
+                    'status' => 'confirmed by company', // Prax potvrdená spoločnosťou
                     'academy_year' => '2025/2026',
                     'start_date' => Carbon::now()->addMonth(),
                     'end_date' => Carbon::now()->addMonths(4),

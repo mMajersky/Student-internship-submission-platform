@@ -476,12 +476,12 @@ const fetchInternships = async () => {
   }
 }
 
-// Update statistics based on internships data
+// Update statistics based on internships data (new status set)
 const updateStatistics = () => {
   stats.value.total = internships.value.length
-  stats.value.inProgress = internships.value.filter(i => i.status === 'in_progress').length
-  stats.value.completed = internships.value.filter(i => i.status === 'completed').length
-  stats.value.planned = internships.value.filter(i => i.status === 'pending').length
+  stats.value.inProgress = internships.value.filter(i => ['approved by garant', 'confirmed by company', 'not confirmed by company'].includes(i.status)).length
+  stats.value.completed = internships.value.filter(i => ['defended by student', 'not defended by student'].includes(i.status)).length
+  stats.value.planned = internships.value.filter(i => i.status === 'created').length
 }
 
 // Computed: unique years from internships
@@ -602,7 +602,7 @@ const handleCreateInternship = async (formData) => {
     const payload = {
       student_id: formData.student_id,
       company_id: formData.company_id,
-      status: formData.status || 'vytvorená',
+      status: formData.status || 'created',
       academy_year: formData.academy_year,
       semester: formData.semester,
       start_date: formData.start_date || null,
@@ -724,22 +724,14 @@ const formatDate = (dateString) => {
 
 const getStatusClass = (status) => {
   const statusClasses = {
-    'vytvorená': 'bg-secondary',
-    'potvrdená': 'bg-info',
-    'schválená': 'bg-success',
-    'obhájená': 'bg-primary',
-    'neobhájená': 'bg-danger',
-    'ukončená': 'bg-primary',
-    'prebieha': 'bg-warning text-dark',
-    'zamietnutá': 'bg-danger',
-    'zrušená': 'bg-danger',
-    'pending': 'bg-secondary',
-    'confirmed': 'bg-info',
-    'approved': 'bg-success',
-    'in_progress': 'bg-warning text-dark',
-    'completed': 'bg-success',
-    'rejected': 'bg-danger',
-    'cancelled': 'bg-danger'
+    // New statuses
+    'created': 'bg-secondary',
+    'approved by garant': 'bg-info',
+    'rejected by garant': 'bg-danger',
+    'confirmed by company': 'bg-success',
+    'not confirmed by company': 'bg-danger',
+    'defended by student': 'bg-primary',
+    'not defended by student': 'bg-danger'
   }
   return statusClasses[status] || 'bg-secondary'
 }
@@ -747,25 +739,17 @@ const getStatusClass = (status) => {
 const getTranslatedStatus = (status) => {
   // Map API status values to translation keys
   const statusMap = {
-    'vytvorená': 'studentInternship.status.vytvorena',
-    'potvrdená': 'studentInternship.status.potvrdena',
-    'schválená': 'studentInternship.status.schvalena',
-    'obhájená': 'studentInternship.status.obhajena',
-    'neobhájená': 'studentInternship.status.neobhajena',
-    'ukončená': 'studentInternship.status.ukoncena',
-    'prebieha': 'studentInternship.status.prebieha',
-    'zamietnutá': 'studentInternship.status.zamietnuta',
-    'zrušená': 'studentInternship.status.zrusena',
-    'pending': 'studentInternship.status.vytvorena',
-    'confirmed': 'studentInternship.status.potvrdena',
-    'approved': 'studentInternship.status.schvalena',
-    'in_progress': 'studentInternship.status.prebieha',
-    'completed': 'studentInternship.status.obhajena',
-    'rejected': 'studentInternship.status.zamietnuta',
-    'cancelled': 'studentInternship.status.zrusena'
+    // New statuses
+    'created': 'studentInternship.status.created',
+    'approved by garant': 'studentInternship.status.approvedByGarant',
+    'rejected by garant': 'studentInternship.status.rejectedByGarant',
+    'confirmed by company': 'studentInternship.status.confirmedByCompany',
+    'not confirmed by company': 'studentInternship.status.notConfirmedByCompany',
+    'defended by student': 'studentInternship.status.defendedByStudent',
+    'not defended by student': 'studentInternship.status.notDefendedByStudent'
   }
 
-  const translationKey = statusMap[status] || 'studentInternship.status.vytvorena'
+  const translationKey = statusMap[status] || 'studentInternship.status.created'
   return t(translationKey)
 }
 
