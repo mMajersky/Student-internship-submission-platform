@@ -371,9 +371,14 @@
         </div>
       </div>
       <!-- Statistics Tab -->
-      <div v-if="activeTab === 'statistics'" class="tab-pane fade show active">
-        <StatisticsTab />
+      <div class="card">
+        <div class="card-body">
+          <div v-if="activeTab === 'statistics'" class="tab-pane fade show active">
+            <StatisticsTab :internships="internships" />
+          </div>
+        </div>
       </div>
+
 
     </div>
 

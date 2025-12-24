@@ -233,7 +233,7 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
     // Future admin-only routes
 });
 
-<<<<<<< HEAD
+
 //charts
 use App\Http\Controllers\StatsController;
 
@@ -243,13 +243,12 @@ Route::prefix('stats')->group(function () {
     Route::get('/top-companies', [StatsController::class, 'topCompanies']);
     Route::get('/all-companies', [StatsController::class, 'allCompanies']);
 
-=======
 // External third-party API routes - OAuth client authenticated only (no user JWTs, no role restrictions)
-Route::middleware(['oauth'])->prefix('external')->group(function () {
-    // Get all internships as objects
-    Route::get('/internships', [ExternalInternshipController::class, 'index']);
+    Route::middleware(['oauth'])->prefix('external')->group(function () {
+        // Get all internships as objects
+        Route::get('/internships', [ExternalInternshipController::class, 'index']);
 
-    // Defend internship - change status from 'schválená' to 'obhájená'
-    Route::post('/internships/{id}/defend', [ExternalInternshipController::class, 'defend']);
->>>>>>> develop
+        // Defend internship - change status from 'schválená' to 'obhájená'
+        Route::post('/internships/{id}/defend', [ExternalInternshipController::class, 'defend']);
+    });
 });
