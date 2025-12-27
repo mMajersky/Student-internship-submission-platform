@@ -23,7 +23,7 @@ class DataSeeder extends Seeder
         $students = collect();
 
         User::factory()
-            ->count(30)
+            ->count(40) // 🔥 viac študentov
             ->create(['role' => 'student'])
             ->each(function ($user) use ($students) {
                 $student = Student::factory()->create([
@@ -33,31 +33,60 @@ class DataSeeder extends Seeder
             });
 
         // -------------------------------------------------------------
-        // 3. Internship configuration
+        // 3. Internship configuration (UNIFIED WITH MODEL)
         // -------------------------------------------------------------
-        $types = ['unpaid', 'paid', 'school_project'];
+        $types = [
+            Internship::TYPE_PAID,
+            Internship::TYPE_UNPAID,
+            Internship::TYPE_SCHOOL_PROJECT,
+        ];
 
-        $statuses = [
-            'Created',
-            'Garant_Approved',
-            'Garant_Rejected',
-            'Company_Approved',
-            'Company_Rejected',
-            'Defended',
-            'Not_Defended',
+        // Vážené rozdelenie statusov (realistické)
+        $statusWeights = [
+            Internship::STATUS_CREATED         => 10,
+            Internship::STATUS_APPROVED        => 20,
+            Internship::STATUS_REJECTED        => 5,
+            Internship::STATUS_CONFIRMED       => 25,
+            Internship::STATUS_NOT_CONFIRMED   => 5,
+            Internship::STATUS_DEFENDED        => 25,
+            Internship::STATUS_NOT_DEFENDED    => 10,
         ];
 
         // -------------------------------------------------------------
         // 4. Generate internships
         // -------------------------------------------------------------
-        Internship::factory()
-            ->count(50)
-            ->create([
-                'student_id' => fn () => $students->random()->id,
-                'company_id' => fn () => $companies->random()->id,
-                'garant_id'  => 1, // alebo random garant ak budeš mať seedovaných viacerých
-                'type'       => fn () => collect($types)->random(),
-                'status'     => fn () => collect($statuses)->random(),
+        for ($i = 0; $i < 120; $i++) { // 🔥 výrazne viac dát
+            Internship::factory()->create([
+                'student_id' => $students->random()->id,
+                'company_id' => $companies->random()->id,
+                'garant_id'  => 1, // ak máš len jedného garanta
+                'type'       => collect($types)->random(),
+                'status'     => $this->weightedRandom($statusWeights),
+                'academy_year' => collect([
+                    '2023/2024',
+                    '2024/2025',
+                    '2025/2026',
+                ])->random(),
             ]);
+        }
+    }
+
+    /**
+     * Pick a value using weighted random distribution
+     */
+    private function weightedRandom(array $weights): string
+    {
+        $sum = array_sum($weights);
+        $rand = rand(1, $sum);
+
+        foreach ($weights as $value => $weight) {
+            $rand -= $weight;
+            if ($rand <= 0) {
+                return $value;
+            }
+        }
+
+        // fallback (should never happen)
+        return array_key_first($weights);
     }
 }

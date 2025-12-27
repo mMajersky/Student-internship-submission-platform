@@ -51,7 +51,7 @@
     </div>
 
     <!-- Student Search -->
-    <div class="col-md-3">
+    <div v-if="showStudent" class="col-md-3">
       <label class="form-label fw-semibold">
         <i class="bi bi-person me-1"></i>
         {{ $t('garantDashboard.filters.student') }}
@@ -82,7 +82,15 @@ const props = defineProps({
   selectedCompanies: { type: Array, default: () => [] },
   selectedStudyFields: { type: Array, default: () => [] },
   studentSearchQuery: { type: String, default: '' },
-  idPrefix: { type: String, default: '' }
+  idPrefix: { type: String, default: '' },
+    showStudyField: {
+    type: Boolean,
+    default: true
+  },
+  showStudent: {
+    type: Boolean,
+    default: true
+  }
 })
 
 const emit = defineEmits([
@@ -119,9 +127,11 @@ const dropdownFilters = computed(() => [
     emit: 'update:selectedCompanies',
     getValue: (item) => item.id,
     getLabel: (item) => item.name,
-    getSingleLabel: (item) => props.availableCompanies.find(c => c.id === item)?.name
+    getSingleLabel: (item) =>
+      props.availableCompanies.find(c => c.id === item)?.name
   },
-  {
+  // 🔥 Study field – ONLY IF ENABLED
+  ...(props.showStudyField ? [{
     key: 'StudyFields',
     icon: 'bi-mortarboard',
     label: 'garantDashboard.filters.studyField',
@@ -131,8 +141,9 @@ const dropdownFilters = computed(() => [
     getValue: (item) => item,
     getLabel: (item) => item,
     getSingleLabel: (item) => item
-  }
+  }] : [])
 ])
+
 
 const getButtonLabel = (filter) => {
   const { selected, available, getSingleLabel } = filter
@@ -160,4 +171,5 @@ const toggleItem = (filter, value) => {
 const handleStudentSearch = () => {
   // Emitting happens automatically via v-model
 }
+
 </script>
