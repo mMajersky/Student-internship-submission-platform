@@ -60,7 +60,7 @@
       <div class="col-md-12 col-lg-4 d-flex flex-column justify-content-center">
         <div class="stat-box mb-3 text-center">
           <div class="stat-number text-waiting-garant">
-            {{ statusCounts.waitingGarant }}
+            {{ statusCounts.created }}
           </div>
           <div class="stat-label">
             Čaká sa na garanta
@@ -69,7 +69,7 @@
 
         <div class="stat-box mb-3 text-center">
           <div class="stat-number text-warning">
-            {{ runningCount }}
+            {{ statusCounts.active }}
           </div>
           <div class="stat-label">
             Prebiehajúce praxe
@@ -78,7 +78,7 @@
 
         <div class="stat-box text-center">
           <div class="stat-number text-success">
-            {{ finishedCount }}
+            {{ statusCounts.finished }}
           </div>
           <div class="stat-label">
             Ukončené praxe
@@ -97,7 +97,7 @@
       <!-- COUNT -->
       <div class="stat-box mb-3 text-center">
         <div class="stat-number text-waiting-garant">
-          {{ statusCounts.waitingCompany }}
+          {{ statusCounts.approved_by_garant }}
         </div>
         <div class="stat-label">
           Čaká sa na firmu
@@ -124,7 +124,7 @@
       <!-- COUNT -->
       <div class="stat-box mb-3 text-center">
         <div class="stat-number text-waiting-garant">
-          {{ statusCounts.waitingDefense }}
+          {{ statusCounts.approved_by_company }}
         </div>
         <div class="stat-label">
           Čaká sa na študenta
@@ -409,34 +409,10 @@ const studentOutcomeChartData = computed(() => {
   }
 })
 
-const finishedCount = computed(() => {
-  return filteredInternships.value.filter(i =>
-    i.status === 'defended by student' ||
-    i.status === 'not defended by student'
-  ).length
-})
-
-const runningCount = computed(() => {
-  return filteredInternships.value.length - finishedCount.value
-})
-
-
-const fetchSummary = async () => {
-  const res = await fetch('/api/stats/internship-summary')
-  const data = await res.json()
-
-  runningCount.value = data.running
-  finishedCount.value = data.finished
-}
-
-onMounted(() => {
-  fetchSummary()
-})
-
 const statusCounts = computed(() => {
-  let waitingGarant = 0
-  let waitingCompany = 0
-  let waitingDefense = 0
+  let created = 0
+  let approved_by_garant = 0
+  let approved_by_company = 0
 
   let defended = 0
   let notDefended = 0
@@ -446,15 +422,15 @@ const statusCounts = computed(() => {
   filteredInternships.value.forEach(i => {
     switch (i.status) {
       case 'created':
-        waitingGarant++
+        created++
         break
 
       case 'approved by garant':
-        waitingCompany++
+        approved_by_garant++
         break
 
-      case 'approved by company':
-        waitingDefense++
+      case 'confirmed by company':
+        approved_by_company++
         break
 
       case 'defended by student':
@@ -474,9 +450,9 @@ const statusCounts = computed(() => {
 
   return {
     // čakacie stavy
-    waitingGarant,
-    waitingCompany,
-    waitingDefense,
+    created,
+    approved_by_garant,
+    approved_by_company,
 
     // výsledok
     defended,
@@ -484,7 +460,7 @@ const statusCounts = computed(() => {
 
     // agregácie
     finished: defended + notDefended,
-    active: waitingGarant + waitingCompany + waitingDefense,
+    active: created + approved_by_garant + approved_by_company,
     rejected
   }
 })
@@ -566,11 +542,6 @@ const pieChartOptions = {
     }
   }
 }
-
-
-
-
-
 </script>
 
 <style>
