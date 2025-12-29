@@ -55,6 +55,17 @@
           {{ $t('garantDashboard.tabs.documents') }}
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          :class="{ active: activeTab === 'statistics' }"
+          @click="activeTab = 'statistics'"
+          type="button"
+        >
+          <i class="bi bi-bar-chart me-2"></i>
+          Štatistiky
+        </button>
+      </li>
     </ul>
 
     <!-- Tab Content -->
@@ -359,6 +370,16 @@
           </div>
         </div>
       </div>
+      <!-- Statistics Tab -->
+      <div class="card">
+        <div class="card-body">
+          <div v-if="activeTab === 'statistics'" class="tab-pane fade show active">
+            <StatisticsTab :internships="internships" />
+          </div>
+        </div>
+      </div>
+
+
     </div>
 
     <!-- Comment Modal -->
@@ -399,6 +420,7 @@ import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 import InternshipFilters from '@/components/garant/InternshipFilters.vue'
+import StatisticsTab from '@/components/garant/tabs/StatisticsTab.vue'
 
 const { t } = useI18n()
 
