@@ -237,13 +237,16 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 //charts
 use App\Http\Controllers\StatsController;
 
-Route::prefix('stats')->group(function () {
-    Route::get('/students-trend', [StatsController::class, 'studentsTrend']);
-    Route::get('/internship-types', [StatsController::class, 'internshipTypes']);
-    Route::get('/top-companies', [StatsController::class, 'topCompanies']);
-    Route::get('/all-companies', [StatsController::class, 'allCompanies']);
-    Route::get('/internship-summary', [StatsController::class, 'internshipSummary']);
+Route::middleware('auth:api')
+    ->prefix('stats')
+    ->group(function () {
 
+        Route::get('/students-trend', [StatsController::class, 'studentsTrend']);
+        Route::get('/internship-types', [StatsController::class, 'internshipTypes']);
+        Route::get('/top-companies', [StatsController::class, 'topCompanies']);
+        Route::get('/all-companies', [StatsController::class, 'allCompanies']);
+        Route::get('/internship-summary', [StatsController::class, 'internshipSummary']);
+        Route::get('/internships/export', [StatsController::class, 'exportCsv']);
 
 // External third-party API routes - OAuth client authenticated only (no user JWTs, no role restrictions)
     Route::middleware(['oauth'])->prefix('external')->group(function () {

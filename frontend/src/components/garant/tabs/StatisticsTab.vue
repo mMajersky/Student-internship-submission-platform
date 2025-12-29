@@ -16,6 +16,13 @@
       id-prefix="stats-"
     />
 
+    <button
+      class="btn btn-outline-primary ms-2"
+      @click="downloadCsv">
+      Export CSV
+    </button>
+
+
 
     <!-- CHARTS -->
     <div class="row g-4 mt-3">
@@ -516,7 +523,7 @@ const pieChartOptions = {
   maintainAspectRatio: false,
   plugins: {
     datalabels: {
-      display: false // ❗ vypneme čísla v pie
+      display: false
     },
     legend: {
       position: 'right',
@@ -542,6 +549,49 @@ const pieChartOptions = {
     }
   }
 }
+
+const API_BASE = import.meta.env.VITE_API_URL
+
+const downloadCsv = async () => {
+  const params = new URLSearchParams()
+
+  if (selectedYears.value.length > 0) {
+    params.append('years', selectedYears.value.join(','))
+  }
+
+  if (selectedCompanyIds.value.length > 0) {
+    params.append('companies', selectedCompanyIds.value.join(','))
+  }
+
+  // 🔥 TU JE HLAVNÁ OPRAVA
+  const url = `${API_BASE}/api/stats/internships/export?${params.toString()}`
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${authStore.token}`,
+      Accept: 'text/csv',
+    },
+  })
+
+  if (!response.ok) {
+    console.error('CSV export failed', response.status)
+    return
+  }
+
+  const blob = await response.blob()
+  const downloadUrl = window.URL.createObjectURL(blob)
+
+  const a = document.createElement('a')
+  a.href = downloadUrl
+  a.download = 'internships.csv'
+  document.body.appendChild(a)
+  a.click()
+
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(downloadUrl)
+}
+
+
 </script>
 
 <style>

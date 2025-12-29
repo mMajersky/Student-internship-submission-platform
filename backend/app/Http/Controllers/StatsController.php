@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Internship;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Http\Request;
 
 class StatsController extends Controller
 {
@@ -82,6 +84,59 @@ class StatsController extends Controller
         return response()->json([
             'running' => $running,
             'finished' => $finished,
+        ]);
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $query = Internship::query()
+            ->with(['student.user', 'company']);
+
+        // FILTER: years
+        if ($request->filled('years')) {
+            $years = explode(',', $request->years);
+            $query->whereIn('academy_year', $years);
+        }
+
+        // FILTER: companies
+        if ($request->filled('companies')) {
+            $companies = explode(',', $request->companies);
+            $query->whereIn('company_id', $companies);
+        }
+
+        $filename = 'internships_export_' . now()->format('Y-m-d_H-i') . '.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+
+            // CSV HEADER
+            fputcsv($handle, [
+                'Student',
+                'Company',
+                'Status',
+                'Type',
+                'Academic year',
+                'Start date',
+                'End date'
+            ]);
+
+            $query->chunk(200, function ($internships) use ($handle) {
+                foreach ($internships as $i) {
+                    fputcsv($handle, [
+                        $i->student?->user?->name,
+                        $i->company?->name,
+                        $i->status,
+                        $i->type,
+                        $i->academy_year,
+                        $i->start_date,
+                        $i->end_date
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
         ]);
     }
 
