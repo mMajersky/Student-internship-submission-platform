@@ -102,12 +102,13 @@
             required
           >
             <option value="" disabled>{{ $t('garantInternshipForm.selectStatus') }}</option>
-            <option value="vytvorená">{{ $t('garantInternshipForm.statusCreated') }}</option>
-            <option value="potvrdená">{{ $t('garantInternshipForm.statusConfirmed') }}</option>
-            <option value="schválená">{{ $t('garantInternshipForm.statusApproved') }}</option>
-            <option value="zamietnutá">{{ $t('garantInternshipForm.statusRejected') }}</option>
-            <option value="obhájená">{{ $t('garantInternshipForm.statusCompleted') }}</option>
-            <option value="neobhájená">{{ $t('garantInternshipForm.statusFailed') }}</option>
+            <option value="created">{{ $t('garantInternshipForm.statusCreated') }}</option>
+            <option value="approved by garant">{{ $t('garantInternshipForm.statusConfirmed') }}</option>
+            <option value="rejected by garant">{{ $t('garantInternshipForm.statusRejected') }}</option>
+            <option value="confirmed by company">{{ $t('garantInternshipForm.statusApproved') }}</option>
+            <option value="not confirmed by company">{{ $t('garantInternshipForm.statusNotConfirmed') }}</option>
+            <option value="defended by student">{{ $t('garantInternshipForm.statusCompleted') }}</option>
+            <option value="not defended by student">{{ $t('garantInternshipForm.statusFailed') }}</option>
           </select>
         </div>
 
@@ -149,7 +150,7 @@
       </div>
 
       <!-- Company approval info box -->
-      <div class="company-approval-info mb-4" v-if="isEditMode && props.internship && props.internship.status === 'potvrdená'">
+      <div class="company-approval-info mb-4" v-if="isEditMode && props.internship && props.internship.status === 'approved by garant'">
         <div class="info-box p-3 rounded">
           <div class="d-flex align-items-start">
             <i class="bi bi-envelope-check text-primary me-3 fs-4"></i>
@@ -259,7 +260,7 @@ const isEditMode = computed(() => props.internship !== null)
 const formData = ref({
   student_id: '',
   company_id: '',
-  status: 'pending',
+  status: 'created',
   academy_year: `${currentYear}/${currentYear + 1}`,
   semester: 'LS',
   start_date: '',
@@ -389,13 +390,13 @@ onMounted(() => {
     formData.value = {
       student_id: props.internship.student_id || props.internship.student?.id || '',
       company_id: props.internship.company_id || props.internship.company?.id || '',
-      status: props.internship.status || 'vytvorená',
+      status: props.internship.status || 'created',
       academy_year: props.internship.academy_year || `${currentYear}/${currentYear + 1}`,
       semester: props.internship.semester || 'LS',
       start_date: props.internship.start_date || '',
       end_date: props.internship.end_date || ''
     }
-    originalStatus.value = props.internship.status || 'vytvorená'
+    originalStatus.value = props.internship.status || 'created'
   }
 })
 
@@ -449,7 +450,7 @@ const resetForm = () => {
   formData.value = {
     student_id: '',
     company_id: '',
-    status: 'vytvorená',
+    status: 'created',
     academy_year: `${currentYear}/${currentYear + 1}`,
     semester: 'LS',
     start_date: '',

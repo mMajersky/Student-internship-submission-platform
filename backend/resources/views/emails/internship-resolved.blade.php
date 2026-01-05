@@ -143,9 +143,21 @@
                 <p><strong>Student:</strong> {{ $internship->student->name ?? 'N/A' }} {{ $internship->student->surname ?? '' }}</p>
                 <p><strong>Company:</strong> {{ $internship->company->name ?? 'N/A' }}</p>
                 <p><strong>Academic Year:</strong> {{ $internship->academy_year }}</p>
+                @php
+                    $statusEn = match($internship->status) {
+                        'created' => 'Created',
+                        'approved by garant' => 'Approved by garant',
+                        'rejected by garant' => 'Rejected by garant',
+                        'defended by student' => 'Defended by student',
+                        'not defended by student' => 'Not defended by student',
+                        'confirmed by company' => 'Confirmed by company',
+                        'not confirmed by company' => 'Not confirmed by company',
+                        default => ucfirst($internship->status)
+                    };
+                @endphp
                 <p><strong>Current Status:</strong>
-                    <span class="status-badge status-{{ strtolower($internship->status) }}">
-                        @if($internship->status == 'vytvorená') Created @elseif($internship->status == 'potvrdená') Confirmed @elseif($internship->status == 'schválená') Approved @elseif($internship->status == 'zamietnutá') Rejected @elseif($internship->status == 'obhájená') Defended @elseif($internship->status == 'neobhájená') Not defended @else {{ ucfirst($internship->status) }} @endif
+                    <span class="status-badge status-{{ strtolower(str_replace(' ', '-', $internship->status)) }}">
+                        {{ $statusEn }}
                     </span>
                 </p>
             </div>

@@ -101,10 +101,9 @@ class InternshipController extends Controller
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send email to company with approve/reject buttons ONLY when created with "potvrdená" status (garant confirms)
-            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
-            // This is the moment when company needs to confirm/reject
-            if ($validated['status'] === Internship::STATUS_POTVRDENA && $internship->company && $internship->company->user && $internship->company->user->email) {
+            // Send email to company with approve/reject buttons ONLY when created with "approved by garant" status
+            // Sequence: Created → Approved by garant → Company confirms/rejects → Defended state
+            if ($validated['status'] === Internship::STATUS_APPROVED && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
@@ -215,6 +214,7 @@ class InternshipController extends Controller
                     return [
                         'id' => $internship->id,
                         'student_id' => $internship->student_id,
+                        'type' => $internship->type,
                         'student' => $internship->student ? [
                             'id' => $internship->student->id,
                             'name' => $internship->student->name,
@@ -398,8 +398,8 @@ class InternshipController extends Controller
             // Check if status is being changed
             $oldStatus = $internship->status;
             $statusChanged = isset($validated['status']) && $oldStatus !== $validated['status'];
-            $statusChangedToPotvrdena = $statusChanged && $validated['status'] === Internship::STATUS_POTVRDENA;
-            
+            $statusChangedToApproved = $statusChanged && $validated['status'] === Internship::STATUS_APPROVED;
+
             // Check if internship has ended (end_date is today or in the past) and evaluation email hasn't been sent yet
             $oldEndDate = $internship->end_date;
             $newEndDate = isset($validated['end_date']) ? Carbon::parse($validated['end_date']) : $oldEndDate;
@@ -413,10 +413,10 @@ class InternshipController extends Controller
             // Load relationships for the response
             $internship->load(['student.user', 'company.user', 'garant.user']);
 
-            // Send email to company with approve/reject buttons when garant confirms (changes to "potvrdená")
-            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
-            // This is the moment when company needs to confirm/reject (after garant confirms)
-            if ($statusChangedToPotvrdena && $internship->company && $internship->company->user && $internship->company->user->email) {
+            // Send email to company with approve/reject buttons when garant approves (changes to "approved by garant")
+            // Sequence: Created → Approved by garant → Company confirms/rejects → Defended state
+            // This is the moment when company needs to confirm/reject (after garant approval)
+            if ($statusChangedToApproved && $internship->company && $internship->company->user && $internship->company->user->email) {
                 // Generate secure tokens for email actions
                 $confirmToken = $this->generateSecureToken($internship->id, 'confirm');
                 $rejectToken = $this->generateSecureToken($internship->id, 'reject');
@@ -452,12 +452,12 @@ class InternshipController extends Controller
 
             // Send evaluation email to company when internship ends (end_date is today or in the past)
             // Only send if evaluation doesn't exist yet and end_date changed to a past/today date
-            if ($internshipEnded && $endDateChanged 
+            if ($internshipEnded && $endDateChanged
                 && $internship->company && $internship->company->user && $internship->company->user->email) {
-                
+
                 // Reload internship to get updated data
                 $internship->refresh();
-                
+
                 // Only send if evaluation email hasn't been sent yet and evaluation hasn't been submitted
                 $evaluation = $internship->evaluation ?: [];
                 if (!isset($evaluation['email_sent_at']) && !isset($evaluation['submitted_at'])) {
@@ -477,7 +477,7 @@ class InternshipController extends Controller
 
                     // Always send evaluation email (critical email)
                     $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $evaluationEmailData);
-                    
+
                     if ($emailSent) {
                         // Mark email as sent in evaluation JSON
                         $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
@@ -522,8 +522,8 @@ class InternshipController extends Controller
                 }
 
                 // Send email to company (if exists) - always send on status change, not just when email_notifications enabled
-                // But skip if we already sent the approval request email above (when changing to "potvrdená")
-                if ($internship->company && $internship->company->user && $internship->company->user->email && !$statusChangedToPotvrdena) {
+                // But skip if we already sent the approval request email above (when changing to "approved by garant")
+                if ($internship->company && $internship->company->user && $internship->company->user->email && !$statusChangedToApproved) {
                     if ($internship->company->user->email_notifications) {
                         NotificationService::createAndNotify(
                             $internship->company->user->id,
@@ -605,7 +605,7 @@ class InternshipController extends Controller
     {
         try {
             $internship = Internship::findOrFail($id);
-            
+
             // Store internship data before deletion for response
             $internshipData = [
                 'id' => $internship->id,
@@ -646,14 +646,14 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Check if user has a student profile
             if (!$user->student) {
                 return response()->json([
                     'message' => 'Student profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get only the student's own internships
             $internships = Internship::with(['student', 'company', 'garant'])
                 ->where('student_id', $user->student->id)
@@ -715,8 +715,8 @@ class InternshipController extends Controller
         try {
             $internship = Internship::findOrFail($id);
 
-            // Update status to confirmed
-            $internship->update(['status' => Internship::STATUS_POTVRDENA]);
+            // Update status to confirmed by company
+            $internship->update(['status' => Internship::STATUS_CONFIRMED]);
 
             return response()->json([
                 'message' => 'Internship confirmed successfully.',
@@ -751,8 +751,8 @@ class InternshipController extends Controller
         try {
             $internship = Internship::findOrFail($id);
 
-            // Update status to rejected
-            $internship->update(['status' => Internship::STATUS_ZAMIETNUTA]);
+            // Update status to not confirmed by company
+            $internship->update(['status' => Internship::STATUS_NOT_CONFIRMED]);
 
             return response()->json([
                 'message' => 'Internship rejected successfully.',
@@ -785,14 +785,14 @@ class InternshipController extends Controller
     public function studentStore(Request $request)
     {
         $user = Auth::user();
-        
+
         // Check if user has a student profile
         if (!$user->student) {
             return response()->json([
                 'message' => 'Student profile not found for this user.'
             ], 403);
         }
-        
+
         // Validate the incoming request data
         // Note: student_id is not required from request, we'll use authenticated user's student_id
         $validated = $request->validate([
@@ -806,7 +806,7 @@ class InternshipController extends Controller
                 'integer',
                 Rule::exists('garants', 'id')
             ],
-            // Status is not required from student - will be automatically set to "potvrdená"
+            // Status is not required from student - will be automatically set to "created"
             'status' => [
                 'nullable',
                 'string',
@@ -854,9 +854,9 @@ class InternshipController extends Controller
         try {
             // Add the authenticated student's ID to the validated data
             $validated['student_id'] = $user->student->id;
-            
-            // Automatically set status to "vytvorená" when student creates internship
-            $validated['status'] = Internship::STATUS_VYTVORENA;
+
+            // Automatically set status to "created" when student creates internship
+            $validated['status'] = Internship::STATUS_CREATED;
 
             // Create the internship
             $internship = Internship::create($validated);
@@ -871,12 +871,12 @@ class InternshipController extends Controller
             // If yes, automatically send evaluation email to company (if no PDF report scan exists)
             if ($internship->end_date && Carbon::parse($internship->end_date)->lte(Carbon::today())
                 && $internship->company && $internship->company->user && $internship->company->user->email) {
-                
+
                 // Check if student has uploaded a PDF report scan
                 $reportScanDoc = \App\Models\Document::where('internship_id', $internship->id)
                     ->where('type', 'vykaz_praxe_scan')
                     ->first();
-                
+
                 // Only send if no PDF report scan exists and email hasn't been sent yet
                 $report = $internship->internship_report ?: [];
                 if (!$reportScanDoc && !isset($report['email_sent_at']) && !isset($report['submitted_at'])) {
@@ -896,17 +896,17 @@ class InternshipController extends Controller
 
                     // Send evaluation email to company
                     $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $evaluationEmailData);
-                    
+
                     if ($emailSent) {
                         // Mark email as sent in internship_report JSON
                         $report['email_sent_at'] = Carbon::now()->toIso8601String();
                         $internship->internship_report = $report;
-                        
+
                         // Also mark in evaluation for backward compatibility
                         $evaluation = $internship->evaluation ?: [];
                         $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
                         $internship->evaluation = $evaluation;
-                        
+
                         $internship->save();
                     }
                 }
@@ -1027,10 +1027,9 @@ class InternshipController extends Controller
 
             $internship = Internship::with(['student.user', 'company.user', 'garant.user'])->findOrFail($tokenData['internship_id']);
 
-            // Check if internship is still in "potvrdená" status (pending company action)
-            // Company can only confirm/reject after garant has confirmed (status "potvrdená")
-            // Sequence: Created → Confirmed (garant) → Approved (company) → Defended
-            if ($internship->status !== Internship::STATUS_POTVRDENA) {
+            // Check if internship is still in "approved by garant" status (pending company action)
+            // Company can only confirm/reject after garant has approved
+            if ($internship->status !== Internship::STATUS_APPROVED) {
                 return response()->json([
                     'message' => 'This internship has already been processed and is no longer available for action.',
                     'current_status' => $internship->status,
@@ -1042,11 +1041,11 @@ class InternshipController extends Controller
             $oldStatus = $internship->status;
 
             // Update status based on action
-            // After garant confirmed (status "potvrdená"), company confirms → "schválená" (Approved)
-            // Company rejects → "zamietnutá"
+            // After garant approves, company confirms → "confirmed by company"
+            // Company rejects → "not confirmed by company"
             $newStatus = $tokenData['action'] === 'confirm'
-                ? Internship::STATUS_SCHVALENA // Company confirmed - status "schválená" (Approved)
-                : Internship::STATUS_ZAMIETNUTA; // Company rejected
+                ? Internship::STATUS_CONFIRMED
+                : Internship::STATUS_NOT_CONFIRMED;
 
             $internship->update(['status' => $newStatus]);
 
@@ -1078,7 +1077,7 @@ class InternshipController extends Controller
 
                 // Send email to ALL garants (users with role 'garant') - respects email_notifications setting
                 $allGarants = User::where('role', 'garant')->whereNotNull('email')->get();
-                
+
                 foreach ($allGarants as $garantUser) {
                     NotificationService::createAndNotify(
                         $garantUser->id,
@@ -1160,8 +1159,8 @@ class InternshipController extends Controller
         try {
             $internship = Internship::with(['company.user', 'student', 'garant'])->findOrFail($id);
 
-            // Check if internship is in "potvrdená" status (awaiting company approval)
-            if ($internship->status !== Internship::STATUS_POTVRDENA) {
+            // Check if internship is in "approved by garant" status (awaiting company approval)
+            if ($internship->status !== Internship::STATUS_APPROVED) {
                 return response()->json([
                     'message' => 'Email can only be resent for internships awaiting company approval.',
                     'current_status' => $internship->status
@@ -1268,12 +1267,12 @@ class InternshipController extends Controller
                 $report = $internship->internship_report ?: [];
                 $report['email_sent_at'] = Carbon::now()->toIso8601String();
                 $internship->internship_report = $report;
-                
+
                 // Also mark in evaluation for backward compatibility
                 $evaluation = $internship->evaluation ?: [];
                 $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
                 $internship->evaluation = $evaluation;
-                
+
                 $internship->save();
 
                 return response()->json([
@@ -1310,14 +1309,14 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Check if user has a student profile
             if (!$user->student) {
                 return response()->json([
                     'message' => 'Student profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get internship and verify it belongs to the student
             $internship = Internship::with(['student', 'company.user', 'garant.user'])
                 ->where('id', $id)
@@ -1369,14 +1368,14 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Check if user has a student profile
             if (!$user->student) {
                 return response()->json([
                     'message' => 'Student profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get internship and verify it belongs to the student
             $internship = Internship::with(['student', 'company.user', 'garant.user'])
                 ->where('id', $id)
@@ -1435,14 +1434,14 @@ class InternshipController extends Controller
                     $report = $internship->internship_report ?: [];
                     $report['email_sent_at'] = Carbon::now()->toIso8601String();
                     $internship->internship_report = $report;
-                    
+
                     // Also mark in evaluation for backward compatibility
                     $evaluation = $internship->evaluation ?: [];
                     $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
                     $internship->evaluation = $evaluation;
-                    
+
                     $internship->save();
-                    
+
                     // Refresh the internship to get latest data
                     $internship->refresh();
 
@@ -1540,16 +1539,16 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Get company profile from user
             $company = Company::where('user_id', $user->id)->first();
-            
+
             if (!$company) {
                 return response()->json([
                     'message' => 'Company profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get only the company's own internships with document count
             $internships = Internship::with(['student', 'company', 'garant'])
                 ->withCount('documents')
@@ -1622,16 +1621,16 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Get company profile from user
             $company = Company::where('user_id', $user->id)->first();
-            
+
             if (!$company) {
                 return response()->json([
                     'message' => 'Company profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get internship and verify it belongs to the company
             $internship = Internship::with(['student', 'company', 'garant', 'documents'])
                 ->where('id', $id)

@@ -161,4 +161,12 @@ onBeforeUnmount(() => {
 watch(() => router.currentRoute.value, () => {
   authStore.initializeAuth()
 })
+// Computed property for dashboard route based on user role
+const dashboardRoute = computed(() => {
+  if (authStore.isAdmin || authStore.isGarant) return '/dashboard'
+  if (authStore.isStudent) return '/student-dashboard'
+  if (authStore.isCompany) return '/company-dashboard'
+  return '/'
+})
+
 </script>
