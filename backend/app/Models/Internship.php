@@ -9,7 +9,9 @@ class Internship extends Model
 {
     use HasFactory;
 
-    // Status constants
+    /* =====================================================
+     | STATUS CONSTANTS (internship workflow states)
+     |=====================================================*/
     const STATUS_CREATED = 'created';
     const STATUS_APPROVED = 'approved by garant';
     const STATUS_REJECTED = 'rejected by garant';
@@ -18,22 +20,39 @@ class Internship extends Model
     const STATUS_CONFIRMED = 'confirmed by company';
     const STATUS_NOT_CONFIRMED = 'not confirmed by company';
 
+    /* =====================================================
+     | PRACTICE TYPE CONSTANTS (internship classification)
+     |=====================================================*/
+    const TYPE_PAID = 'paid';
+    const TYPE_UNPAID = 'unpaid';
+    const TYPE_SCHOOL_PROJECT = 'school_project';
+
     protected $table = 'internships';
 
+    /**
+     * Mass assignable attributes
+     */
     protected $fillable = [
         'student_id',
         'company_id',
         'garant_id',
+
         'status',
+        'type',
+
         'start_date',
         'end_date',
         'confirmed_date',
         'approved_date',
-        'academy_year', // voliteľné, ak je už v DB
-        'evaluation', // JSON stĺpec pre hodnotenie od firmy (používa sa pre výkaz praxe)
-        'internship_report', // JSON stĺpec pre výkaz praxe
+        'academy_year',
+
+        'evaluation',
+        'internship_report',
     ];
 
+    /**
+     * Attribute casting
+     */
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
@@ -41,16 +60,19 @@ class Internship extends Model
         'approved_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'evaluation' => 'array', // JSON stĺpec pre hodnotenie (používa sa pre výkaz praxe)
-        'internship_report' => 'array', // JSON stĺpec pre výkaz praxe
+
+        'evaluation' => 'array',
+        'internship_report' => 'array',
     ];
 
+    /* =====================================================
+     | HELPER METHODS
+     |=====================================================*/
+
     /**
-     * Get all available status values
-     *
-     * @return array
+     * Get all available internship statuses
      */
-    public static function getStatuses()
+    public static function getStatuses(): array
     {
         return [
             self::STATUS_CREATED,
@@ -64,7 +86,23 @@ class Internship extends Model
     }
 
     /**
-     * Stáž patrí študentovi
+     * Get all available internship practice types
+     */
+    public static function getPracticeTypes(): array
+    {
+        return [
+            self::TYPE_PAID,
+            self::TYPE_UNPAID,
+            self::TYPE_SCHOOL_PROJECT,
+        ];
+    }
+
+    /* =====================================================
+     | RELATIONSHIPS
+     |=====================================================*/
+
+    /**
+     * Internship belongs to a student
      */
     public function student()
     {
@@ -72,7 +110,7 @@ class Internship extends Model
     }
 
     /**
-     * Stáž patrí firme
+     * Internship belongs to a company
      */
     public function company()
     {
@@ -80,7 +118,7 @@ class Internship extends Model
     }
 
     /**
-     * Stáž patrí garantovi
+     * Internship belongs to a guarantor
      */
     public function garant()
     {
@@ -88,7 +126,7 @@ class Internship extends Model
     }
 
     /**
-     * Stáž má viac dokumentov
+     * Internship has many documents
      */
     public function documents()
     {
@@ -96,7 +134,7 @@ class Internship extends Model
     }
 
     /**
-     * Stáž môže mať viaceré kontaktné osoby (N:N)
+     * Internship may have multiple contact persons (many-to-many)
      */
     public function contactPersons()
     {
@@ -109,20 +147,20 @@ class Internship extends Model
     }
 
     /**
-     * Stáž má viac komentárov od garantov
+     * Internship has many guarantor comments
      */
     public function comments()
     {
-        return $this->hasMany(Comment::class, 'internship_id')->orderBy('created_at', 'desc');
+        return $this->hasMany(Comment::class, 'internship_id')
+            ->orderBy('created_at', 'desc');
     }
 
     /**
-     * Get latest comment for this internship
+     * Get the latest comment for the internship
      */
     public function latestComment()
     {
-        return $this->hasOne(Comment::class, 'internship_id')->latestOfMany();
+        return $this->hasOne(Comment::class, 'internship_id')
+            ->latestOfMany();
     }
-
-
 }

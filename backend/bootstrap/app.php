@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\TestSecureEmail::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'internships/evaluation',
+            'internships/company-action',
+        ]);
+        
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'oauth' => \App\Http\Middleware\OAuthMiddleware::class,

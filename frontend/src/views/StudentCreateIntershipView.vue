@@ -40,13 +40,20 @@
 
           <div class="form-group">
             <label for="datumKonca" class="label">{{ $t('createInternship.endDate') }}<span class="required">*</span></label>
-            <input id="datumKonca" v-model="formData.end_date" type="date" class="input" required />
+            <input 
+              id="datumKonca" 
+              v-model="formData.end_date" 
+              type="date" 
+              class="input" 
+              :min="formData.start_date"
+              required 
+            />
           </div>
         </div>
 
         <div class="form-actions">
           <button type="button" @click="handleCancel" class="btn btn-secondary">{{ $t('createInternship.cancel') }}</button>
-          <button type="submit" class="btn btn-primary">{{ $t('createInternship.createInternship') }}</button>
+          <button type="submit" class="btn btn-success">{{ $t('createInternship.createInternship') }}</button>
         </div>
 
         <div class="info-box">
@@ -71,6 +78,16 @@
     @close="showCompanyModal = false"
     @success="handleCompanyRequestSuccess"
   />
+
+  <!-- Message Modal -->
+  <MessageModal
+    v-if="showMessageModal"
+    :is-visible="showMessageModal"
+    :title="messageModalTitle"
+    :message="messageModalMessage"
+    :type="messageModalType"
+    @close="closeMessageModal"
+  />
 </template>
 
 <script setup>
@@ -78,7 +95,9 @@ import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import CompanyRequestModal from '@/components/company/CompanyRequestModal.vue'
+import MessageModal from '@/components/common/MessageModal.vue'
 import { useI18n } from 'vue-i18n'
+import { useModal } from '@/composables/useModal'
 
 const { t } = useI18n()
 
@@ -94,6 +113,17 @@ const formData = reactive({
 
 const companies = ref([])
 const showCompanyModal = ref(false)
+const { 
+  showMessageModal, 
+  messageModalTitle, 
+  messageModalMessage, 
+  messageModalType,
+  showSuccess, 
+  showError, 
+  showWarning,
+  showInfo,
+  closeMessageModal
+} = useModal()
 
 const loadCompanies = async () => {
   const token = authStore.token
@@ -109,7 +139,7 @@ const loadCompanies = async () => {
     companies.value = data.data
   } catch (error) {
     console.error(error)
-    alert(error.message)
+    await showError(error.message || t('createInternship.loadCompaniesError'))
   }
 }
 
@@ -124,7 +154,7 @@ onMounted(async () => {
 const handleSubmit = async () => {
   const token = authStore.token
   if (!token) {
-    alert(t('createInternship.authError'))
+    await showError(t('createInternship.authError'))
     router.push('/login')
     return
   }
@@ -133,7 +163,7 @@ const handleSubmit = async () => {
   const studentId = authStore.user?.student?.id || authStore.user?.id
 
   if (!studentId) {
-    alert(t('createInternship.studentIdError'))
+    await showError(t('createInternship.studentIdError'))
     return
   }
 
@@ -159,16 +189,18 @@ const handleSubmit = async () => {
     if (!response.ok) {
       if (response.status === 422) {
         const errors = Object.values(data.errors).flat().join('\n')
-        throw new Error(`${t('createInternship.validationError')}\n${errors}`)
+        await showError(errors, t('createInternship.validationError'))
+        return
       }
-      throw new Error(data.message || t('createInternship.createError'))
+      await showError(data.message || t('createInternship.createError'))
+      return
     }
 
-    alert(data.message || t('createInternship.createSuccess'))
+    await showSuccess(data.message || t('createInternship.createSuccess'))
     router.push('/internships')
   } catch (error) {
     console.error('Chyba:', error)
-    alert(error.message)
+    await showError(error.message || t('createInternship.createError'))
   }
 }
 
@@ -176,8 +208,8 @@ const handleCancel = () => {
   router.push('/internships')
 }
 
-const handleCompanyRequestSuccess = () => {
-  alert(t('createInternship.companyRequestSuccess'))
+const handleCompanyRequestSuccess = async () => {
+  await showSuccess(t('createInternship.companyRequestSuccess'))
 }
 </script>
 
@@ -300,13 +332,13 @@ const handleCompanyRequestSuccess = () => {
   background: #f9fafb;
 }
 
-.btn-primary {
-  background: #2563eb;
+.btn-success {
+  background: #198754;
   color: white;
 }
 
-.btn-primary:hover {
-  background: #1d4ed8;
+.btn-success:hover {
+  background: #157347;
 }
 
 .info-box {
