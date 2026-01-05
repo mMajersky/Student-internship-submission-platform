@@ -220,7 +220,7 @@ Route::middleware(['auth:api', 'role:company'])->prefix('company')->group(functi
     // Internship management for companies - view internships assigned to them
     Route::get('/internships', [InternshipController::class, 'companyIndex']);
     Route::get('/internships/{id}', [InternshipController::class, 'companyShow']);
-    
+
     // Documents for companies - view and validate
     Route::get('/internships/{internship}/documents', [InternshipDocumentController::class, 'companyIndex']);
     Route::get('/internships/{internship}/documents/{document}', [InternshipDocumentController::class, 'companyDownload']);
@@ -233,11 +233,27 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
     // Future admin-only routes
 });
 
-// External third-party API routes - OAuth client authenticated only (no user JWTs, no role restrictions)
-Route::middleware(['oauth'])->prefix('external')->group(function () {
-    // Get all internships as objects
-    Route::get('/internships', [ExternalInternshipController::class, 'index']);
 
-    // Defend internship - change status from 'schválená' to 'obhájená'
-    Route::post('/internships/{id}/defend', [ExternalInternshipController::class, 'defend']);
+//charts
+use App\Http\Controllers\StatsController;
+
+Route::middleware('auth:api')
+    ->prefix('stats')
+    ->group(function () {
+
+        Route::get('/students-trend', [StatsController::class, 'studentsTrend']);
+        Route::get('/internship-types', [StatsController::class, 'internshipTypes']);
+        Route::get('/top-companies', [StatsController::class, 'topCompanies']);
+        Route::get('/all-companies', [StatsController::class, 'allCompanies']);
+        Route::get('/internship-summary', [StatsController::class, 'internshipSummary']);
+        Route::get('/internships/export', [StatsController::class, 'exportCsv']);
+
+// External third-party API routes - OAuth client authenticated only (no user JWTs, no role restrictions)
+    Route::middleware(['oauth'])->prefix('external')->group(function () {
+        // Get all internships as objects
+        Route::get('/internships', [ExternalInternshipController::class, 'index']);
+
+        // Defend internship - change status from 'schválená' to 'obhájená'
+        Route::post('/internships/{id}/defend', [ExternalInternshipController::class, 'defend']);
+    });
 });

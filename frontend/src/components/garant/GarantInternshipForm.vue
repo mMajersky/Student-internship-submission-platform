@@ -143,7 +143,7 @@
       </div>
 
       <!-- Info message for new internships -->
-      <div class="alert alert-info mb-4" v-if="!isEditMode">
+      <div class="alert mb-4" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;" v-if="!isEditMode">
         <i class="bi bi-info-circle me-2"></i>
         {{ $t('garantInternshipForm.infoMessage') }}
         <strong>{{ $t('garantInternshipForm.statusCreatedBold') }}</strong>.
@@ -212,6 +212,16 @@
       @cancel="cancelStatusChange"
     />
 
+    <!-- Message Modal -->
+    <MessageModal
+      :is-visible="showMessageModal"
+      :title="messageModalTitle"
+      :message="messageModalMessage"
+      :type="messageModalType"
+      @close="closeMessageModal"
+      @confirm="closeMessageModal"
+    />
+
   </div>
 </template>
 
@@ -220,6 +230,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
+import MessageModal from '@/components/common/MessageModal.vue'
 
 const { t } = useI18n()
 
@@ -265,6 +276,23 @@ const showStatusChangeConfirmation = ref(false)
 const originalStatus = ref(null)
 const pendingStatusChange = ref(null)
 const statusSelect = ref(null)
+
+// Message modal state
+const showMessageModal = ref(false)
+const messageModalTitle = ref('')
+const messageModalMessage = ref('')
+const messageModalType = ref('info')
+
+const showMessage = (message, title = null, type = 'info') => {
+  messageModalTitle.value = title || t('common.message')
+  messageModalMessage.value = message
+  messageModalType.value = type
+  showMessageModal.value = true
+}
+
+const closeMessageModal = () => {
+  showMessageModal.value = false
+}
 
 // Students data from API
 const students = ref(props.initialStudents.length > 0 ? props.initialStudents : [])
@@ -448,13 +476,13 @@ const resendApprovalEmail = async () => {
     const data = await response.json()
 
     if (response.ok) {
-      alert(`${t('garantInternshipForm.emailResentSuccess')} ${data.email}`)
+      showMessage(`${t('garantInternshipForm.emailResentSuccess')} ${data.email}`, null, 'success')
     } else {
-      alert(`${t('garantInternshipForm.emailResentError')} ${data.message || t('garantInternshipForm.emailResentUnknownError')}`)
+      showMessage(`${t('garantInternshipForm.emailResentError')} ${data.message || t('garantInternshipForm.emailResentUnknownError')}`, null, 'error')
     }
   } catch (error) {
     console.error('Error resending email:', error)
-    alert(t('garantInternshipForm.emailResentFailed'))
+    showMessage(t('garantInternshipForm.emailResentFailed'), null, 'error')
   } finally {
     isResendingEmail.value = false
   }

@@ -246,6 +246,14 @@ class StudentDocumentController extends Controller
     {
         try {
             $user = Auth::user();
+            
+            // Check if user has student profile
+            if (!$user->student) {
+                return response()->json([
+                    'message' => 'Student profile not found for this user.'
+                ], 403);
+            }
+            
             $internship = Internship::with(['student', 'company.contactPersons'])->findOrFail($internshipId);
 
             // Check authorization
@@ -258,38 +266,74 @@ class StudentDocumentController extends Controller
             $student = $internship->student;
             $company = $internship->company;
             
-            if (!$student || !$company) {
-                abort(500, 'K stáži chýba priradený študent alebo firma.');
+            if (!$student) {
+                return response()->json([
+                    'message' => 'K stáži chýba priradený študent.'
+                ], 400);
+            }
+            
+            if (!$company) {
+                return response()->json([
+                    'message' => 'K stáži chýba priradená firma.'
+                ], 400);
             }
 
-            $tutor = $company->contactPersons->first();
+            $tutor = $company->contactPersons ? $company->contactPersons->first() : null;
 
+            $generationDate = now()->format('d.m.Y');
+            
+            // Format company address
+            $companyAddressParts = array_filter([
+                $company->street ?? null,
+                $company->house_number ?? null,
+                $company->postal_code ?? null,
+                $company->city ?? null,
+            ]);
+            $companyFullAddress = !empty($companyAddressParts) ? implode(', ', $companyAddressParts) : '......................';
+            
             $data = [
                 'student_name' => $student->name . ' ' . $student->surname,
                 'student_address' => $this->formatAddress($student),
-                'student_contact' => $student->student_email,
+                'student_contact' => $student->student_email ?? '......................',
                 'study_program' => 'Aplikovaná informatika',
                 'company_name' => $company->name,
                 'company_address' => $this->formatAddress($company),
+                'company_full_address' => $companyFullAddress,
+                'company_street' => $company->street ?? '......................',
+                'company_house_number' => $company->house_number ?? '',
+                'company_city' => $company->city ?? '......................',
+                'company_postal_code' => $company->postal_code ?? '',
                 'company_contact' => $tutor ? $tutor->name . ' ' . $tutor->surname : '......................',
                 'tutor_name' => $tutor ? $tutor->name . ' ' . $tutor->surname : '.....................................',
-                'start_date' => Carbon::parse($internship->start_date)->format('d.m.Y'),
-                'end_date' => Carbon::parse($internship->end_date)->format('d.m.Y'),
-                'generation_date' => now()->format('d.m.Y'),
+                'start_date' => $internship->start_date ? Carbon::parse($internship->start_date)->format('d.m.Y') : '......................',
+                'end_date' => $internship->end_date ? Carbon::parse($internship->end_date)->format('d.m.Y') : '......................',
+                'generation_date' => $generationDate,
+                'date_nitra' => $generationDate,
+                'date_company' => $generationDate,
+                'city_company' => $company->city ?? '......................',
             ];
 
-            $pdf = Pdf::loadView('pdf.internship_agreement', $data);
-            $pdf->setPaper('A4', 'portrait');
-            $pdf->setOption('isHtml5ParserEnabled', true);
+            try {
+                $pdf = Pdf::loadView('pdf.internship_agreement', $data);
+                $pdf->setPaper('A4', 'portrait');
+                $pdf->setOption('isHtml5ParserEnabled', true);
 
-            return $pdf->download('Dohoda_o_odbornej_praxi_' . $student->surname . '.pdf');
+                $filename = 'Dohoda_o_odbornej_praxi_' . ($student->surname ?? 'dokument') . '.pdf';
+                return $pdf->download($filename);
+            } catch (\Exception $pdfException) {
+                \Log::error('PDF generation error: ' . $pdfException->getMessage());
+                \Log::error('PDF stack trace: ' . $pdfException->getTraceAsString());
+                throw $pdfException;
+            }
 
         } catch (\Exception $e) {
             \Log::error('Error generating agreement: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
 
             return response()->json([
                 'message' => 'An error occurred while generating the document.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }
     }

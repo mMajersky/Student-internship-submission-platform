@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
         // Laravel ich spustí presne takto, keď použiješ príkaz `php artisan db:seed`.
         $this->call([
             // 1. Najprv vytvoríme všetkých používateľov (admin, student, garant...)
-            AdminUserSeeder::class, 
-            
+            AdminUserSeeder::class,
+
             // 2. Potom vytvoríme študenta a prepojíme ho s používateľom
             StudentSeeder::class,
 
@@ -26,6 +26,9 @@ class DatabaseSeeder extends Seeder
 
             // 4. Až nakoniec, keď máme všetko pripravené, vytvoríme samotné praxe
             InternshipSeeder::class,
+
+            // 5. EXTRA demo dáta pre grafy/vizualizáciu
+            DataSeeder::class,
         ]);
     }
 }

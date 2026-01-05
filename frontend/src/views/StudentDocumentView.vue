@@ -5,17 +5,23 @@
         <i class="bi bi-file-earmark-text me-2"></i> {{ $t('studentDocuments.title') }}
       </h5>
 
-      <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">{{ $t('studentDocuments.tabs.documents') }}</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-muted" href="#">{{ $t('studentDocuments.tabs.overview') }}</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-muted" href="#">{{ $t('studentDocuments.tabs.myInternships') }}</a>
-        </li>
-      </ul>
+      <!-- Checkbox pre zamestnanie/vlastnú živnosť -->
+      <div class="card p-3 mb-4">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="isEmployedOrSelfEmployed"
+            v-model="isEmployedOrSelfEmployed"
+          />
+          <label class="form-check-label" for="isEmployedOrSelfEmployed">
+            {{ $t('studentDocuments.isEmployedOrSelfEmployed') }}
+          </label>
+        </div>
+        <small class="text-muted d-block mt-2">
+          {{ $t('studentDocuments.isEmployedOrSelfEmployedDesc') }}
+        </small>
+      </div>
 
       <div class="card p-4">
         <h5 class="mb-4">{{ $t('studentDocuments.documentsTitle') }}</h5>
@@ -46,9 +52,19 @@
           <div class="col-md-6">
             <div class="border rounded p-4 bg-white mb-4">
               <h6 class="fw-semibold mb-3">
-                {{ $t('studentDocuments.signedAgreement') }}
+                <template v-if="isEmployedOrSelfEmployed">
+                  {{ $t('studentDocuments.invoiceOrContract') }}
+                </template>
+                <template v-else>
+                  {{ $t('studentDocuments.signedAgreement') }}
+                </template>
                 <small class="text-muted d-block">
-                  {{ $t('studentDocuments.signedAgreementDesc') }}
+                  <template v-if="isEmployedOrSelfEmployed">
+                    {{ $t('studentDocuments.invoiceOrContractDesc') }}
+                  </template>
+                  <template v-else>
+                    {{ $t('studentDocuments.signedAgreementDesc') }}
+                  </template>
                 </small>
               </h6>
 
@@ -83,8 +99,8 @@
               </div>
             </div>
 
-            <!-- Výkaz praxe sekcia -->
-            <div class="border rounded p-4 bg-white mb-4">
+            <!-- Výkaz praxe sekcia - skrytá ak je zamestnaný/vlastná živnosť -->
+            <div v-if="!isEmployedOrSelfEmployed" class="border rounded p-4 bg-white mb-4">
               <h6 class="fw-semibold mb-3">{{ $t('studentDocuments.internshipReport') }}</h6>
               <p class="text-muted small mb-3">
                 {{ $t('studentDocuments.internshipReportDesc') }}
@@ -316,6 +332,7 @@ const { t } = useI18n();
 
 const zmluvaFile = ref(null);
 const vykazFile = ref(null);
+const isEmployedOrSelfEmployed = ref(false);
 const route = useRoute();
 const authStore = useAuthStore();
 const internshipId = ref(route.params.id || route.query.internshipId || null);

@@ -201,9 +201,20 @@ class InternshipController extends Controller
 
             return response()->json([
                 'data' => $internships->map(function ($internship) {
+                    // Count digital reports (internship_report) as documents
+                    $digitalReportCount = 0;
+                    $report = $internship->internship_report ?: [];
+                    if (isset($report['submitted_at'])) {
+                        $digitalReportCount = 1; // Digital report exists
+                    }
+                    
+                    // Total documents count = uploaded documents + digital reports
+                    $totalDocumentsCount = $internship->documents_count + $digitalReportCount;
+                    
                     return [
                         'id' => $internship->id,
                         'student_id' => $internship->student_id,
+                        'type' => $internship->type,
                         'student' => $internship->student ? [
                             'id' => $internship->student->id,
                             'name' => $internship->student->name,
@@ -227,7 +238,7 @@ class InternshipController extends Controller
                         'end_date' => $internship->end_date?->format('Y-m-d'),
                         'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
                         'approved_date' => $internship->approved_date?->format('Y-m-d'),
-                        'documents_count' => $internship->documents_count,
+                        'documents_count' => $totalDocumentsCount,
                         'created_at' => $internship->created_at?->toIso8601String(),
                         'updated_at' => $internship->updated_at?->toIso8601String(),
                     ];
@@ -388,7 +399,7 @@ class InternshipController extends Controller
             $oldStatus = $internship->status;
             $statusChanged = isset($validated['status']) && $oldStatus !== $validated['status'];
             $statusChangedToApproved = $statusChanged && $validated['status'] === Internship::STATUS_APPROVED;
-            
+
             // Check if internship has ended (end_date is today or in the past) and evaluation email hasn't been sent yet
             $oldEndDate = $internship->end_date;
             $newEndDate = isset($validated['end_date']) ? Carbon::parse($validated['end_date']) : $oldEndDate;
@@ -441,12 +452,12 @@ class InternshipController extends Controller
 
             // Send evaluation email to company when internship ends (end_date is today or in the past)
             // Only send if evaluation doesn't exist yet and end_date changed to a past/today date
-            if ($internshipEnded && $endDateChanged 
+            if ($internshipEnded && $endDateChanged
                 && $internship->company && $internship->company->user && $internship->company->user->email) {
-                
+
                 // Reload internship to get updated data
                 $internship->refresh();
-                
+
                 // Only send if evaluation email hasn't been sent yet and evaluation hasn't been submitted
                 $evaluation = $internship->evaluation ?: [];
                 if (!isset($evaluation['email_sent_at']) && !isset($evaluation['submitted_at'])) {
@@ -466,7 +477,7 @@ class InternshipController extends Controller
 
                     // Always send evaluation email (critical email)
                     $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $evaluationEmailData);
-                    
+
                     if ($emailSent) {
                         // Mark email as sent in evaluation JSON
                         $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
@@ -594,7 +605,7 @@ class InternshipController extends Controller
     {
         try {
             $internship = Internship::findOrFail($id);
-            
+
             // Store internship data before deletion for response
             $internshipData = [
                 'id' => $internship->id,
@@ -635,14 +646,14 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Check if user has a student profile
             if (!$user->student) {
                 return response()->json([
                     'message' => 'Student profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get only the student's own internships
             $internships = Internship::with(['student', 'company', 'garant'])
                 ->where('student_id', $user->student->id)
@@ -774,14 +785,14 @@ class InternshipController extends Controller
     public function studentStore(Request $request)
     {
         $user = Auth::user();
-        
+
         // Check if user has a student profile
         if (!$user->student) {
             return response()->json([
                 'message' => 'Student profile not found for this user.'
             ], 403);
         }
-        
+
         // Validate the incoming request data
         // Note: student_id is not required from request, we'll use authenticated user's student_id
         $validated = $request->validate([
@@ -843,7 +854,7 @@ class InternshipController extends Controller
         try {
             // Add the authenticated student's ID to the validated data
             $validated['student_id'] = $user->student->id;
-            
+
             // Automatically set status to "created" when student creates internship
             $validated['status'] = Internship::STATUS_CREATED;
 
@@ -860,12 +871,12 @@ class InternshipController extends Controller
             // If yes, automatically send evaluation email to company (if no PDF report scan exists)
             if ($internship->end_date && Carbon::parse($internship->end_date)->lte(Carbon::today())
                 && $internship->company && $internship->company->user && $internship->company->user->email) {
-                
+
                 // Check if student has uploaded a PDF report scan
                 $reportScanDoc = \App\Models\Document::where('internship_id', $internship->id)
                     ->where('type', 'vykaz_praxe_scan')
                     ->first();
-                
+
                 // Only send if no PDF report scan exists and email hasn't been sent yet
                 $report = $internship->internship_report ?: [];
                 if (!$reportScanDoc && !isset($report['email_sent_at']) && !isset($report['submitted_at'])) {
@@ -885,17 +896,17 @@ class InternshipController extends Controller
 
                     // Send evaluation email to company
                     $emailSent = EmailService::send(EvaluationRequest::class, $internship->company->user->email, $evaluationEmailData);
-                    
+
                     if ($emailSent) {
                         // Mark email as sent in internship_report JSON
                         $report['email_sent_at'] = Carbon::now()->toIso8601String();
                         $internship->internship_report = $report;
-                        
+
                         // Also mark in evaluation for backward compatibility
                         $evaluation = $internship->evaluation ?: [];
                         $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
                         $internship->evaluation = $evaluation;
-                        
+
                         $internship->save();
                     }
                 }
@@ -1066,7 +1077,7 @@ class InternshipController extends Controller
 
                 // Send email to ALL garants (users with role 'garant') - respects email_notifications setting
                 $allGarants = User::where('role', 'garant')->whereNotNull('email')->get();
-                
+
                 foreach ($allGarants as $garantUser) {
                     NotificationService::createAndNotify(
                         $garantUser->id,
@@ -1176,8 +1187,8 @@ class InternshipController extends Controller
                 'startDate' => $internship->start_date?->format('Y-m-d'),
                 'endDate' => $internship->end_date?->format('Y-m-d'),
                 'status' => $internship->status,
-                'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
-                'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
+                'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
                 'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
                 'showButtons' => true, // Show buttons for company emails
             ];
@@ -1256,12 +1267,12 @@ class InternshipController extends Controller
                 $report = $internship->internship_report ?: [];
                 $report['email_sent_at'] = Carbon::now()->toIso8601String();
                 $internship->internship_report = $report;
-                
+
                 // Also mark in evaluation for backward compatibility
                 $evaluation = $internship->evaluation ?: [];
                 $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
                 $internship->evaluation = $evaluation;
-                
+
                 $internship->save();
 
                 return response()->json([
@@ -1298,14 +1309,14 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Check if user has a student profile
             if (!$user->student) {
                 return response()->json([
                     'message' => 'Student profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get internship and verify it belongs to the student
             $internship = Internship::with(['student', 'company.user', 'garant.user'])
                 ->where('id', $id)
@@ -1357,14 +1368,14 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Check if user has a student profile
             if (!$user->student) {
                 return response()->json([
                     'message' => 'Student profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get internship and verify it belongs to the student
             $internship = Internship::with(['student', 'company.user', 'garant.user'])
                 ->where('id', $id)
@@ -1423,14 +1434,14 @@ class InternshipController extends Controller
                     $report = $internship->internship_report ?: [];
                     $report['email_sent_at'] = Carbon::now()->toIso8601String();
                     $internship->internship_report = $report;
-                    
+
                     // Also mark in evaluation for backward compatibility
                     $evaluation = $internship->evaluation ?: [];
                     $evaluation['email_sent_at'] = Carbon::now()->toIso8601String();
                     $internship->evaluation = $evaluation;
-                    
+
                     $internship->save();
-                    
+
                     // Refresh the internship to get latest data
                     $internship->refresh();
 
@@ -1528,16 +1539,16 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Get company profile from user
             $company = Company::where('user_id', $user->id)->first();
-            
+
             if (!$company) {
                 return response()->json([
                     'message' => 'Company profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get only the company's own internships with document count
             $internships = Internship::with(['student', 'company', 'garant'])
                 ->withCount('documents')
@@ -1547,6 +1558,16 @@ class InternshipController extends Controller
 
             return response()->json([
                 'data' => $internships->map(function ($internship) {
+                    // Count digital reports (internship_report) as documents
+                    $digitalReportCount = 0;
+                    $report = $internship->internship_report ?: [];
+                    if (isset($report['submitted_at'])) {
+                        $digitalReportCount = 1; // Digital report exists
+                    }
+                    
+                    // Total documents count = uploaded documents + digital reports
+                    $totalDocumentsCount = $internship->documents_count + $digitalReportCount;
+                    
                     return [
                         'id' => $internship->id,
                         'student_id' => $internship->student_id,
@@ -1573,7 +1594,7 @@ class InternshipController extends Controller
                         'end_date' => $internship->end_date?->format('Y-m-d'),
                         'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
                         'approved_date' => $internship->approved_date?->format('Y-m-d'),
-                        'documents_count' => $internship->documents_count,
+                        'documents_count' => $totalDocumentsCount,
                         'created_at' => $internship->created_at?->toIso8601String(),
                         'updated_at' => $internship->updated_at?->toIso8601String(),
                     ];
@@ -1600,16 +1621,16 @@ class InternshipController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Get company profile from user
             $company = Company::where('user_id', $user->id)->first();
-            
+
             if (!$company) {
                 return response()->json([
                     'message' => 'Company profile not found for this user.'
                 ], 403);
             }
-            
+
             // Get internship and verify it belongs to the company
             $internship = Internship::with(['student', 'company', 'garant', 'documents'])
                 ->where('id', $id)

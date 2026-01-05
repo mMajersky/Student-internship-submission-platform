@@ -29,7 +29,14 @@ const messages = {
       export: 'Export',
       import: 'Import',
       language: 'Switch Language',
-      note: 'Note'
+      note: 'Note',
+      ok: 'OK',
+      confirm: 'Confirm',
+      message: 'Message',
+      warning: 'Warning',
+      info: 'Information',
+      value: 'Value',
+      input: 'Input'
     },
     landing: {
       title: 'Student Internship Management System',
@@ -109,14 +116,30 @@ const messages = {
         phdLevel: 'PhD. (Doctoral)',
         validation: {
           requiredFields: 'Name, email and password are required.',
+          nameRequired: 'Name is required.',
           surnameRequired: 'Surname is required.',
+          emailRequired: 'Email is required.',
+          emailInvalid: 'Invalid email format.',
+          universityEmailRequired: 'Use your university email (@student.ukf.sk)',
+          passwordRequired: 'Password is required.',
+          passwordTooShort: 'Password must be at least 8 characters long.',
           studyLevelRequired: 'Study level is required.',
           studyFieldRequired: 'Study field is required.',
+          stateRequired: 'State is required.',
+          regionRequired: 'Region is required.',
+          cityRequired: 'City is required.',
+          postalCodeRequired: 'Postal code is required.',
+          postalCodeInvalid: 'Postal code must contain exactly 5 digits (e.g. 94901).',
+          streetRequired: 'Street is required.',
+          houseNumberRequired: 'House number is required.',
+          phoneInvalid: 'Invalid phone number format.',
           addressRequired: 'All address fields are required.',
-          universityEmailRequired: "{'Use your university email (@student.ukf.sk)'}",
           registerFailed: 'Registration failed.',
           registerError: 'Registration error.'
-        }
+        },
+        postalCodeFormat: 'Format: 5 digits (e.g. 94901)',
+        phoneFormat: 'Format: +421 900 123 456 or 0900123456',
+        passwordMinLength: 'Password must be at least 8 characters long.'
       }
     },
     dashboard: {
@@ -318,6 +341,9 @@ const messages = {
     notifications: {
       title: 'Notifications',
       markAllAsRead: 'Mark all as read',
+      deleteAll: 'Delete all',
+      deleteAllTitle: 'Delete All Notifications',
+      deleteAllConfirm: 'Are you sure you want to delete all notifications? This action cannot be undone.',
       loading: 'Loading...',
       noNotifications: 'No notifications',
       new: 'New',
@@ -664,7 +690,18 @@ const messages = {
       validationError: 'Please correct the errors in the form.',
       submitError: 'Failed to submit the request.',
       submitSuccess: 'Company registration request has been successfully submitted!',
-      unknownError: 'An error occurred while submitting the request. Please try again.'
+      unknownError: 'An error occurred while submitting the request. Please try again.',
+      postalCodeFormat: 'Format: 5 digits (e.g. 81101)',
+      phoneFormat: 'Format: +421 900 123 456 or 0900123456',
+      validation: {
+        companyNameRequired: 'Company name is required.',
+        contactPersonNameRequired: 'Contact person name is required.',
+        contactPersonSurnameRequired: 'Contact person surname is required.',
+        contactPersonEmailRequired: 'Contact person email is required.',
+        emailInvalid: 'Invalid email format.',
+        postalCodeInvalid: 'Postal code must contain exactly 5 digits (e.g. 81101).',
+        phoneInvalid: 'Invalid phone number format.'
+      }
     },
     companyRequestModal: {
       title: 'Request to Add New Company',
@@ -1063,11 +1100,18 @@ const messages = {
       export: 'Exportovať',
       import: 'Importovať',
       language: 'Prepnúť jazyk',
-      note: 'Poznámka'
+      note: 'Poznámka',
+      ok: 'OK',
+      confirm: 'Potvrdiť',
+      message: 'Správa',
+      warning: 'Varovanie',
+      info: 'Informácia',
+      value: 'Hodnota',
+      input: 'Vstup'
     },
     landing: {
       title: 'Evidencia a správa odbornej praxe',
-      subtitle: 'Lorem ipsum dolor sit amet consectetur. Blandit felis sed feugiat sapien imperdiet quam suspendisse enim nec.',
+      subtitle: 'Komplexný systém na správu a sledovanie umiestnení a aplikácií študentov na odbornú prax.',
       registerStudent: 'Registrovať študenta',
       registerCompany: 'Registrovať firmu',
       loginLink: 'Alebo sa',
@@ -1143,14 +1187,30 @@ const messages = {
         phdLevel: 'PhD. (Doktorandské)',
         validation: {
           requiredFields: 'Meno, email a heslo sú povinné.',
+          nameRequired: 'Meno je povinné.',
           surnameRequired: 'Priezvisko je povinné.',
+          emailRequired: 'Email je povinný.',
+          emailInvalid: 'Neplatný formát emailu.',
+          universityEmailRequired: 'Použite univerzitný email @student.ukf.sk',
+          passwordRequired: 'Heslo je povinné.',
+          passwordTooShort: 'Heslo musí mať minimálne 8 znakov.',
           studyLevelRequired: 'Stupeň štúdia je povinný.',
           studyFieldRequired: 'Študijný odbor je povinný.',
+          stateRequired: 'Štát je povinný.',
+          regionRequired: 'Región je povinný.',
+          cityRequired: 'Mesto je povinné.',
+          postalCodeRequired: 'PSČ je povinné.',
+          postalCodeInvalid: 'PSČ musí obsahovať presne 5 číslic (napr. 94901).',
+          streetRequired: 'Ulica je povinná.',
+          houseNumberRequired: 'Číslo domu je povinné.',
+          phoneInvalid: 'Neplatný formát telefónneho čísla.',
           addressRequired: 'Všetky polia adresy sú povinné.',
-          universityEmailRequired: "{'Použite univerzitný email @student.ukf.sk'}",
           registerFailed: 'Registrácia zlyhala.',
           registerError: 'Chyba pri registrácii.'
-        }
+        },
+        postalCodeFormat: 'Formát: 5 číslic (napr. 94901)',
+        phoneFormat: 'Formát: +421 900 123 456 alebo 0900123456',
+        passwordMinLength: 'Heslo musí mať minimálne 8 znakov.'
       }
     },
     dashboard: {
@@ -1352,6 +1412,9 @@ const messages = {
     notifications: {
       title: 'Notifikácie',
       markAllAsRead: 'Označiť všetko',
+      deleteAll: 'Vymazať všetky',
+      deleteAllTitle: 'Vymazať všetky notifikácie',
+      deleteAllConfirm: 'Naozaj chcete vymazať všetky notifikácie? Táto akcia sa nedá vrátiť späť.',
       loading: 'Načítavam...',
       noNotifications: 'Žiadne notifikácie',
       new: 'Nové',
@@ -1790,7 +1853,18 @@ const messages = {
       validationError: 'Prosím opravte chyby vo formulári.',
       submitError: 'Nepodarilo sa odoslať žiadosť.',
       submitSuccess: 'Žiadosť o registráciu firmy bola úspešne odoslaná!',
-      unknownError: 'Vyskytla sa chyba pri odosielaní žiadosti. Skúste to znova.'
+      unknownError: 'Vyskytla sa chyba pri odosielaní žiadosti. Skúste to znova.',
+      postalCodeFormat: 'Formát: 5 číslic (napr. 81101)',
+      phoneFormat: 'Formát: +421 900 123 456 alebo 0900123456',
+      validation: {
+        companyNameRequired: 'Názov firmy je povinný.',
+        contactPersonNameRequired: 'Meno kontaktnej osoby je povinné.',
+        contactPersonSurnameRequired: 'Priezvisko kontaktnej osoby je povinné.',
+        contactPersonEmailRequired: 'Email kontaktnej osoby je povinný.',
+        emailInvalid: 'Neplatný formát emailu.',
+        postalCodeInvalid: 'PSČ musí obsahovať presne 5 číslic (napr. 81101).',
+        phoneInvalid: 'Neplatný formát telefónneho čísla.'
+      }
     },
     companyRequestModal: {
       title: 'Požiadať o pridanie novej firmy',
@@ -1911,7 +1985,11 @@ const messages = {
       securityWhere: 'Kde sa ukladajú dokumenty?',
       securityDesc: 'Všetky nahraté dokumenty (najmä podpísané PDF) sú uložené v zabezpečenom súkromnom úložisku Dokumenty NIE SÚ verejne prístupné - prístup k nim majú len autorizovaní používatelia cez API s kontrolou oprávnení.',
       signedAgreement: 'Zmluva podpísaná študentom',
-      signedAgreementDesc: '(povinné pri stave „Potvrdená spoločnosťou")',
+      signedAgreementDesc: '(povinné pri stave „Schválená")',
+      isEmployedOrSelfEmployed: 'Som zamestnaný v tejto firme alebo mám vlastnú živnosť/spoločnosť',
+      isEmployedOrSelfEmployedDesc: 'Ak ste zamestnaní vo firme, kde vykonávate prax, alebo máte vlastnú živnosť/spoločnosť, musíte nahrať faktúru alebo pracovnú zmluvu namiesto podpísanej dohody. Výkaz praxe nie je potrebný.',
+      invoiceOrContract: 'Faktúra alebo pracovná zmluva',
+      invoiceOrContractDesc: 'Nahrať faktúru alebo pracovnú zmluvu (povinné pri stave „Schválená")',
       uploadDocument: 'Nahrať dokument (PDF)',
       upload: 'Nahrať',
       uploaded: 'Nahrané',
