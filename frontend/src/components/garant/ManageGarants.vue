@@ -90,7 +90,7 @@
           </div>
 
           <!-- Info message -->
-          <div class="alert alert-info mb-3">
+          <div class="alert mb-3" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;">
             <i class="bi bi-info-circle me-2"></i>
             {{ editingGarant ? $t('manageGarants.infoMessageEdit') : $t('manageGarants.infoMessageCreate') }}
           </div>
@@ -225,6 +225,16 @@
       @confirm="confirmDeleteGarant"
       @cancel="cancelDeleteGarant"
     />
+
+    <!-- Message Modal -->
+    <MessageModal
+      :is-visible="showMessageModal"
+      :title="messageModalTitle"
+      :message="messageModalMessage"
+      :type="messageModalType"
+      @close="closeMessageModal"
+      @confirm="closeMessageModal"
+    />
   </div>
 </template>
 
@@ -233,6 +243,7 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useI18n } from 'vue-i18n'
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
+import MessageModal from '@/components/common/MessageModal.vue'
 
 const { t } = useI18n()
 
@@ -262,6 +273,23 @@ const editingGarant = ref(null)
 // Delete confirmation state
 const showDeleteConfirmation = ref(false)
 const garantToDelete = ref(null)
+
+// Message modal state
+const showMessageModal = ref(false)
+const messageModalTitle = ref('')
+const messageModalMessage = ref('')
+const messageModalType = ref('info')
+
+const showMessage = (message, title = null, type = 'info') => {
+  messageModalTitle.value = title || t('common.message')
+  messageModalMessage.value = message
+  messageModalType.value = type
+  showMessageModal.value = true
+}
+
+const closeMessageModal = () => {
+  showMessageModal.value = false
+}
 
 // Validate form
 const validateForm = () => {
@@ -477,10 +505,10 @@ const confirmDeleteGarant = async () => {
     await fetchGarants()
 
     // Show success message
-    alert(t('manageGarants.deleteSuccess'))
+    showMessage(t('manageGarants.deleteSuccess'), null, 'success')
   } catch (error) {
     console.error('Error deleting garant:', error)
-    alert(error.message || t('manageGarants.deleteError'))
+    showMessage(error.message || t('manageGarants.deleteError'), null, 'error')
   } finally {
     showDeleteConfirmation.value = false
     garantToDelete.value = null

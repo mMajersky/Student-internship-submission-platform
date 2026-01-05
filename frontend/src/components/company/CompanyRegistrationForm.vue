@@ -83,14 +83,23 @@
               <input
                 type="text"
                 class="form-control"
-                :class="{ 'is-invalid': errors.postal_code }"
+                :class="{ 'is-invalid': errors.postal_code || validationErrors.postal_code }"
                 id="postalCode"
                 v-model="formData.postalCode"
+                @input="validatePostalCode"
                 :placeholder="$t('companyRegistration.postalCodePlaceholder')"
+                pattern="[0-9]{5}"
+                maxlength="5"
               />
               <div v-if="errors.postal_code" class="invalid-feedback">
                 {{ errors.postal_code[0] }}
               </div>
+              <div v-else-if="validationErrors.postal_code" class="invalid-feedback">
+                {{ validationErrors.postal_code }}
+              </div>
+              <small v-if="formData.postalCode && !errors.postal_code && !validationErrors.postal_code" class="form-text text-muted">
+                {{ $t('companyRegistration.postalCodeFormat') }}
+              </small>
             </div>
             <div class="col-md-4">
               <label for="street" class="form-label">{{ $t('companyRegistration.street') }}</label>
@@ -182,9 +191,10 @@
               <input
                 type="email"
                 class="form-control"
-                :class="{ 'is-invalid': errors.contact_person_email }"
+                :class="{ 'is-invalid': errors.contact_person_email || validationErrors.contact_person_email }"
                 id="contactPersonEmail"
                 v-model="formData.contactPersonEmail"
+                @input="validateEmail"
                 :placeholder="$t('companyRegistration.contactPersonEmailPlaceholder')"
                 maxlength="100"
                 required
@@ -192,21 +202,32 @@
               <div v-if="errors.contact_person_email" class="invalid-feedback">
                 {{ errors.contact_person_email[0] }}
               </div>
+              <div v-else-if="validationErrors.contact_person_email" class="invalid-feedback">
+                {{ validationErrors.contact_person_email }}
+              </div>
             </div>
             <div class="col-md-6">
               <label for="contactPersonPhone" class="form-label">{{ $t('companyRegistration.contactPersonPhone') }}</label>
               <input
                 type="tel"
                 class="form-control"
-                :class="{ 'is-invalid': errors.contact_person_phone }"
+                :class="{ 'is-invalid': errors.contact_person_phone || validationErrors.contact_person_phone }"
                 id="contactPersonPhone"
                 v-model="formData.contactPersonPhone"
+                @input="validatePhone"
                 :placeholder="$t('companyRegistration.contactPersonPhonePlaceholder')"
                 maxlength="50"
+                pattern="[0-9+\s\-()]+"
               />
               <div v-if="errors.contact_person_phone" class="invalid-feedback">
                 {{ errors.contact_person_phone[0] }}
               </div>
+              <div v-else-if="validationErrors.contact_person_phone" class="invalid-feedback">
+                {{ validationErrors.contact_person_phone }}
+              </div>
+              <small v-if="formData.contactPersonPhone && !errors.contact_person_phone && !validationErrors.contact_person_phone" class="form-text text-muted">
+                {{ $t('companyRegistration.phoneFormat') }}
+              </small>
             </div>
           </div>
 
@@ -318,9 +339,101 @@ const formData = ref({
 
 // Form state
 const errors = ref({})
+const validationErrors = ref({})
 const isSubmitting = ref(false)
 const submitError = ref(null)
 const submitSuccess = ref(null)
+
+// Validation functions
+const validatePostalCode = () => {
+  if (!formData.value.postalCode) {
+    validationErrors.value.postal_code = null
+    return
+  }
+  const postalCodeRegex = /^[0-9]{5}$/
+  if (!postalCodeRegex.test(formData.value.postalCode)) {
+    validationErrors.value.postal_code = t('companyRegistration.validation.postalCodeInvalid')
+  } else {
+    validationErrors.value.postal_code = null
+  }
+}
+
+const validateEmail = () => {
+  if (!formData.value.contactPersonEmail) {
+    validationErrors.value.contact_person_email = null
+    return
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(formData.value.contactPersonEmail)) {
+    validationErrors.value.contact_person_email = t('companyRegistration.validation.emailInvalid')
+  } else {
+    validationErrors.value.contact_person_email = null
+  }
+}
+
+const validatePhone = () => {
+  if (!formData.value.contactPersonPhone) {
+    validationErrors.value.contact_person_phone = null
+    return
+  }
+  const phoneRegex = /^[+]?[0-9\s\-()]{9,}$/
+  if (!phoneRegex.test(formData.value.contactPersonPhone.replace(/\s/g, ''))) {
+    validationErrors.value.contact_person_phone = t('companyRegistration.validation.phoneInvalid')
+  } else {
+    validationErrors.value.contact_person_phone = null
+  }
+}
+
+const validateForm = () => {
+  validationErrors.value = {}
+  
+  // Validate required fields
+  if (!formData.value.companyName || !formData.value.companyName.trim()) {
+    submitError.value = t('companyRegistration.validation.companyNameRequired')
+    return false
+  }
+
+  if (!formData.value.contactPersonName || !formData.value.contactPersonName.trim()) {
+    submitError.value = t('companyRegistration.validation.contactPersonNameRequired')
+    return false
+  }
+
+  if (!formData.value.contactPersonSurname || !formData.value.contactPersonSurname.trim()) {
+    submitError.value = t('companyRegistration.validation.contactPersonSurnameRequired')
+    return false
+  }
+
+  if (!formData.value.contactPersonEmail || !formData.value.contactPersonEmail.trim()) {
+    submitError.value = t('companyRegistration.validation.contactPersonEmailRequired')
+    return false
+  }
+
+  validateEmail()
+  if (validationErrors.value.contact_person_email) {
+    submitError.value = validationErrors.value.contact_person_email
+    return false
+  }
+
+  // Validate postal code if provided
+  if (formData.value.postalCode) {
+    validatePostalCode()
+    if (validationErrors.value.postal_code) {
+      submitError.value = validationErrors.value.postal_code
+      return false
+    }
+  }
+
+  // Validate phone if provided
+  if (formData.value.contactPersonPhone) {
+    validatePhone()
+    if (validationErrors.value.contact_person_phone) {
+      submitError.value = validationErrors.value.contact_person_phone
+      return false
+    }
+  }
+
+  return true
+}
 
 // Reset form
 const resetForm = () => {
@@ -339,6 +452,7 @@ const resetForm = () => {
     contactPersonPosition: ''
   }
   errors.value = {}
+  validationErrors.value = {}
   submitError.value = null
   submitSuccess.value = null
 }
@@ -349,6 +463,12 @@ const handleSubmit = async () => {
   submitError.value = null
   submitSuccess.value = null
   errors.value = {}
+  validationErrors.value = {}
+
+  // Client-side validation
+  if (!validateForm()) {
+    return
+  }
 
   isSubmitting.value = true
 

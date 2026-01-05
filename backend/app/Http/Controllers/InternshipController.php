@@ -201,6 +201,16 @@ class InternshipController extends Controller
 
             return response()->json([
                 'data' => $internships->map(function ($internship) {
+                    // Count digital reports (internship_report) as documents
+                    $digitalReportCount = 0;
+                    $report = $internship->internship_report ?: [];
+                    if (isset($report['submitted_at'])) {
+                        $digitalReportCount = 1; // Digital report exists
+                    }
+                    
+                    // Total documents count = uploaded documents + digital reports
+                    $totalDocumentsCount = $internship->documents_count + $digitalReportCount;
+                    
                     return [
                         'id' => $internship->id,
                         'student_id' => $internship->student_id,
@@ -228,7 +238,7 @@ class InternshipController extends Controller
                         'end_date' => $internship->end_date?->format('Y-m-d'),
                         'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
                         'approved_date' => $internship->approved_date?->format('Y-m-d'),
-                        'documents_count' => $internship->documents_count,
+                        'documents_count' => $totalDocumentsCount,
                         'created_at' => $internship->created_at?->toIso8601String(),
                         'updated_at' => $internship->updated_at?->toIso8601String(),
                     ];
@@ -1177,8 +1187,8 @@ class InternshipController extends Controller
                 'startDate' => $internship->start_date?->format('Y-m-d'),
                 'endDate' => $internship->end_date?->format('Y-m-d'),
                 'status' => $internship->status,
-                'confirmUrl' => config('app.url') . '/api/internships/company-action?token=' . $confirmToken,
-                'rejectUrl' => config('app.url') . '/api/internships/company-action?token=' . $rejectToken,
+                'confirmUrl' => config('app.url') . '/internships/company-action?token=' . $confirmToken,
+                'rejectUrl' => config('app.url') . '/internships/company-action?token=' . $rejectToken,
                 'garantEmail' => ($internship->garant && $internship->garant->user) ? $internship->garant->user->email : 'garant@school.sk',
                 'showButtons' => true, // Show buttons for company emails
             ];
@@ -1548,6 +1558,16 @@ class InternshipController extends Controller
 
             return response()->json([
                 'data' => $internships->map(function ($internship) {
+                    // Count digital reports (internship_report) as documents
+                    $digitalReportCount = 0;
+                    $report = $internship->internship_report ?: [];
+                    if (isset($report['submitted_at'])) {
+                        $digitalReportCount = 1; // Digital report exists
+                    }
+                    
+                    // Total documents count = uploaded documents + digital reports
+                    $totalDocumentsCount = $internship->documents_count + $digitalReportCount;
+                    
                     return [
                         'id' => $internship->id,
                         'student_id' => $internship->student_id,
@@ -1574,7 +1594,7 @@ class InternshipController extends Controller
                         'end_date' => $internship->end_date?->format('Y-m-d'),
                         'confirmed_date' => $internship->confirmed_date?->format('Y-m-d'),
                         'approved_date' => $internship->approved_date?->format('Y-m-d'),
-                        'documents_count' => $internship->documents_count,
+                        'documents_count' => $totalDocumentsCount,
                         'created_at' => $internship->created_at?->toIso8601String(),
                         'updated_at' => $internship->updated_at?->toIso8601String(),
                     ];

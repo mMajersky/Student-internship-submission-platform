@@ -408,6 +408,16 @@
       @cancel="cancelDeleteInternship"
     />
 
+    <!-- Message Modal -->
+    <MessageModal
+      :is-visible="showMessageModal"
+      :title="messageModalTitle"
+      :message="messageModalMessage"
+      :type="messageModalType"
+      @close="closeMessageModal"
+      @confirm="closeMessageModal"
+    />
+
   </div>
 </template>
 
@@ -420,6 +430,7 @@ import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
 import CommentModal from '@/components/garant/CommentModal.vue'
 import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 import InternshipFilters from '@/components/garant/InternshipFilters.vue'
+import MessageModal from '@/components/common/MessageModal.vue'
 import StatisticsTab from '@/components/garant/tabs/StatisticsTab.vue'
 
 const { t } = useI18n()
@@ -439,6 +450,23 @@ const selectedInternshipForComment = ref(null)
 // Delete confirmation state
 const showDeleteConfirmation = ref(false)
 const internshipToDelete = ref(null)
+
+// Message modal state
+const showMessageModal = ref(false)
+const messageModalTitle = ref('')
+const messageModalMessage = ref('')
+const messageModalType = ref('info')
+
+const showMessage = (message, title = null, type = 'info') => {
+  messageModalTitle.value = title || t('common.message')
+  messageModalMessage.value = message
+  messageModalType.value = type
+  showMessageModal.value = true
+}
+
+const closeMessageModal = () => {
+  showMessageModal.value = false
+}
 
 // Filter state
 const selectedYears = ref([])
@@ -644,7 +672,7 @@ const handleCreateInternship = async (formData) => {
     internships.value = [...internships.value]
     
     // Show success message
-    alert(editingInternship.value ? t('garantDashboard.messages.internshipUpdated') : t('garantDashboard.messages.internshipCreated'))
+    showMessage(editingInternship.value ? t('garantDashboard.messages.internshipUpdated') : t('garantDashboard.messages.internshipCreated'), null, 'success')
 
     // Reset editing state
     editingInternship.value = null
@@ -653,7 +681,7 @@ const handleCreateInternship = async (formData) => {
     activeTab.value = 'internships'
   } catch (error) {
     console.error('Error creating internship:', error)
-    alert(error.message || t('garantDashboard.messages.createError'))
+    showMessage(error.message || t('garantDashboard.messages.createError'), null, 'error')
   }
 }
 
@@ -683,10 +711,10 @@ const confirmDeleteInternship = async () => {
     await fetchInternships()
     
     // Show success message
-    alert(t('garantDashboard.messages.internshipDeleted'))
+    showMessage(t('garantDashboard.messages.internshipDeleted'), null, 'success')
   } catch (error) {
     console.error('Error deleting internship:', error)
-    alert(error.message || t('garantDashboard.messages.deleteError'))
+    showMessage(error.message || t('garantDashboard.messages.deleteError'), null, 'error')
   } finally {
     showDeleteConfirmation.value = false
     internshipToDelete.value = null
@@ -794,7 +822,7 @@ const handleSubmitComment = async (commentData) => {
     }
 
     // Show success message
-    alert(t('garantDashboard.messages.commentAdded'))
+    showMessage(t('garantDashboard.messages.commentAdded'), null, 'success')
     
     // Close modal
     handleCloseCommentModal()

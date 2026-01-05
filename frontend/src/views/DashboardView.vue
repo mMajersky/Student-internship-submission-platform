@@ -37,7 +37,7 @@
             <div class="card-body">
               <h5 class="card-title">{{ $t('dashboard.welcomeMessage') }}</h5>
               <p class="card-text">{{ $t('dashboard.systemDescription') }}</p>
-              <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>{{ $t('dashboard.yourRole') }}: <strong>{{ authStore.userRole }}</strong></div>
+              <div class="alert" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;"><i class="bi bi-info-circle me-2"></i>{{ $t('dashboard.yourRole') }}: <strong>{{ authStore.userRole }}</strong></div>
             </div>
           </div>
         </div>

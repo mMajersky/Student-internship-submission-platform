@@ -24,7 +24,7 @@
             </label>
           </div>
 
-          <div class="alert alert-info mt-3 mb-0">
+          <div class="alert mt-3 mb-0" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;">
             <small>
               <i class="bi bi-info-circle me-2"></i>
               <strong>{{ $t('common.note') }}:</strong> {{ $t('settings.emailNote') }}
@@ -133,6 +133,16 @@
     <footer class="bg-white border-top py-3 text-center text-muted small">
       {{ $t('footer.copyright') }}
     </footer>
+
+    <!-- Message Modal -->
+    <MessageModal
+      :is-visible="showMessageModal"
+      :title="messageModalTitle"
+      :message="messageModalMessage"
+      :type="messageModalType"
+      @close="closeMessageModal"
+      @confirm="closeMessageModal"
+    />
   </div>
 </template>
 
@@ -140,6 +150,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useI18n } from 'vue-i18n';
+import MessageModal from '@/components/common/MessageModal.vue';
 
 const { t } = useI18n();
 
@@ -165,6 +176,23 @@ const password = reactive({
 
 const isUpdatingProfile = ref(false);
 const isChangingPassword = ref(false);
+
+// Message modal state
+const showMessageModal = ref(false);
+const messageModalTitle = ref('');
+const messageModalMessage = ref('');
+const messageModalType = ref('info');
+
+const showMessage = (message, title = null, type = 'info') => {
+  messageModalTitle.value = title || t('common.message');
+  messageModalMessage.value = message;
+  messageModalType.value = type;
+  showMessageModal.value = true;
+};
+
+const closeMessageModal = () => {
+  showMessageModal.value = false;
+};
 
 const loadSettings = async () => {
   try {
@@ -207,15 +235,15 @@ const updateEmailNotifications = async () => {
     const data = await response.json();
     
     if (response.ok) {
-      alert(data.message || t('settings.validation.settingUpdated'));
+      showMessage(data.message || t('settings.validation.settingUpdated'), null, 'success');
     } else {
-      alert(data.message || t('settings.validation.settingUpdateError'));
+      showMessage(data.message || t('settings.validation.settingUpdateError'), null, 'error');
       // Revert on error
       settings.email_notifications = !settings.email_notifications;
     }
   } catch (error) {
     console.error('Error updating email notifications:', error);
-    alert(t('settings.validation.settingUpdateError'));
+    showMessage(t('settings.validation.settingUpdateError'), null, 'error');
     settings.email_notifications = !settings.email_notifications;
   }
 };
@@ -236,15 +264,15 @@ const updateProfile = async () => {
     const data = await response.json();
     
     if (response.ok) {
-      alert(data.message || t('settings.validation.profileUpdated'));
+      showMessage(data.message || t('settings.validation.profileUpdated'), null, 'success');
       settings.name = profile.name;
       settings.email = profile.email;
     } else {
-      alert(data.message || t('settings.validation.profileUpdateError'));
+      showMessage(data.message || t('settings.validation.profileUpdateError'), null, 'error');
     }
   } catch (error) {
     console.error('Error updating profile:', error);
-    alert(t('settings.validation.profileUpdateError'));
+    showMessage(t('settings.validation.profileUpdateError'), null, 'error');
   } finally {
     isUpdatingProfile.value = false;
   }
@@ -252,17 +280,17 @@ const updateProfile = async () => {
 
 const changePassword = async () => {
   if (!password.current || !password.new || !password.confirm) {
-    alert(t('settings.validation.fillAllFields'));
+    showMessage(t('settings.validation.fillAllFields'), null, 'warning');
     return;
   }
 
   if (password.new !== password.confirm) {
-    alert(t('settings.validation.passwordsDontMatch'));
+    showMessage(t('settings.validation.passwordsDontMatch'), null, 'warning');
     return;
   }
 
   if (password.new.length < 8) {
-    alert(t('settings.validation.passwordTooShort'));
+    showMessage(t('settings.validation.passwordTooShort'), null, 'warning');
     return;
   }
 
@@ -285,16 +313,16 @@ const changePassword = async () => {
     const data = await response.json();
     
     if (response.ok) {
-      alert(data.message || t('settings.validation.passwordChanged'));
+      showMessage(data.message || t('settings.validation.passwordChanged'), null, 'success');
       password.current = '';
       password.new = '';
       password.confirm = '';
     } else {
-      alert(data.message || t('settings.validation.passwordChangeError'));
+      showMessage(data.message || t('settings.validation.passwordChangeError'), null, 'error');
     }
   } catch (error) {
     console.error('Error changing password:', error);
-    alert(t('settings.validation.passwordChangeError'));
+    showMessage(t('settings.validation.passwordChangeError'), null, 'error');
   } finally {
     isChangingPassword.value = false;
   }

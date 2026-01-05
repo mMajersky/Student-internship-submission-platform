@@ -148,6 +148,22 @@ const router = createRouter({
       meta: { 
         requiresAuth: true
       }
+    },
+    {
+      path: '/internships/company-action',
+      name: 'company-action',
+      component: () => import('../views/CompanyActionView.vue'),
+      meta: { 
+        guest: true // Allow access without auth for email links
+      }
+    },
+    {
+      path: '/internships/evaluation',
+      name: 'evaluation',
+      component: () => import('../views/EvaluationFormView.vue'),
+      meta: { 
+        guest: true // Allow access without auth for email links
+      }
     }
   ]
 })

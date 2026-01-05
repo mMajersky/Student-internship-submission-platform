@@ -51,7 +51,7 @@
               {{ $t('studentDashboard.profile') }}
             </h5>
             <p class="card-text">{{ $t('studentDashboard.profileDesc') }}</p>
-            <button class="btn btn-outline-primary" disabled>
+            <button @click="handleEditProfile" class="btn btn-primary">
               <i class="bi bi-gear me-2"></i>
               {{ $t('studentDashboard.editProfile') }}
             </button>
@@ -97,5 +97,9 @@ const { t } = useI18n()
 
 const handleZobrazitPraxe = () => {
   router.push('/internships')
+}
+
+const handleEditProfile = () => {
+  router.push('/settings')
 }
 </script>
