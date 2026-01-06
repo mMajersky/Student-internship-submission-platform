@@ -8,7 +8,7 @@
     <style>
         @page {
             size: A4;
-            margin: 2cm 2cm 2cm 2cm;
+            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
         }
         @font-face {
     font-family: 'Calibri';
