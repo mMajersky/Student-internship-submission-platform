@@ -59,9 +59,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 });
 
-// Auth routes from develop
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/register', [AuthController::class, 'register']);
+// Auth routes from develop - with rate limiting for security
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/register', [AuthController::class, 'register']);
+});
 
 // Password reset - sends email with reset link (no auth required)
 Route::post('/password/forgot', [App\Http\Controllers\PasswordResetController::class, 'sendResetLinkApi']);
