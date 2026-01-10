@@ -8,8 +8,32 @@
     <style>
         @page {
             size: A4;
-            margin: 2cm 2cm 2cm 2cm;
+            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
         }
+        @font-face {
+    font-family: 'Calibri';
+    font-style: normal;
+    font-weight: 400;
+    src: url("{{ storage_path('fonts/Calibri-Regular.ttf') }}") format("truetype");
+}
+@font-face {
+    font-family: 'Calibri';
+    font-style: normal;
+    font-weight: 700;
+    src: url("{{ storage_path('fonts/Calibri-Bold.ttf') }}") format("truetype");
+}
+@font-face {
+    font-family: 'Calibri';
+    font-style: italic;
+    font-weight: 400;
+    src: url("{{ storage_path('fonts/Calibri-Italic.ttf') }}") format("truetype");
+}
+@font-face {
+    font-family: 'Calibri';
+    font-style: italic;
+    font-weight: 700;
+    src: url("{{ storage_path('fonts/Calibri-BoldItalic.ttf') }}") format("truetype");
+}
 
         body {
             font-family: "Calibri", sans-serif;
@@ -85,7 +109,7 @@
         .header-note {
             font-size: 9pt;
             text-align: right;
-            margin-bottom: 20pt;
+            margin-bottom: 10pt;
         }
         
         .signature-block {
