@@ -76,13 +76,13 @@
   border-radius: var(--border-radius);
 }
 
-.card:hover {
+/* .card:hover {
   transform: translateY(-2px);
 }
 
 .card.h-100:hover {
   transform: translateY(-2px);
-}
+} */
 
 /* ===============================================
    BADGE & STATUS STYLES

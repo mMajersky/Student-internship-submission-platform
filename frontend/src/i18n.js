@@ -932,7 +932,7 @@ const messages = {
       internshipNotEnded: 'Internship has not ended yet.'
     },
     garantDashboard: {
-      title: 'Garant Dashboard',
+      title: 'Internship Management',
       tabs: {
         overview: 'Overview',
         createInternship: 'New Internship',
@@ -1628,7 +1628,7 @@ const messages = {
       removeUserMessage: 'Naozaj chcete odobrať tohto používateľa?'
     },
     garantDashboard: {
-      title: 'Dashboard garanta',
+      title: 'Správa praxe',
       tabs: {
         overview: 'Prehľad',
         createInternship: 'Nová prax',

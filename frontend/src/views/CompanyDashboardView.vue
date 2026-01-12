@@ -4,7 +4,6 @@
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h2>{{ $t('companyDashboard.title') }}</h2>
-          <span class="badge bg-success fs-6">{{ authStore.userRole }}</span>
         </div>
       </div>
     </div>
