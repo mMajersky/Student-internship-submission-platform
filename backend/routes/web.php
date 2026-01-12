@@ -7,7 +7,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Models\User;
 use App\Models\Internship;
 use App\Models\Notification;
-use App\Http\Controllers\EmailController;
+// use App\Http\Controllers\EmailController;
 use App\Services\NotificationService;
 use App\Mail\InternshipStatusChanged;
 use Illuminate\Support\Facades\Crypt;
@@ -28,7 +28,7 @@ Route::get('/login', function () {
 
 Route::get('/users', [UserController::class, 'index']);
 
-Route::get('/test-mail', [EmailController::class, 'test']);
+// Route::get('/test-mail', [EmailController::class, 'test']);
 
 // Company action route for email links (web interface)
 Route::get('/internships/company-action', function (Request $request) {
