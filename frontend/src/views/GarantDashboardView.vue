@@ -211,14 +211,7 @@
               </span>
             </div>
 
-            <div v-if="loading" class="text-center py-5">
-              <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="visually-hidden">{{ $t('common.loading') }}</span>
-              </div>
-              <p class="mt-2 text-muted">{{ $t('common.loading') }}</p>
-            </div>
-
-            <div v-else-if="internships.length === 0" class="text-center py-5">
+            <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
               <p class="text-muted mt-3">{{ $t('garantDashboard.noInternships') }}</p>
               <button class="btn btn-primary" @click="activeTab = 'create-internship'">
@@ -251,7 +244,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="internship in paginatedInternships" :key="internship.id">
+                  <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
                     <td>{{ getYear(internship.start_date) }}</td>
@@ -280,36 +273,6 @@
                   </tr>
                 </tbody>
               </table>
-            </div>
-
-            <!-- Pagination Controls -->
-            <div v-if="filteredInternships.length > 0" class="d-flex justify-content-between align-items-center mt-3">
-              <div class="d-flex align-items-center">
-                <select class="form-select form-select-sm" v-model="itemsPerPage" style="width: auto;">
-                  <option :value="10">10</option>
-                  <option :value="25">25</option>
-                  <option :value="50">50</option>
-                  <option :value="100">100</option>
-                </select>
-              </div>
-              
-              <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm mb-0">
-                  <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                    <button class="page-link" @click="changePage(currentPage - 1)" :disabled="currentPage === 1">
-                      &laquo;
-                    </button>
-                  </li>
-                  <li class="page-item disabled">
-                    <span class="page-link">{{ currentPage }} / {{ totalPages }}</span>
-                  </li>
-                  <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                    <button class="page-link" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
-                      &raquo;
-                    </button>
-                  </li>
-                </ul>
-              </nav>
             </div>
           </div>
         </div>
@@ -352,14 +315,7 @@
               </span>
             </div>
 
-            <div v-if="loading" class="text-center py-5">
-              <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="visually-hidden">{{ $t('common.loading') }}</span>
-              </div>
-              <p class="mt-2 text-muted">{{ $t('common.loading') }}</p>
-            </div>
-
-            <div v-else-if="internships.length === 0" class="text-center py-5">
+            <div v-if="internships.length === 0" class="text-center py-5">
               <i class="bi bi-inbox fs-1 text-muted"></i>
               <p class="text-muted mt-3">{{ $t('garantDashboard.noInternships') }}</p>
             </div>
@@ -387,7 +343,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="internship in paginatedInternships" :key="internship.id">
+                  <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
                     <td>{{ getYear(internship.start_date) }}</td>
@@ -409,36 +365,6 @@
                   </tr>
                 </tbody>
               </table>
-            </div>
-
-            <!-- Pagination Controls -->
-            <div v-if="filteredInternships.length > 0" class="d-flex justify-content-between align-items-center mt-3">
-              <div class="d-flex align-items-center">
-                <select class="form-select form-select-sm" v-model="itemsPerPage" style="width: auto;">
-                  <option :value="10">10</option>
-                  <option :value="25">25</option>
-                  <option :value="50">50</option>
-                  <option :value="100">100</option>
-                </select>
-              </div>
-              
-              <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm mb-0">
-                  <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                    <button class="page-link" @click="changePage(currentPage - 1)" :disabled="currentPage === 1">
-                      &laquo;
-                    </button>
-                  </li>
-                  <li class="page-item disabled">
-                    <span class="page-link">{{ currentPage }} / {{ totalPages }}</span>
-                  </li>
-                  <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                    <button class="page-link" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
-                      &raquo;
-                    </button>
-                  </li>
-                </ul>
-              </nav>
             </div>
           </div>
         </div>
@@ -495,7 +421,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
@@ -512,8 +438,6 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const activeTab = ref('overview')
-const loading = ref(false)
-
 
 // Editing state
 const editingInternship = ref(null)
@@ -562,8 +486,6 @@ const internships = ref([])
 
 // Fetch internships from API
 const fetchInternships = async () => {
-  loading.value = true
-  const start = Date.now()
   try {
     const response = await fetch('/api/internships', {
       headers: {
@@ -583,12 +505,6 @@ const fetchInternships = async () => {
     }
   } catch (error) {
     console.error('Error fetching internships:', error)
-  } finally {
-    const elapsed = Date.now() - start
-    if (elapsed < 800) {
-      await new Promise(resolve => setTimeout(resolve, 800 - elapsed))
-    }
-    loading.value = false
   }
 }
 
@@ -674,29 +590,6 @@ const filteredInternships = computed(() => {
     
     return true
   })
-})
-
-// Pagination state
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-
-const totalPages = computed(() => Math.ceil(filteredInternships.value.length / itemsPerPage.value))
-
-const paginatedInternships = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredInternships.value.slice(start, end)
-})
-
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
-
-// Watch for filter changes to reset page
-watch(() => filteredInternships.value.length, () => {
-  currentPage.value = 1
 })
 
 const clearAllFilters = () => {
