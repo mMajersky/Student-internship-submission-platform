@@ -5,9 +5,7 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 class="h3 mb-1">{{ $t('dashboard.title') }}</h1>
-          <p class="text-muted mb-0">{{ $t('dashboard.welcome') }}, {{ authStore.userDisplayName }} ({{ authStore.userRole }})</p>
         </div>
-        <button @click="logout" class="btn btn-outline-danger">{{ $t('dashboard.logout') }}</button>
       </div>
 
       <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
@@ -33,11 +31,17 @@
 
       <div class="tab-content">
         <div v-if="activeTab === 'overview'" class="tab-pane fade show active">
-          <div class="card">
+          <div class="card text-center shadow-sm p-4">
             <div class="card-body">
-              <h5 class="card-title">{{ $t('dashboard.welcomeMessage') }}</h5>
-              <p class="card-text">{{ $t('dashboard.systemDescription') }}</p>
-              <div class="alert" style="background-color: #d1e7dd; border-color: #badbcc; color: #0f5132;"><i class="bi bi-info-circle me-2"></i>{{ $t('dashboard.yourRole') }}: <strong>{{ authStore.userRole }}</strong></div>
+              <h1 class="display-4 mb-4 text-primary"><i class="bi bi-mortarboard"></i></h1>
+              <h2 class="card-title mb-3">{{ $t('dashboard.welcomeMessage') }}</h2>
+              <p class="card-text lead mb-4">{{ $t('dashboard.systemDescription') }}</p>
+              <div class="d-inline-block">
+                <span class="badge bg-light text-dark border p-2 px-4 fs-5 rounded-pill">
+                  <i class="bi bi-person-badge me-2"></i>
+                  {{ $t('dashboard.yourRole') }}: <strong>{{ authStore.userRole }}</strong>
+                </span>
+              </div>
             </div>
           </div>
         </div>
