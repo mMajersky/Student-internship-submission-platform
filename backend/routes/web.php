@@ -28,18 +28,6 @@ Route::get('/login', function () {
 
 Route::get('/users', [UserController::class, 'index']);
 
-Route::get('/add-user', function () {
-    $random = rand(1000, 9999);
-
-    $user = User::create([
-        'role' => 'admin',
-        'password' => bcrypt('secret123'),
-        'email' => "admin{$random}@example.com"
-    ]);
-
-    return 'Používateľ pridaný s ID: ' . $user->id . "\n email: " . $user->email;
-});
-
 Route::get('/test-mail', [EmailController::class, 'test']);
 
 // Company action route for email links (web interface)
