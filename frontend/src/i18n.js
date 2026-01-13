@@ -59,6 +59,7 @@ const messages = {
         loginButton: 'Login',
         noAccount: 'Don\'t have an account?',
         registerStudent: 'Student registration',
+        or: 'or',
         registerCompany: 'company registration',
         requiredFields: 'Email and password are required fields.',
         emailPlaceholder: "{'your.email@example.com'}",
@@ -78,6 +79,8 @@ const messages = {
         companyName: 'Company Name',
         password: 'Password',
         passwordPlaceholder: '********',
+        passwordConfirmation: 'Confirm Password',
+        passwordConfirmationPlaceholder: '********',
         email: 'Email',
         universityEmail: 'University Email',
         alternativeEmail: 'Alternative Email',
@@ -123,6 +126,8 @@ const messages = {
           universityEmailRequired: 'Use your university email (@student.ukf.sk)',
           passwordRequired: 'Password is required.',
           passwordTooShort: 'Password must be at least 8 characters long.',
+          passwordConfirmationRequired: 'Password confirmation is required.',
+          passwordConfirmationMismatch: 'Password confirmation does not match.',
           studyLevelRequired: 'Study level is required.',
           studyFieldRequired: 'Study field is required.',
           stateRequired: 'State is required.',
@@ -333,11 +338,12 @@ const messages = {
         settingUpdated: 'Setting has been updated.',
         settingUpdateError: 'Error updating setting.',
         profileUpdated: 'Profile has been updated.',
-        profileUpdateError: 'Error updating profile.',
-        passwordChanged: 'Password has been changed.',
-        passwordChangeError: 'Error changing password.'
-      }
-    },
+      profileUpdateError: 'Error updating profile.',
+      passwordChanged: 'Password has been changed.',
+      passwordChangeError: 'Error changing password.',
+      contactGarantToChange: 'To change your name or email, please contact the internship supervisor (garant).'
+    }
+  },
     notifications: {
       title: 'Notifications',
       markAllAsRead: 'Mark all as read',
@@ -862,6 +868,10 @@ const messages = {
       securityDesc: 'All uploaded documents (especially signed PDFs) are stored in a secure private storage. Documents are NOT publicly accessible - access is only available to authorized users through API with permission controls.',
       signedAgreement: 'Agreement signed by student',
       signedAgreementDesc: '(required when status is "Approved by garant")',
+      isEmployedOrSelfEmployed: 'I am employed in this company or I have my own business/company',
+      isEmployedOrSelfEmployedDesc: 'If you are employed in the company where you are doing the internship, or you have your own business/company, you must upload an invoice or employment contract instead of the signed agreement. The internship report is not required.',
+      invoiceOrContract: 'Invoice or Employment Contract',
+      invoiceOrContractDesc: 'Upload invoice or employment contract (required when status is "Approved")',
       uploadDocument: 'Upload document (PDF)',
       upload: 'Upload',
       uploaded: 'Uploaded',
@@ -943,7 +953,8 @@ const messages = {
       reportUploadSuccess: 'Report uploaded successfully!',
       sendReportSuccess: 'Report sent successfully to company!',
       sendReportError: 'Error sending report to company.',
-      internshipNotEnded: 'Internship has not ended yet.'
+      internshipNotEnded: 'Internship has not ended yet.',
+      close: 'Close'
     },
     garantDashboard: {
       title: 'Internship Management',
@@ -1148,6 +1159,7 @@ const messages = {
         loginButton: 'Prihlásiť sa',
         noAccount: 'Nemáte účet?',
         registerStudent: 'Registrácia študenta',
+        or: 'alebo',
         registerCompany: 'registrácia firmy',
         requiredFields: 'Email a heslo sú povinné polia.',
         emailPlaceholder: "{'meno@priklad.sk'}",
@@ -1167,6 +1179,8 @@ const messages = {
         companyName: 'Názov firmy',
         password: 'Heslo',
         passwordPlaceholder: '********',
+        passwordConfirmation: 'Potvrdiť heslo',
+        passwordConfirmationPlaceholder: '********',
         email: 'Email',
         universityEmail: 'Univerzitný email',
         alternativeEmail: 'Alternatívny email',
@@ -1212,6 +1226,8 @@ const messages = {
           universityEmailRequired: 'Použite univerzitný email @student.ukf.sk',
           passwordRequired: 'Heslo je povinné.',
           passwordTooShort: 'Heslo musí mať minimálne 8 znakov.',
+          passwordConfirmationRequired: 'Potvrdenie hesla je povinné.',
+          passwordConfirmationMismatch: 'Potvrdenie hesla sa nezhoduje.',
           studyLevelRequired: 'Stupeň štúdia je povinný.',
           studyFieldRequired: 'Študijný odbor je povinný.',
           stateRequired: 'Štát je povinný.',
@@ -1422,11 +1438,12 @@ const messages = {
         settingUpdated: 'Nastavenie bolo aktualizované.',
         settingUpdateError: 'Chyba pri aktualizácii nastavenia.',
         profileUpdated: 'Profil bol aktualizovaný.',
-        profileUpdateError: 'Chyba pri aktualizácii profilu.',
-        passwordChanged: 'Heslo bolo zmenené.',
-        passwordChangeError: 'Chyba pri zmene hesla.'
-      }
-    },
+      profileUpdateError: 'Chyba pri aktualizácii profilu.',
+      passwordChanged: 'Heslo bolo zmenené.',
+      passwordChangeError: 'Chyba pri zmene hesla.',
+      contactGarantToChange: 'Pre zmenu mena alebo emailu kontaktujte garanta praxe.'
+    }
+  },
     notifications: {
       title: 'Notifikácie',
       markAllAsRead: 'Označiť všetko',
