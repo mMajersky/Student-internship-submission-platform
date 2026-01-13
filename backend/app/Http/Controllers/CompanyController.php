@@ -307,8 +307,8 @@ class CompanyController extends Controller
                 'user_id' => $companyUser->id,
             ]);
 
-            // Clear the companies cache
-            Cache::tags(['dropdowns'])->forget('companies');
+            // Clear the companies cache (without tags, since database cache doesn't support tagging)
+            Cache::forget('companies');
 
             // Send email with credentials
             try {
