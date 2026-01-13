@@ -78,6 +78,7 @@ Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
     // Internship management routes
     Route::get('/internships', [InternshipController::class, 'index']);
     Route::post('/internships', [InternshipController::class, 'store']);
+    Route::post('/internships/bulk-delete', [InternshipController::class, 'bulkDestroy']);
     Route::get('/internships/{id}', [InternshipController::class, 'show']);
     Route::put('/internships/{id}', [InternshipController::class, 'update']);
     Route::delete('/internships/{id}', [InternshipController::class, 'destroy']);

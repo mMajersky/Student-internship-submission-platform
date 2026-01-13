@@ -993,12 +993,16 @@ const messages = {
         viewDocuments: 'View Documents',
         delete: 'Delete',
         sendEvaluationEmail: 'Send Evaluation Email',
-        resendApprovalEmail: 'Resend Approval Email'
+        resendApprovalEmail: 'Resend Approval Email',
+        deleteSelected: 'Delete Selected'
       },
       messages: {
         internshipCreated: 'Internship has been successfully created!',
         internshipUpdated: 'Internship has been successfully updated!',
         internshipDeleted: 'Internship has been successfully deleted!',
+        internshipsDeleted: 'Selected internships have been successfully deleted!',
+        bulkDeleteTitle: 'Delete Selected Internships',
+        bulkDeleteMessage: 'Are you sure you want to delete the selected internships?',
         commentAdded: 'Comment has been successfully added!',
         confirmDelete: 'Are you sure you want to delete this internship?',
         createError: 'Error creating internship. Please try again.',
@@ -1688,6 +1692,7 @@ const messages = {
         viewDocuments: 'Zobraziť dokumenty',
         viewReport: 'Zobraziť výkaz praxe',
         delete: 'Vymazať',
+        deleteSelected: 'Vymazať vybrané',
         sendEvaluationEmail: 'Poslať hodnotiaci email',
         resendApprovalEmail: 'Znovu poslať schvaľovací email'
       },
@@ -1728,6 +1733,9 @@ const messages = {
         internshipCreated: 'Prax bola úspešne vytvorená!',
         internshipUpdated: 'Prax bola úspešne upravená!',
         internshipDeleted: 'Prax bola úspešne vymazaná!',
+        internshipsDeleted: 'Vybrané praxe boli úspešne vymazané!',
+        bulkDeleteTitle: 'Vymazať vybrané praxe',
+        bulkDeleteMessage: 'Naozaj chcete vymazať vybrané praxe?',
         commentAdded: 'Komentár bol úspešne pridaný!',
         confirmDelete: 'Naozaj chcete vymazať túto prax?',
         createError: 'Chyba pri vytváraní praxe. Skúste to znova.',
