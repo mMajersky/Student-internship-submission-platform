@@ -18,12 +18,6 @@ class AdminUserSeeder extends Seeder{
     {
         $users = [
             [
-                'name' => 'Admin',
-                'surname' => 'Adminovič',
-                'role' => 'admin',
-                'email' => 'admin@example.com',
-            ],
-            [
                 'name' => 'Peter',
                 'surname' => 'Hudec',
                 'role' => 'student',

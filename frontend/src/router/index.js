@@ -38,9 +38,9 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
-      meta: { 
+      meta: {
         requiresAuth: true,
-        roles: ['ADMIN', 'GARANT']
+        roles: ['GARANT']
       }
     },
     {
@@ -119,15 +119,7 @@ const router = createRouter({
         roles: ['GARANT']
       }
     },
-    {
-      path: '/admin-panel',
-      name: 'admin-panel',
-      component: () => import('../views/AdminPanelView.vue'),
-      meta: { 
-        requiresAuth: true,
-        roles: ['ADMIN']
-      }
-    },
+
     {
       path: '/unauthorized',
       name: 'unauthorized',
@@ -186,7 +178,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (isGuestRoute && authStore.isAuthenticated) {
-    if (authStore.isAdmin || authStore.isGarant) {
+    if (authStore.isGarant) {
       next({ name: 'dashboard' })
     } else if (authStore.isStudent) {
       next({ name: 'student-dashboard' })

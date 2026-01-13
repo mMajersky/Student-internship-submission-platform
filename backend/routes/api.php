@@ -71,8 +71,8 @@ Route::post('/password/forgot', [App\Http\Controllers\PasswordResetController::c
 // Public announcements endpoint from develop
 Route::get('/announcements/published', [AnnouncementController::class, 'published']);
 
-// Protected routes for Admin/Garant
-Route::middleware(['auth:api', 'role:admin,garant'])->group(function () {
+// Protected routes for Garant
+Route::middleware(['auth:api', 'role:garant'])->group(function () {
     Route::match(['GET', 'PUT'], '/announcement', [AnnouncementController::class, 'single']);
 
     // Internship management routes
@@ -164,10 +164,6 @@ Route::middleware(['auth:api', 'role:company'])->prefix('company')->group(functi
 });
 
 
-// Admin-only routes
-Route::middleware(['auth:api', 'role:admin'])->group(function () {
-    // Future admin-only routes
-});
 
 
 //charts

@@ -51,7 +51,6 @@ class Role extends Model
     /**
      * Role constants
      */
-    public const ADMIN = 'ADMIN';
     public const GARANT = 'GARANT';
     public const COMPANY = 'COMPANY';
     public const STUDENT = 'STUDENT';
