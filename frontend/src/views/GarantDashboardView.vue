@@ -65,6 +65,17 @@
           Štatistiky
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          :class="{ active: activeTab === 'company-requests' }"
+          @click="activeTab = 'company-requests'"
+          type="button"
+        >
+          <i class="bi bi-building me-2"></i>
+          {{ $t('garantDashboard.tabs.companyRequests') }}
+        </button>
+      </li>
     </ul>
 
     <!-- Tab Content -->
@@ -369,16 +380,24 @@
           </div>
         </div>
       </div>
-      <!-- Statistics Tab -->
-      <div class="card">
-        <div class="card-body">
-          <div v-if="activeTab === 'statistics'" class="tab-pane fade show active">
-            <StatisticsTab :internships="internships" />
+
+      <!-- Company Requests Tab -->
+      <div v-if="activeTab === 'company-requests'" class="tab-pane fade show active">
+        <div class="card">
+          <div class="card-body">
+            <CompanyRequests />
           </div>
         </div>
       </div>
 
-
+      <!-- Statistics Tab -->
+      <div v-if="activeTab === 'statistics'" class="tab-pane fade show active">
+        <div class="card">
+          <div class="card-body">
+            <StatisticsTab :internships="internships" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Comment Modal -->
@@ -431,6 +450,7 @@ import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 import InternshipFilters from '@/components/garant/InternshipFilters.vue'
 import MessageModal from '@/components/common/MessageModal.vue'
 import StatisticsTab from '@/components/garant/tabs/StatisticsTab.vue'
+import CompanyRequests from '@/components/garant/CompanyRequests.vue'
 
 const { t } = useI18n()
 

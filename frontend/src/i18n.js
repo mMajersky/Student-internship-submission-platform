@@ -750,10 +750,17 @@ const messages = {
         view: 'View details',
         approve: 'Approve',
         reject: 'Reject',
-        close: 'Close'
+        close: 'Close',
+        cancel: 'Cancel'
       },
       modal: {
         title: 'Company Request Details',
+        approve: {
+          title: 'Approve Company Request'
+        },
+        reject: {
+          title: 'Reject Company Request'
+        },
         sections: {
           companyInfo: 'Company Information',
           contact: 'Contact Person',
@@ -782,7 +789,14 @@ const messages = {
         }
       },
       confirm: {
-        approve: 'Are you sure you want to approve this request? The company will be added to the system.'
+        approve: 'Are you sure you want to approve this request? The company will be added to the system.',
+        reject: 'Are you sure you want to reject this request? This action cannot be undone.'
+      },
+      placeholder: {
+        rejectionReason: 'Enter reason for rejection...'
+      },
+      hint: {
+        rejectionReason: 'Please provide a clear reason for rejection. This will be sent to the requester.'
       },
       alert: {
         accepted: 'Request has been accepted! Company "{name}" has been added to the system.',
@@ -1913,10 +1927,17 @@ const messages = {
         view: 'Zobraziť detaily',
         approve: 'Schváliť',
         reject: 'Zamietnuť',
-        close: 'Zavrieť'
+        close: 'Zavrieť',
+        cancel: 'Zrušiť'
       },
       modal: {
         title: 'Detail žiadosti o firmu',
+        approve: {
+          title: 'Schváliť žiadosť o firmu'
+        },
+        reject: {
+          title: 'Zamietnuť žiadosť o firmu'
+        },
         sections: {
           companyInfo: 'Informácie o firme',
           contact: 'Kontaktná osoba',
@@ -1945,7 +1966,14 @@ const messages = {
         }
       },
       confirm: {
-        approve: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.'
+        approve: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.',
+        reject: 'Naozaj chcete zamietnuť túto žiadosť? Táto akcia sa nedá vrátiť späť.'
+      },
+      placeholder: {
+        rejectionReason: 'Zadajte dôvod zamietnutia...'
+      },
+      hint: {
+        rejectionReason: 'Prosím uveďte jasný dôvod zamietnutia. Ten bude odoslaný žiadateľovi.'
       },
       alert: {
         accepted: 'Žiadosť bola schválená! Firma "{name}" bola pridaná do systému.',

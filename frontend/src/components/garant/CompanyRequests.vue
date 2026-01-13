@@ -306,6 +306,45 @@
 
     <!-- Modal Backdrop -->
     <div v-if="selectedRequest" class="modal-backdrop fade show"></div>
+
+    <!-- Approve Confirmation Dialog -->
+    <ConfirmationDialog
+      :is-visible="showApproveConfirmation"
+      :title="t('companyRequests.modal.approve.title')"
+      :message="t('companyRequests.confirm.approve')"
+      :confirm-text="t('companyRequests.actions.approve')"
+      :cancel-text="t('companyRequests.actions.cancel')"
+      type="success"
+      @confirm="confirmApproveRequest"
+      @cancel="cancelApproveRequest"
+    />
+
+    <!-- Reject Confirmation Dialog -->
+    <ConfirmationDialog
+      :is-visible="showRejectConfirmation"
+      :title="t('companyRequests.modal.reject.title')"
+      :message="t('companyRequests.confirm.reject')"
+      :confirm-text="t('companyRequests.actions.reject')"
+      :cancel-text="t('companyRequests.actions.cancel')"
+      type="danger"
+      :requires-text-confirmation="true"
+      confirmation-text-required=""
+      :text-confirmation-label="t('companyRequests.prompt.rejectionReason')"
+      :text-confirmation-placeholder="t('companyRequests.placeholder.rejectionReason')"
+      :text-confirmation-hint="t('companyRequests.hint.rejectionReason')"
+      @confirm="confirmRejectRequest"
+      @cancel="cancelRejectRequest"
+    />
+
+    <!-- Message Modal -->
+    <MessageModal
+      :is-visible="showMessageModal"
+      :title="messageModalTitle"
+      :message="messageModalMessage"
+      :type="messageModalType"
+      @close="closeMessageModal"
+      @confirm="closeMessageModal"
+    />
   </div>
 </template>
 
@@ -313,6 +352,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
+import MessageModal from '../common/MessageModal.vue'
+import ConfirmationDialog from '../common/ConfirmationDialog.vue'
 
 const authStore = useAuthStore()
 
@@ -320,6 +361,18 @@ const requests = ref([])
 const isLoading = ref(false)
 const activeFilter = ref('pending')
 const selectedRequest = ref(null)
+
+// Modal states
+const showMessageModal = ref(false)
+const messageModalTitle = ref('')
+const messageModalMessage = ref('')
+const messageModalType = ref('info')
+
+const showApproveConfirmation = ref(false)
+const requestToApprove = ref(null)
+
+const showRejectConfirmation = ref(false)
+const requestToReject = ref(null)
 
 // Statistics
 const stats = computed(() => ({
@@ -329,6 +382,18 @@ const stats = computed(() => ({
 }))
 
 const { t } = useI18n()
+
+// Helper to show message modal
+const showMessage = (message, title = null, type = 'info') => {
+  messageModalTitle.value = title || t('common.message')
+  messageModalMessage.value = message
+  messageModalType.value = type
+  showMessageModal.value = true
+}
+
+const closeMessageModal = () => {
+  showMessageModal.value = false
+}
 
 // Filtered requests
 const filteredRequests = computed(() => {
@@ -366,10 +431,15 @@ const fetchRequests = async () => {
 }
 
 // Approve request
-const approveRequest = async (requestId) => {
-  if (!confirm(t('companyRequests.confirm.approve'))) {
-    return
-  }
+const approveRequest = (requestId) => {
+  requestToApprove.value = requestId
+  showApproveConfirmation.value = true
+}
+
+const confirmApproveRequest = async () => {
+  const requestId = requestToApprove.value
+  showApproveConfirmation.value = false
+  requestToApprove.value = null
 
   try {
     const response = await fetch(`/api/company-requests/${requestId}/approve`, {
@@ -383,24 +453,37 @@ const approveRequest = async (requestId) => {
     const data = await response.json()
 
     if (response.ok) {
-      alert(t('companyRequests.alert.accepted', { name: data.data.name }))
+      showMessage(t('companyRequests.alert.accepted', { name: data.data.name }), null, 'success')
       selectedRequest.value = null
       await fetchRequests()
     } else {
-      alert(data.message || t('companyRequests.error.approve'))
+      showMessage(data.message || t('companyRequests.error.approve'), null, 'error')
     }
   } catch (error) {
     console.error('Error approving request:', error)
-    alert(t('companyRequests.error.approveUnexpected'))
+    showMessage(t('companyRequests.error.approveUnexpected'), null, 'error')
   }
 }
 
-// Reject request
-const rejectRequest = async (requestId) => {
-  const reason = prompt(t('companyRequests.prompt.rejectionReason'))
+const cancelApproveRequest = () => {
+  showApproveConfirmation.value = false
+  requestToApprove.value = null
+}
 
-  if (!reason || !reason.trim()) {
-    alert(t('companyRequests.error.rejectionReasonRequired'))
+// Reject request
+const rejectRequest = (requestId) => {
+  requestToReject.value = requestId
+  showRejectConfirmation.value = true
+}
+
+const confirmRejectRequest = async (rejectionReason) => {
+  const requestId = requestToReject.value
+  showRejectConfirmation.value = false
+  requestToReject.value = null
+
+  // Validate rejection reason
+  if (!rejectionReason || rejectionReason.trim().length === 0) {
+    showMessage(t('companyRequests.error.rejectionReasonRequired'), null, 'error')
     return
   }
 
@@ -413,23 +496,28 @@ const rejectRequest = async (requestId) => {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        rejection_reason: reason.trim()
+        rejection_reason: rejectionReason.trim()
       })
     })
 
     const data = await response.json()
 
     if (response.ok) {
-      alert(t('companyRequests.alert.declined'))
+      showMessage(t('companyRequests.alert.declined'), null, 'success')
       selectedRequest.value = null
       await fetchRequests()
     } else {
-      alert(data.message || t('companyRequests.error.reject'))
+      showMessage(data.message || t('companyRequests.error.reject'), null, 'error')
     }
   } catch (error) {
     console.error('Error rejecting request:', error)
-    alert(t('companyRequests.error.rejectUnexpected'))
+    showMessage(t('companyRequests.error.rejectUnexpected'), null, 'error')
   }
+}
+
+const cancelRejectRequest = () => {
+  showRejectConfirmation.value = false
+  requestToReject.value = null
 }
 
 // View details
