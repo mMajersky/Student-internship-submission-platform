@@ -125,6 +125,8 @@ const messages = {
           universityEmailRequired: 'Use your university email (@student.ukf.sk)',
           passwordRequired: 'Password is required.',
           passwordTooShort: 'Password must be at least 8 characters long.',
+          passwordConfirmationRequired: 'Password confirmation is required.',
+          passwordConfirmationMismatch: 'Password confirmation does not match.',
           studyLevelRequired: 'Study level is required.',
           studyFieldRequired: 'Study field is required.',
           stateRequired: 'State is required.',
