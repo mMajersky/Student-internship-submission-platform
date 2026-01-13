@@ -48,7 +48,8 @@
               class="form-control"
               id="name"
               v-model="profile.name"
-              :placeholder="$t('settings.namePlaceholder')">
+              :placeholder="$t('settings.namePlaceholder')"
+              :disabled="!canEditProfile">
           </div>
 
           <div class="mb-3">
@@ -58,7 +59,8 @@
               class="form-control"
               id="email"
               v-model="profile.email"
-              :placeholder="$t('settings.emailPlaceholder')">
+              :placeholder="$t('settings.emailPlaceholder')"
+              :disabled="!canEditProfile">
           </div>
 
           <div class="mb-3">
@@ -72,12 +74,18 @@
           </div>
 
           <button
+            v-if="canEditProfile"
             @click="updateProfile"
             class="btn btn-primary"
             :disabled="isUpdatingProfile">
             <span v-if="isUpdatingProfile" class="spinner-border spinner-border-sm me-2"></span>
             {{ $t('settings.saveChanges') }}
           </button>
+
+          <div v-else class="alert alert-info mt-3 mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            {{ $t('settings.validation.contactGarantToChange') }}
+          </div>
         </div>
       </div>
 
@@ -147,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useI18n } from 'vue-i18n';
 import MessageModal from '@/components/common/MessageModal.vue';
@@ -174,8 +182,12 @@ const password = reactive({
   confirm: '',
 });
 
-const isUpdatingProfile = ref(false);
+// const isUpdatingProfile = ref(false);
 const isChangingPassword = ref(false);
+
+const canEditProfile = computed(() => {
+  return authStore.isGarant;
+});
 
 // Message modal state
 const showMessageModal = ref(false);

@@ -337,11 +337,12 @@ const messages = {
         settingUpdated: 'Setting has been updated.',
         settingUpdateError: 'Error updating setting.',
         profileUpdated: 'Profile has been updated.',
-        profileUpdateError: 'Error updating profile.',
-        passwordChanged: 'Password has been changed.',
-        passwordChangeError: 'Error changing password.'
-      }
-    },
+      profileUpdateError: 'Error updating profile.',
+      passwordChanged: 'Password has been changed.',
+      passwordChangeError: 'Error changing password.',
+      contactGarantToChange: 'To change your name or email, please contact the internship supervisor (garant).'
+    }
+  },
     notifications: {
       title: 'Notifications',
       markAllAsRead: 'Mark all as read',
@@ -1417,11 +1418,12 @@ const messages = {
         settingUpdated: 'Nastavenie bolo aktualizované.',
         settingUpdateError: 'Chyba pri aktualizácii nastavenia.',
         profileUpdated: 'Profil bol aktualizovaný.',
-        profileUpdateError: 'Chyba pri aktualizácii profilu.',
-        passwordChanged: 'Heslo bolo zmenené.',
-        passwordChangeError: 'Chyba pri zmene hesla.'
-      }
-    },
+      profileUpdateError: 'Chyba pri aktualizácii profilu.',
+      passwordChanged: 'Heslo bolo zmenené.',
+      passwordChangeError: 'Chyba pri zmene hesla.',
+      contactGarantToChange: 'Pre zmenu mena alebo emailu kontaktujte garanta praxe.'
+    }
+  },
     notifications: {
       title: 'Notifikácie',
       markAllAsRead: 'Označiť všetko',
