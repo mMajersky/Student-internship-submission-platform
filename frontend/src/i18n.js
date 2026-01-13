@@ -46,7 +46,15 @@ const messages = {
       loginLink: 'Or',
       login: 'login',
       loginLinkEnd: 'to your existing account.',
-      officeWork: 'Office Work'
+      officeWork: 'Office Work',
+      internshipTypes: {
+        paid: 'Paid',
+        unpaid: 'Unpaid',
+        school_project: 'School Project'
+      },
+      studentsByYear: 'Number of students by year',
+      internshipTypesTitle: 'Types of internships',
+      topEmployers: 'Top employers'
     },
     auth: {
       login: {
@@ -828,8 +836,8 @@ const messages = {
       noContactPerson: 'No contact details provided'
     },
     aboutInternship: {
-      title: 'What is Professional Practice?',
-      description: 'Professional practice is an important part of study during which students gain practical experience in a real work environment. It allows them to apply theoretical knowledge in practice, develop professional skills and prepare for their future career.'
+      title: 'Professional Practice in One System',
+      description: 'Professional practice is a mandatory part of study that connects education with real work experience. This system provides a clear and centralized way to manage internships, from student and internship registration, through approval by supervisors, to document management and statistics.'
     },
     infoCards: {
       forStudents: 'For Students',
@@ -1146,7 +1154,15 @@ const messages = {
       loginLink: 'Alebo sa',
       login: 'prihláste',
       loginLinkEnd: 'do existujúceho účtu.',
-      officeWork: 'Office práca'
+      officeWork: 'Office práca',
+      internshipTypes: {
+        paid: 'platená',
+        unpaid: 'neplatená',
+        school_project: 'školský projekt'
+      },
+      studentsByYear: 'Počet študentov podľa ročníka',
+      internshipTypesTitle: 'Typy praxí',
+      topEmployers: 'Top zamestnávatelia'
     },
     auth: {
       login: {
@@ -2184,8 +2200,8 @@ const messages = {
       }
     },
     aboutInternship: {
-      title: 'Čo je to odborná prax?',
-      description: 'Odborná prax je dôležitou súčasťou štúdia, počas ktorej študenti získavajú praktické skúsenosti v reálnom pracovnom prostredí. Umožňuje aplikovať teoretické poznatky do praxe, rozvíjať odborné zručnosti a pripraviť sa na budúce povolanie.'
+      title: 'Odborná prax v jednom systéme',
+      description: 'Odborná prax je povinnou súčasťou štúdia, ktorá prepája školu s reálnym pracovným prostredím. Tento systém slúži na jej prehľadnú správu, od registrácie študentov a praxí, cez schvaľovanie garantom, až po evidenciu dokumentov a štatistík.'
     },
     infoCards: {
       forStudents: 'Pre študentov',

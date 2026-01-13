@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { Bar } from 'vue-chartjs'
+import { baseOptions } from '@/components/charts/chartOptions'
 
 import {
   Chart as ChartJS,
@@ -26,11 +27,17 @@ const formattedLabels = computed(() =>
 )
 
 onMounted(async () => {
-  const res = await fetch('/api/stats/top-companies')
-  const data = await res.json()
+  try {
+    const res = await fetch('/api/stats/top-companies')
+    if (!res.ok) throw new Error('Failed to fetch data')
+    const data = await res.json()
 
-  labels.value = data.map(i => i.company_name)
-  values.value = data.map(i => i.count)
+    labels.value = data.map(i => i.company_name)
+    values.value = data.map(i => i.count)
+  } catch (error) {
+    console.error('Error fetching top companies:', error)
+    // Optionally set some default data or leave empty
+  }
 })
 
 const options = {

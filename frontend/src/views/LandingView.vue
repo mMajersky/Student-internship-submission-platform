@@ -58,15 +58,17 @@ const { t } = useI18n()
       </div>
     </section>
 
-    <!-- 🚀 NEW SECTION: stats BELOW main hero -->
+    <!-- NEW SECTION: stats BELOW main hero -->
+    <AboutInternship />
     <section class="py-5">
       <div class="container px-4">
+        
         <StatsSection />
       </div>
     </section>
 
-    <AboutInternship />
-    <InfoCardsSection />
+    
+    <!-- <InfoCardsSection /> -->
     <TheFooter />
   </div>
 </template>

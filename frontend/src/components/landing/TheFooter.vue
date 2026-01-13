@@ -13,7 +13,7 @@ const { t } = useI18n()
         </div>
         <div class="col-md-6 text-md-end">
           <div class="d-flex flex-wrap justify-content-md-end gap-3">
-            <router-link to="/login" class="text-decoration-none text-muted">
+            <!-- <router-link to="/login" class="text-decoration-none text-muted">
               {{ $t('footer.login') }}
             </router-link>
             <router-link to="/register" class="text-decoration-none text-muted">
@@ -21,7 +21,7 @@ const { t } = useI18n()
             </router-link>
             <router-link to="/register-company" class="text-decoration-none text-muted">
               {{ $t('footer.registerCompany') }}
-            </router-link>
+            </router-link> -->
           </div>
         </div>
       </div>
