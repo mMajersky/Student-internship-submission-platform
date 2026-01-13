@@ -67,6 +67,7 @@ const messages = {
         loginButton: 'Login',
         noAccount: 'Don\'t have an account?',
         registerStudent: 'Student registration',
+        or: 'or',
         registerCompany: 'company registration',
         requiredFields: 'Email and password are required fields.',
         emailPlaceholder: "{'your.email@example.com'}",
@@ -86,6 +87,8 @@ const messages = {
         companyName: 'Company Name',
         password: 'Password',
         passwordPlaceholder: '********',
+        passwordConfirmation: 'Confirm Password',
+        passwordConfirmationPlaceholder: '********',
         email: 'Email',
         universityEmail: 'University Email',
         alternativeEmail: 'Alternative Email',
@@ -131,6 +134,8 @@ const messages = {
           universityEmailRequired: 'Use your university email (@student.ukf.sk)',
           passwordRequired: 'Password is required.',
           passwordTooShort: 'Password must be at least 8 characters long.',
+          passwordConfirmationRequired: 'Password confirmation is required.',
+          passwordConfirmationMismatch: 'Password confirmation does not match.',
           studyLevelRequired: 'Study level is required.',
           studyFieldRequired: 'Study field is required.',
           stateRequired: 'State is required.',
@@ -341,11 +346,12 @@ const messages = {
         settingUpdated: 'Setting has been updated.',
         settingUpdateError: 'Error updating setting.',
         profileUpdated: 'Profile has been updated.',
-        profileUpdateError: 'Error updating profile.',
-        passwordChanged: 'Password has been changed.',
-        passwordChangeError: 'Error changing password.'
-      }
-    },
+      profileUpdateError: 'Error updating profile.',
+      passwordChanged: 'Password has been changed.',
+      passwordChangeError: 'Error changing password.',
+      contactGarantToChange: 'To change your name or email, please contact the internship supervisor (garant).'
+    }
+  },
     notifications: {
       title: 'Notifications',
       markAllAsRead: 'Mark all as read',
@@ -758,10 +764,17 @@ const messages = {
         view: 'View details',
         approve: 'Approve',
         reject: 'Reject',
-        close: 'Close'
+        close: 'Close',
+        cancel: 'Cancel'
       },
       modal: {
         title: 'Company Request Details',
+        approve: {
+          title: 'Approve Company Request'
+        },
+        reject: {
+          title: 'Reject Company Request'
+        },
         sections: {
           companyInfo: 'Company Information',
           contact: 'Contact Person',
@@ -790,7 +803,14 @@ const messages = {
         }
       },
       confirm: {
-        approve: 'Are you sure you want to approve this request? The company will be added to the system.'
+        approve: 'Are you sure you want to approve this request? The company will be added to the system.',
+        reject: 'Are you sure you want to reject this request? This action cannot be undone.'
+      },
+      placeholder: {
+        rejectionReason: 'Enter reason for rejection...'
+      },
+      hint: {
+        rejectionReason: 'Please provide a clear reason for rejection. This will be sent to the requester.'
       },
       alert: {
         accepted: 'Request has been accepted! Company "{name}" has been added to the system.',
@@ -856,6 +876,10 @@ const messages = {
       securityDesc: 'All uploaded documents (especially signed PDFs) are stored in a secure private storage. Documents are NOT publicly accessible - access is only available to authorized users through API with permission controls.',
       signedAgreement: 'Agreement signed by student',
       signedAgreementDesc: '(required when status is "Approved by garant")',
+      isEmployedOrSelfEmployed: 'I am employed in this company or I have my own business/company',
+      isEmployedOrSelfEmployedDesc: 'If you are employed in the company where you are doing the internship, or you have your own business/company, you must upload an invoice or employment contract instead of the signed agreement. The internship report is not required.',
+      invoiceOrContract: 'Invoice or Employment Contract',
+      invoiceOrContractDesc: 'Upload invoice or employment contract (required when status is "Approved")',
       uploadDocument: 'Upload document (PDF)',
       upload: 'Upload',
       uploaded: 'Uploaded',
@@ -937,7 +961,8 @@ const messages = {
       reportUploadSuccess: 'Report uploaded successfully!',
       sendReportSuccess: 'Report sent successfully to company!',
       sendReportError: 'Error sending report to company.',
-      internshipNotEnded: 'Internship has not ended yet.'
+      internshipNotEnded: 'Internship has not ended yet.',
+      close: 'Close'
     },
     garantDashboard: {
       title: 'Internship Management',
@@ -987,12 +1012,16 @@ const messages = {
         viewDocuments: 'View Documents',
         delete: 'Delete',
         sendEvaluationEmail: 'Send Evaluation Email',
-        resendApprovalEmail: 'Resend Approval Email'
+        resendApprovalEmail: 'Resend Approval Email',
+        deleteSelected: 'Delete Selected'
       },
       messages: {
         internshipCreated: 'Internship has been successfully created!',
         internshipUpdated: 'Internship has been successfully updated!',
         internshipDeleted: 'Internship has been successfully deleted!',
+        internshipsDeleted: 'Selected internships have been successfully deleted!',
+        bulkDeleteTitle: 'Delete Selected Internships',
+        bulkDeleteMessage: 'Are you sure you want to delete the selected internships?',
         commentAdded: 'Comment has been successfully added!',
         confirmDelete: 'Are you sure you want to delete this internship?',
         createError: 'Error creating internship. Please try again.',
@@ -1146,6 +1175,7 @@ const messages = {
         loginButton: 'Prihlásiť sa',
         noAccount: 'Nemáte účet?',
         registerStudent: 'Registrácia študenta',
+        or: 'alebo',
         registerCompany: 'registrácia firmy',
         requiredFields: 'Email a heslo sú povinné polia.',
         emailPlaceholder: "{'meno@priklad.sk'}",
@@ -1165,6 +1195,8 @@ const messages = {
         companyName: 'Názov firmy',
         password: 'Heslo',
         passwordPlaceholder: '********',
+        passwordConfirmation: 'Potvrdiť heslo',
+        passwordConfirmationPlaceholder: '********',
         email: 'Email',
         universityEmail: 'Univerzitný email',
         alternativeEmail: 'Alternatívny email',
@@ -1210,6 +1242,8 @@ const messages = {
           universityEmailRequired: 'Použite univerzitný email @student.ukf.sk',
           passwordRequired: 'Heslo je povinné.',
           passwordTooShort: 'Heslo musí mať minimálne 8 znakov.',
+          passwordConfirmationRequired: 'Potvrdenie hesla je povinné.',
+          passwordConfirmationMismatch: 'Potvrdenie hesla sa nezhoduje.',
           studyLevelRequired: 'Stupeň štúdia je povinný.',
           studyFieldRequired: 'Študijný odbor je povinný.',
           stateRequired: 'Štát je povinný.',
@@ -1420,11 +1454,12 @@ const messages = {
         settingUpdated: 'Nastavenie bolo aktualizované.',
         settingUpdateError: 'Chyba pri aktualizácii nastavenia.',
         profileUpdated: 'Profil bol aktualizovaný.',
-        profileUpdateError: 'Chyba pri aktualizácii profilu.',
-        passwordChanged: 'Heslo bolo zmenené.',
-        passwordChangeError: 'Chyba pri zmene hesla.'
-      }
-    },
+      profileUpdateError: 'Chyba pri aktualizácii profilu.',
+      passwordChanged: 'Heslo bolo zmenené.',
+      passwordChangeError: 'Chyba pri zmene hesla.',
+      contactGarantToChange: 'Pre zmenu mena alebo emailu kontaktujte garanta praxe.'
+    }
+  },
     notifications: {
       title: 'Notifikácie',
       markAllAsRead: 'Označiť všetko',
@@ -1690,6 +1725,7 @@ const messages = {
         viewDocuments: 'Zobraziť dokumenty',
         viewReport: 'Zobraziť výkaz praxe',
         delete: 'Vymazať',
+        deleteSelected: 'Vymazať vybrané',
         sendEvaluationEmail: 'Poslať hodnotiaci email',
         resendApprovalEmail: 'Znovu poslať schvaľovací email'
       },
@@ -1730,6 +1766,9 @@ const messages = {
         internshipCreated: 'Prax bola úspešne vytvorená!',
         internshipUpdated: 'Prax bola úspešne upravená!',
         internshipDeleted: 'Prax bola úspešne vymazaná!',
+        internshipsDeleted: 'Vybrané praxe boli úspešne vymazané!',
+        bulkDeleteTitle: 'Vymazať vybrané praxe',
+        bulkDeleteMessage: 'Naozaj chcete vymazať vybrané praxe?',
         commentAdded: 'Komentár bol úspešne pridaný!',
         confirmDelete: 'Naozaj chcete vymazať túto prax?',
         createError: 'Chyba pri vytváraní praxe. Skúste to znova.',
@@ -1929,10 +1968,17 @@ const messages = {
         view: 'Zobraziť detaily',
         approve: 'Schváliť',
         reject: 'Zamietnuť',
-        close: 'Zavrieť'
+        close: 'Zavrieť',
+        cancel: 'Zrušiť'
       },
       modal: {
         title: 'Detail žiadosti o firmu',
+        approve: {
+          title: 'Schváliť žiadosť o firmu'
+        },
+        reject: {
+          title: 'Zamietnuť žiadosť o firmu'
+        },
         sections: {
           companyInfo: 'Informácie o firme',
           contact: 'Kontaktná osoba',
@@ -1961,7 +2007,14 @@ const messages = {
         }
       },
       confirm: {
-        approve: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.'
+        approve: 'Naozaj chcete schváliť túto žiadosť? Firma bude pridaná do systému.',
+        reject: 'Naozaj chcete zamietnuť túto žiadosť? Táto akcia sa nedá vrátiť späť.'
+      },
+      placeholder: {
+        rejectionReason: 'Zadajte dôvod zamietnutia...'
+      },
+      hint: {
+        rejectionReason: 'Prosím uveďte jasný dôvod zamietnutia. Ten bude odoslaný žiadateľovi.'
       },
       alert: {
         accepted: 'Žiadosť bola schválená! Firma "{name}" bola pridaná do systému.',
