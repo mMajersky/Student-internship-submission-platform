@@ -8,8 +8,32 @@
     <style>
         @page {
             size: A4;
-            margin: 2cm 2cm 2cm 2cm;
+            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
         }
+        @font-face {
+    font-family: 'Calibri';
+    font-style: normal;
+    font-weight: 400;
+    src: url("{{ storage_path('fonts/Calibri-Regular.ttf') }}") format("truetype");
+}
+@font-face {
+    font-family: 'Calibri';
+    font-style: normal;
+    font-weight: 700;
+    src: url("{{ storage_path('fonts/Calibri-Bold.ttf') }}") format("truetype");
+}
+@font-face {
+    font-family: 'Calibri';
+    font-style: italic;
+    font-weight: 400;
+    src: url("{{ storage_path('fonts/Calibri-Italic.ttf') }}") format("truetype");
+}
+@font-face {
+    font-family: 'Calibri';
+    font-style: italic;
+    font-weight: 700;
+    src: url("{{ storage_path('fonts/Calibri-BoldItalic.ttf') }}") format("truetype");
+}
 
         body {
             font-family: "Calibri", sans-serif;
@@ -85,7 +109,7 @@
         .header-note {
             font-size: 9pt;
             text-align: right;
-            margin-bottom: 20pt;
+            margin-bottom: 10pt;
         }
         
         .signature-block {
@@ -103,7 +127,7 @@
 </head>
 <body>
 
-<div class="header-note"><i>Platnosť tlačiva od 1.10.2022 (aplikovaná informatika)</i></div>
+<div class="header-note"><i>Platnosť tlačiva od 1.10.2024 (aplikovaná informatika)</i></div>
 
 <p class="center no-margin-top"><b class="text-upper">Dohoda o odbornej praxi študenta</b></p>
 
@@ -117,16 +141,15 @@
 
 <p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trieda A. Hlinku 1, 949 01 Nitra</p>
 
-<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v zastúpení prof. RNDr. František Petrovič, PhD. – dekan fakulty</p>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v zastúpení Dr. h. c. prof. RNDr. František Petrovič, PhD., MBA – dekan fakulty</p>
 
-<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e-mail: <a href="mailto:fpetrovic@ukf.sk">fpetrovic@ukf.sk</a>, tel. 037/6408 555</p>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e-mail: <a href="mailto:dfpvai@ukf.sk">dfpvai@ukf.sk</a>, tel. 037/6408 555</p>
 
 <p class="left no-margin-top">&nbsp;</p>
 
 <p class="left no-margin-top"><b>Poskytovateľ odbornej praxe (organizácia, resp. inštitúcia)</b></p>
 
-<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plný názov: <span class="dotted-line" style="width: 350px;">{{ $company_name }}</span></p>
-<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Adresa: <span class="dotted-line" style="width: 400px;">{{ $company_full_address }}</span></p>
+<p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plný názov a adresa: <span class="dotted-line" style="width: 350px;">{{ $company_name }}, {{ $company_full_address }}</span></p>
 
 <p class="left no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v zastúpení <span class="dotted-line" style="width: 350px;">{{ $company_contact }}</span> (meno, pozícia)</p>
 
@@ -162,7 +185,7 @@
 
 <p class="no-margin-top"><b>1. Fakulta prírodných vied a informatiky Univerzity Konštantína Filozofa v Nitre:</b></p>
 
-<p class="no-margin-top margin-left-18">1.1 Poverí svojho zamestnanca: Mgr. Martin Vozár, PhD. (<a href="mailto:mvozar@ukf.sk">mvozar@ukf.sk</a>) za 1. stupeň, PaedDr. Peter Švec, Ph.D. (<a href="mailto:psvec@ukf.sk">psvec@ukf.sk</a>) za 2. stupeň (ďalej garant odbornej praxe) garanciou odbornej praxe.</p>
+<p class="no-margin-top margin-left-18">1.1	Poverí svojho zamestnanca: Mgr. Dominik Halvoník, PhD. (ďalej garant odbornej praxe) garanciou odbornej praxe.</p>
 
 <p class="no-margin-top">1.2 Prostredníctvom garanta odbornej praxe:</p>
 
@@ -204,9 +227,11 @@
 
 <p class="no-margin-top">&nbsp;</p>
 
-<p class="no-margin-top margin-left-18">1. Dohoda sa uzatvára na dobu určitú. Dohoda nadobúda platnosť a účinnosť dňom podpísania obidvomi zmluvnými stranami. Obsah dohody sa môže meniť písomne len po súhlase jej zmluvných strán.</p>
+<p class="no-margin-top margin-left-18">1.	Dohoda sa uzatvára na dobu určitú. Dohoda nadobúda platnosť a účinnosť dňom podpísania obidvomi zmluvnými stranami. Obsah dohody sa môže meniť písomne len po súhlase jej zmluvných strán.</p>
 
-<p class="no-margin-top margin-left-18">2. Dohoda sa uzatvára v 3 vyhotoveniach, každá zmluvná strana obdrží jedno vyhotovenie dohody.</p>
+<p class="no-margin-top margin-left-18">2.	Diela vytvorené študentom sa spravujú režimom zamestnaneckého diela podľa § 90 zákona č. 185/2015 Z. z. (Autorský zákon). V prípade, že sa dielo stane školským dielom podľa § 93 citovaného zákona, Fakulta prírodných vied a informatiky Univerzity Konštantína Filozofa v Nitre týmto udeľuje Poskytovateľovi odbornej praxe výhradnú, časovo a teritoriálne neobmedzenú, bezodplatnú licenciu na akékoľvek použitie alebo sublicenciu diel vytvorených študentom počas trvania odbornej praxe.</p>
+
+<p class="no-margin-top margin-left-18">3.	Dohoda sa uzatvára v 3 vyhotoveniach, každá zmluvná strana obdrží jedno vyhotovenie dohody. </p>
 
 <div class="signature-block">
     <p class="no-margin-top">V Nitre, dňa <span class="dotted-line" style="width: 100px;">{{ $date_nitra }}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V <span class="dotted-line" style="width: 80px;">{{ $city_company }}</span>, dňa <span class="dotted-line" style="width: 100px;">{{ $date_company }}</span></p>
@@ -219,7 +244,7 @@
         <tr>
             <td width="45%" style="vertical-align: top;">
                 <p class="no-margin-top"><span class="signature-line" style="width: 300px;"></span></p>
-                <p class="no-margin-top">prof. RNDr. František Petrovič, PhD.</p>
+                <p class="no-margin-top">Dr. h. c. prof. RNDr. František Petrovič, PhD., MBA</p>
                 <p class="no-margin-top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dekan FPVaI UKF v Nitre</p>
             </td>
             <td width="10%">&nbsp;</td>

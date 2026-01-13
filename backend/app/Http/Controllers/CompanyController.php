@@ -132,6 +132,19 @@ class CompanyController extends Controller
         }
 
         try {
+            // Check if email already exists in users or contact_persons table
+            $emailExists = User::where('email', $request->contact_person_email)->exists() ||
+                           ContactPerson::where('email', $request->contact_person_email)->exists();
+            
+            if ($emailExists) {
+                return response()->json([
+                    'message' => 'This email address is already registered in the system. Please use a different email address.',
+                    'errors' => [
+                        'contact_person_email' => ['This email address is already in use.']
+                    ]
+                ], 422);
+            }
+
             DB::beginTransaction();
             
             $user = $request->user('api'); // Use 'api' guard to get authenticated user
@@ -288,6 +301,17 @@ class CompanyController extends Controller
                 ], 400);
             }
 
+            // Check if a user with this email already exists
+            $existingUser = User::where('email', $contactPerson->email)->first();
+            
+            if ($existingUser) {
+                // Email already exists - cannot approve this company
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'A user account with this email address already exists. The company cannot be approved with a duplicate email. Please contact the company to use a different email address.'
+                ], 400);
+            }
+
             // Generate random password
             $password = \Illuminate\Support\Str::random(12);
 
@@ -307,8 +331,8 @@ class CompanyController extends Controller
                 'user_id' => $companyUser->id,
             ]);
 
-            // Clear the companies cache
-            Cache::tags(['dropdowns'])->forget('companies');
+            // Clear the companies cache (without tags, since database cache doesn't support tagging)
+            Cache::forget('companies');
 
             // Send email with credentials
             try {

@@ -4,7 +4,6 @@
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h2>{{ $t('garantDashboard.title') }}</h2>
-          <span class="badge bg-warning text-dark fs-6">{{ authStore.userRole }}</span>
         </div>
       </div>
     </div>
@@ -64,6 +63,17 @@
         >
           <i class="bi bi-bar-chart me-2"></i>
           Štatistiky
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          :class="{ active: activeTab === 'company-requests' }"
+          @click="activeTab = 'company-requests'"
+          type="button"
+        >
+          <i class="bi bi-building me-2"></i>
+          {{ $t('garantDashboard.tabs.companyRequests') }}
         </button>
       </li>
     </ul>
@@ -206,10 +216,21 @@
             />
 
             <!-- Results count -->
-            <div v-if="internships.length > 0 && hasActiveFilters" class="mb-3">
-              <span class="text-muted">
+            <div v-if="internships.length > 0" class="mb-3 d-flex align-items-center gap-3">
+              <span v-if="hasActiveFilters" class="text-muted">
                 {{ $t('garantDashboard.filters.showing', { count: filteredInternships.length, total: internships.length }) }}
               </span>
+              <span v-if="selectedCount > 0" class="badge bg-primary">
+                {{ selectedCount }} selected
+              </span>
+              <button 
+                v-if="selectedCount > 0" 
+                class="btn btn-sm btn-outline-danger d-flex align-items-center" 
+                @click="handleDeleteSelected"
+              >
+                <i class="bi bi-trash me-1"></i>
+                {{ $t('garantDashboard.actions.deleteSelected') || 'Delete Selected' }}
+              </button>
             </div>
 
             <div v-if="internships.length === 0" class="text-center py-5">
@@ -234,21 +255,72 @@
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>{{ $t('garantDashboard.tableHeaders.student') }}</th>
-                    <th>{{ $t('garantDashboard.tableHeaders.company') }}</th>
-                    <th>{{ $t('garantDashboard.tableHeaders.year') }}</th>
-                    <th>{{ $t('garantDashboard.tableHeaders.semester') }}</th>
-                    <th>{{ $t('garantDashboard.tableHeaders.start') }}</th>
-                    <th>{{ $t('garantDashboard.tableHeaders.end') }}</th>
-                    <th>{{ $t('garantDashboard.tableHeaders.status') }}</th>
+                    <th style="width: 50px">
+                      <div class="form-check d-flex justify-content-center">
+                        <input 
+                          class="form-check-input border-secondary" 
+                          style="transform: scale(1.2); cursor: pointer;"
+                          type="checkbox" 
+                          :checked="allVisibleSelected"
+                          :indeterminate.prop="someVisibleSelected"
+                          @change="toggleSelectAllVisible"
+                        >
+                      </div>
+                    </th>
+                    <th @click="toggleSort('student')" style="cursor: pointer">
+                      {{ $t('garantDashboard.tableHeaders.student') }}
+                      <i v-if="sortColumn === 'student'" :class="sortDirection === 'asc' ? 'bi bi-arrow-up ms-1' : 'bi bi-arrow-down ms-1'"></i>
+                      <i v-else class="bi bi-arrow-down-up text-muted ms-1"></i>
+                    </th>
+                    <th @click="toggleSort('company')" style="cursor: pointer">
+                      {{ $t('garantDashboard.tableHeaders.company') }}
+                      <i v-if="sortColumn === 'company'" :class="sortDirection === 'asc' ? 'bi bi-arrow-up ms-1' : 'bi bi-arrow-down ms-1'"></i>
+                      <i v-else class="bi bi-arrow-down-up text-muted ms-1"></i>
+                    </th>
+                    <th @click="toggleSort('year')" style="cursor: pointer">
+                      {{ $t('garantDashboard.tableHeaders.year') }}
+                      <i v-if="sortColumn === 'year'" :class="sortDirection === 'asc' ? 'bi bi-arrow-up ms-1' : 'bi bi-arrow-down ms-1'"></i>
+                      <i v-else class="bi bi-arrow-down-up text-muted ms-1"></i>
+                    </th>
+                    <th @click="toggleSort('semester')" style="cursor: pointer">
+                      {{ $t('garantDashboard.tableHeaders.semester') }}
+                      <i v-if="sortColumn === 'semester'" :class="sortDirection === 'asc' ? 'bi bi-arrow-up ms-1' : 'bi bi-arrow-down ms-1'"></i>
+                      <i v-else class="bi bi-arrow-down-up text-muted ms-1"></i>
+                    </th>
+                    <th @click="toggleSort('start')" style="cursor: pointer">
+                      {{ $t('garantDashboard.tableHeaders.start') }}
+                      <i v-if="sortColumn === 'start'" :class="sortDirection === 'asc' ? 'bi bi-arrow-up ms-1' : 'bi bi-arrow-down ms-1'"></i>
+                      <i v-else class="bi bi-arrow-down-up text-muted ms-1"></i>
+                    </th>
+                    <th @click="toggleSort('end')" style="cursor: pointer">
+                      {{ $t('garantDashboard.tableHeaders.end') }}
+                      <i v-if="sortColumn === 'end'" :class="sortDirection === 'asc' ? 'bi bi-arrow-up ms-1' : 'bi bi-arrow-down ms-1'"></i>
+                      <i v-else class="bi bi-arrow-down-up text-muted ms-1"></i>
+                    </th>
+                    <th @click="toggleSort('status')" style="cursor: pointer">
+                      {{ $t('garantDashboard.tableHeaders.status') }}
+                      <i v-if="sortColumn === 'status'" :class="sortDirection === 'asc' ? 'bi bi-arrow-up ms-1' : 'bi bi-arrow-down ms-1'"></i>
+                      <i v-else class="bi bi-arrow-down-up text-muted ms-1"></i>
+                    </th>
                     <th>{{ $t('garantDashboard.tableHeaders.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="internship in filteredInternships" :key="internship.id">
+                  <tr v-for="internship in paginatedInternships" :key="internship.id">
+                    <td>
+                      <div class="form-check d-flex justify-content-center">
+                        <input 
+                          class="form-check-input border-secondary" 
+                          style="transform: scale(1.2); cursor: pointer;"
+                          type="checkbox" 
+                          :checked="selectedInternshipIds.has(internship.id)"
+                          @change="toggleSelection(internship.id)"
+                        >
+                      </div>
+                    </td>
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
-                    <td>{{ getYear(internship.start_date) }}</td>
+                    <td>{{ internship.academy_year || getYear(internship.start_date) }}</td>
                     <td><span class="badge bg-secondary">{{ getSemester(internship.start_date) }}</span></td>
                     <td>{{ formatDate(internship.start_date) }}</td>
                     <td>{{ formatDate(internship.end_date) }}</td>
@@ -274,6 +346,41 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div v-if="filteredInternships.length > 0" class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
+              <div class="d-flex align-items-center">
+                <select class="form-select form-select-sm" v-model="itemsPerPage" style="width: auto">
+                  <option :value="10">10 / str.</option>
+                  <option :value="20">20 / str.</option>
+                  <option :value="50">50 / str.</option>
+                  <option :value="100">100 / str.</option>
+                </select>
+                <span class="ms-2 text-muted small">
+                  {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredInternships.length) }} z {{ filteredInternships.length }}
+                </span>
+              </div>
+
+              <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                    <button class="page-link" @click="currentPage--" :disabled="currentPage === 1">
+                      <i class="bi bi-chevron-left"></i>
+                    </button>
+                  </li>
+                  <li class="page-item disabled">
+                    <span class="page-link text-dark">
+                      {{ currentPage }} / {{ totalPages }}
+                    </span>
+                  </li>
+                  <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                    <button class="page-link" @click="currentPage++" :disabled="currentPage === totalPages">
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
         </div>
@@ -347,7 +454,7 @@
                   <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
-                    <td>{{ getYear(internship.start_date) }}</td>
+                    <td>{{ internship.academy_year || getYear(internship.start_date) }}</td>
                     <td><span class="badge bg-secondary">{{ getSemester(internship.start_date) }}</span></td>
                     <td>
                       <span class="badge" :class="getStatusClass(internship.status)">
@@ -370,16 +477,24 @@
           </div>
         </div>
       </div>
-      <!-- Statistics Tab -->
-      <div class="card">
-        <div class="card-body">
-          <div v-if="activeTab === 'statistics'" class="tab-pane fade show active">
-            <StatisticsTab :internships="internships" />
+
+      <!-- Company Requests Tab -->
+      <div v-if="activeTab === 'company-requests'" class="tab-pane fade show active">
+        <div class="card">
+          <div class="card-body">
+            <CompanyRequests />
           </div>
         </div>
       </div>
 
-
+      <!-- Statistics Tab -->
+      <div v-if="activeTab === 'statistics'" class="tab-pane fade show active">
+        <div class="card">
+          <div class="card-body">
+            <StatisticsTab :internships="internships" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Comment Modal -->
@@ -394,8 +509,8 @@
     <!-- Confirmation Dialog -->
     <ConfirmationDialog
       :is-visible="showDeleteConfirmation"
-      :title="$t('confirmationDialog.deleteTitle')"
-      :message="$t('confirmationDialog.deleteMessage')"
+      :title="deleteConfirmationTitle"
+      :message="deleteConfirmationMessage"
       :confirm-text="$t('confirmationDialog.confirm')"
       :cancel-text="$t('confirmationDialog.cancel')"
       type="danger"
@@ -422,8 +537,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
 import CreateInternshipForm from '@/components/garant/GarantInternshipForm.vue'
@@ -432,11 +547,13 @@ import ConfirmationDialog from '@/components/common/ConfirmationDialog.vue'
 import InternshipFilters from '@/components/garant/InternshipFilters.vue'
 import MessageModal from '@/components/common/MessageModal.vue'
 import StatisticsTab from '@/components/garant/tabs/StatisticsTab.vue'
+import CompanyRequests from '@/components/garant/CompanyRequests.vue'
 
 const { t } = useI18n()
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const activeTab = ref('overview')
 
@@ -450,6 +567,19 @@ const selectedInternshipForComment = ref(null)
 // Delete confirmation state
 const showDeleteConfirmation = ref(false)
 const internshipToDelete = ref(null)
+const deleteMode = ref('single') // 'single' | 'bulk'
+
+const deleteConfirmationTitle = computed(() => {
+  return deleteMode.value === 'single'
+    ? t('confirmationDialog.deleteTitle')
+    : (t('garantDashboard.messages.bulkDeleteTitle') || 'Delete Selected Internships')
+})
+
+const deleteConfirmationMessage = computed(() => {
+  return deleteMode.value === 'single'
+    ? t('confirmationDialog.deleteMessage')
+    : (t('garantDashboard.messages.bulkDeleteMessage') || `Are you sure you want to delete ${selectedCount.value} selected internships?`)
+})
 
 // Message modal state
 const showMessageModal = ref(false)
@@ -473,6 +603,17 @@ const selectedYears = ref([])
 const selectedCompanies = ref([])
 const selectedStudyFields = ref([])
 const studentSearchQuery = ref('')
+
+// Selection state
+const selectedInternshipIds = ref(new Set())
+
+// Pagination state
+const currentPage = ref(1)
+const itemsPerPage = ref(20)
+
+// Sorting state
+const sortColumn = ref(null)
+const sortDirection = ref('asc')
 
 // Statistics
 const stats = ref({
@@ -593,6 +734,74 @@ const filteredInternships = computed(() => {
   })
 })
 
+// Sorting and Pagination computed properties
+const sortedInternships = computed(() => {
+  if (!sortColumn.value) {
+    return filteredInternships.value
+  }
+
+  return [...filteredInternships.value].sort((a, b) => {
+    let valA, valB
+
+    switch (sortColumn.value) {
+      case 'student':
+        valA = a.student ? `${a.student.surname} ${a.student.name}`.toLowerCase() : ''
+        valB = b.student ? `${b.student.surname} ${b.student.name}`.toLowerCase() : ''
+        break
+      case 'company':
+        valA = a.company ? a.company.name.toLowerCase() : ''
+        valB = b.company ? b.company.name.toLowerCase() : ''
+        break
+      case 'year':
+        valA = a.academy_year || ''
+        valB = b.academy_year || ''
+        break
+      case 'semester':
+        valA = getSemester(a.start_date)
+        valB = getSemester(b.start_date)
+        break
+      case 'start':
+        valA = a.start_date || ''
+        valB = b.start_date || ''
+        break
+      case 'end':
+        valA = a.end_date || ''
+        valB = b.end_date || ''
+        break
+      case 'status':
+        valA = a.status || ''
+        valB = b.status || ''
+        break
+      default:
+        return 0
+    }
+
+    if (valA < valB) return sortDirection.value === 'asc' ? -1 : 1
+    if (valA > valB) return sortDirection.value === 'asc' ? 1 : -1
+    return 0
+  })
+})
+
+const totalPages = computed(() => {
+  if (filteredInternships.value.length === 0) return 1
+  return Math.ceil(filteredInternships.value.length / itemsPerPage.value)
+})
+
+const paginatedInternships = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return sortedInternships.value.slice(start, end)
+})
+
+// Reset pagination when filters change
+watch(filteredInternships, () => {
+  currentPage.value = 1
+})
+
+watch(itemsPerPage, () => {
+  currentPage.value = 1
+})
+
 const clearAllFilters = () => {
   selectedYears.value = []
   selectedCompanies.value = []
@@ -607,9 +816,87 @@ const hasActiveFilters = computed(() => {
     studentSearchQuery.value.trim().length > 0
 })
 
+// Selection computed properties
+const allVisibleSelected = computed(() => {
+  if (filteredInternships.value.length === 0) return false
+  return filteredInternships.value.every(i => selectedInternshipIds.value.has(i.id))
+})
+
+const someVisibleSelected = computed(() => {
+  if (filteredInternships.value.length === 0) return false
+  const visibleIds = filteredInternships.value.map(i => i.id)
+  const selectedVisibleCount = visibleIds.filter(id => selectedInternshipIds.value.has(id)).length
+  return selectedVisibleCount > 0 && selectedVisibleCount < visibleIds.length
+})
+
+const selectedCount = computed(() => selectedInternshipIds.value.size)
+
+// Selection methods
+const toggleSelectAllVisible = () => {
+  const newSet = new Set(selectedInternshipIds.value)
+  if (allVisibleSelected.value) {
+    // Deselect all visible
+    filteredInternships.value.forEach(i => newSet.delete(i.id))
+  } else {
+    // Select all visible
+    filteredInternships.value.forEach(i => newSet.add(i.id))
+  }
+  selectedInternshipIds.value = newSet
+}
+
+const toggleSelection = (id) => {
+  const newSet = new Set(selectedInternshipIds.value)
+  if (newSet.has(id)) {
+    newSet.delete(id)
+  } else {
+    newSet.add(id)
+  }
+  selectedInternshipIds.value = newSet
+}
+
+const toggleSort = (column) => {
+  if (sortColumn.value === column) {
+    if (sortDirection.value === 'asc') {
+      sortDirection.value = 'desc'
+    } else {
+      sortColumn.value = null
+      sortDirection.value = 'asc'
+    }
+  } else {
+    sortColumn.value = column
+    sortDirection.value = 'asc'
+  }
+}
+
+// Handle query parameters from notifications
+const handleQueryParams = () => {
+  const { tab, studentName, selectInternshipId } = route.query
+  
+  if (tab && ['overview', 'create-internship', 'internships', 'documents', 'statistics', 'companyRequests'].includes(tab)) {
+    activeTab.value = tab
+  }
+  
+  if (studentName) {
+    studentSearchQuery.value = studentName
+  }
+  
+  if (selectInternshipId) {
+    const id = parseInt(selectInternshipId)
+    if (!isNaN(id)) {
+      selectedInternshipIds.value = new Set([id])
+    }
+  }
+}
+
+// Watch for route query changes
+watch(() => route.query, () => {
+  handleQueryParams()
+})
+
 // Load data when component is mounted
-onMounted(() => {
-  fetchInternships()
+onMounted(async () => {
+  await fetchInternships()
+  handleQueryParams()
 })
 
 const handleNewInternship = () => {
@@ -686,38 +973,73 @@ const handleCreateInternship = async (formData) => {
 }
 
 const handleDeleteInternship = (internshipId) => {
+  deleteMode.value = 'single'
   internshipToDelete.value = internshipId
   showDeleteConfirmation.value = true
 }
 
-const confirmDeleteInternship = async () => {
-  if (!internshipToDelete.value) return
-  
-  try {
-    const response = await fetch(`/api/internships/${internshipToDelete.value}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`,
-        'Accept': 'application/json',
-      }
-    })
+const handleDeleteSelected = () => {
+  deleteMode.value = 'bulk'
+  showDeleteConfirmation.value = true
+}
 
-    if (!response.ok) {
-      const data = await response.json()
-      throw new Error(data.message || data.error || 'Failed to delete internship')
+const confirmDeleteInternship = async () => {
+  try {
+    if (deleteMode.value === 'single') {
+      if (!internshipToDelete.value) return
+      
+      const response = await fetch(`/api/internships/${internshipToDelete.value}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authStore.token}`,
+          'Accept': 'application/json',
+        }
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || data.error || 'Failed to delete internship')
+      }
+      
+      // Refresh internships list
+      await fetchInternships()
+      
+      // Show success message
+      showMessage(t('garantDashboard.messages.internshipDeleted'), null, 'success')
+    } else {
+      // Bulk delete
+      const ids = Array.from(selectedInternshipIds.value)
+      const response = await fetch('/api/internships/bulk-delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authStore.token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ ids })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || data.error || 'Failed to delete selected internships')
+      }
+
+      // Refresh internships list
+      await fetchInternships()
+      
+      // Clear selection
+      selectedInternshipIds.value = new Set()
+      
+      // Show success message
+      showMessage(t('garantDashboard.messages.internshipsDeleted') || 'Selected internships deleted successfully', null, 'success')
     }
-    
-    // Refresh internships list
-    await fetchInternships()
-    
-    // Show success message
-    showMessage(t('garantDashboard.messages.internshipDeleted'), null, 'success')
   } catch (error) {
-    console.error('Error deleting internship:', error)
+    console.error('Error deleting internship(s):', error)
     showMessage(error.message || t('garantDashboard.messages.deleteError'), null, 'error')
   } finally {
     showDeleteConfirmation.value = false
     internshipToDelete.value = null
+    deleteMode.value = 'single'
   }
 }
 

@@ -236,8 +236,33 @@ const handleNotificationClick = async (notification) => {
     // For garants, navigate based on notification type
     if (notification.type === 'company_request_created') {
       router.push('/garant-dashboard?tab=companyRequests');
-    } else if (internshipId) {
+    } else if (notification.type === 'document_uploaded' && internshipId) {
       router.push(`/garant/internships/${internshipId}/documents`);
+    } else if (internshipId) {
+      let studentName = notification.data?.studentName || '';
+      
+      // Attempt to extract student name from message if not in data
+      if (!studentName) {
+        if (notification.type === 'internship_created') {
+          const match = notification.message.match(/Študent (.+?) vytvoril/);
+          if (match) studentName = match[1];
+        } else if (notification.type === 'internship_status_changed') {
+          const match = notification.message.match(/študenta (.+?)\./);
+          if (match) studentName = match[1];
+        } else if (notification.type === 'approval_request') {
+          const match = notification.message.match(/Študent (.+?) žiada/);
+          if (match) studentName = match[1];
+        }
+      }
+
+      router.push({
+        path: '/garant-dashboard',
+        query: {
+          tab: 'internships',
+          studentName: studentName,
+          selectInternshipId: internshipId
+        }
+      });
     } else {
       router.push('/garant-dashboard');
     }

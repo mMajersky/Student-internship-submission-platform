@@ -133,12 +133,21 @@ const canConfirm = computed(() => {
   if (!props.requiresTextConfirmation) {
     return true
   }
+  // If confirmationTextRequired is empty, just check that some text is entered
+  if (props.confirmationTextRequired === '') {
+    return confirmationText.value.trim().length > 0
+  }
   return confirmationText.value.toLowerCase().trim() === props.confirmationTextRequired.toLowerCase()
 })
 
 const handleConfirm = () => {
   if (canConfirm.value) {
-    emit('confirm')
+    // If requires text confirmation and no specific match required, emit the text value
+    if (props.requiresTextConfirmation && props.confirmationTextRequired === '') {
+      emit('confirm', confirmationText.value.trim())
+    } else {
+      emit('confirm')
+    }
     confirmationText.value = ''
   }
 }

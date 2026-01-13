@@ -16,15 +16,14 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = computed(() => user.value?.email || '')
 
   // Role-based computed properties
-  const isAdmin = computed(() => userRole.value === 'admin')
   const isGarant = computed(() => userRole.value === 'garant')
   const isCompany = computed(() => userRole.value === 'company')
   const isStudent = computed(() => userRole.value === 'student')
   const isAnonymous = computed(() => !isAuthenticated.value || userRole.value === 'anonymous')
 
   // Permission-based computed properties
-  const canManageAnnouncements = computed(() => 
-    isAdmin.value || isGarant.value
+  const canManageAnnouncements = computed(() =>
+    isGarant.value
   )
 
   // Actions
@@ -137,7 +136,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Role constants
   const ROLES = {
-    ADMIN: 'ADMIN',
     GARANT: 'GARANT',
     COMPANY: 'COMPANY',
     STUDENT: 'STUDENT',
@@ -157,7 +155,6 @@ export const useAuthStore = defineStore('auth', () => {
     userPermissions,
     userDisplayName,
     userEmail,
-    isAdmin,
     isGarant,
     isCompany,
     isStudent,
