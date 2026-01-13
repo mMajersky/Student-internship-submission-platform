@@ -848,6 +848,10 @@ const messages = {
       securityDesc: 'All uploaded documents (especially signed PDFs) are stored in a secure private storage. Documents are NOT publicly accessible - access is only available to authorized users through API with permission controls.',
       signedAgreement: 'Agreement signed by student',
       signedAgreementDesc: '(required when status is "Approved by garant")',
+      isEmployedOrSelfEmployed: 'I am employed in this company or I have my own business/company',
+      isEmployedOrSelfEmployedDesc: 'If you are employed in the company where you are doing the internship, or you have your own business/company, you must upload an invoice or employment contract instead of the signed agreement. The internship report is not required.',
+      invoiceOrContract: 'Invoice or Employment Contract',
+      invoiceOrContractDesc: 'Upload invoice or employment contract (required when status is "Approved")',
       uploadDocument: 'Upload document (PDF)',
       upload: 'Upload',
       uploaded: 'Uploaded',
@@ -929,7 +933,8 @@ const messages = {
       reportUploadSuccess: 'Report uploaded successfully!',
       sendReportSuccess: 'Report sent successfully to company!',
       sendReportError: 'Error sending report to company.',
-      internshipNotEnded: 'Internship has not ended yet.'
+      internshipNotEnded: 'Internship has not ended yet.',
+      close: 'Close'
     },
     garantDashboard: {
       title: 'Internship Management',
