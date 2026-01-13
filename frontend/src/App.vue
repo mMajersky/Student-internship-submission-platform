@@ -13,8 +13,8 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item" v-if="authStore.isAuthenticated">
+          <ul class="navbar-nav me-auto align-items-center">
+            <li class="nav-item" v-if="authStore.isAuthenticated && !authStore.isGarant">
               <router-link :to="dashboardLink" class="nav-link" :class="{ active: isDashboardRoute }">{{ $t('nav.home') }}</router-link>
             </li>
             <li class="nav-item" v-if="!authStore.isAuthenticated">
@@ -30,7 +30,7 @@
             </li>
           </ul>
 
-          <ul class="navbar-nav">
+          <ul class="navbar-nav align-items-center">
             <li class="nav-item" v-if="!authStore.isAuthenticated">
               <router-link to="/login" class="nav-link">{{ $t('nav.login') }}</router-link>
             </li>

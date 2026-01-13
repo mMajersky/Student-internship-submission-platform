@@ -596,6 +596,37 @@ class InternshipController extends Controller
     }
 
     /**
+     * Remove multiple internships from storage (admin/garant only).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bulkDestroy(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer|exists:internships,id'
+            ]);
+
+            $count = Internship::whereIn('id', $validated['ids'])->delete();
+
+            return response()->json([
+                'message' => 'Internships deleted successfully.',
+                'count' => $count
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error bulk deleting internships: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'An error occurred while deleting internships.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
+    }
+
+    /**
      * Remove the specified internship from storage (admin/garant only).
      *
      * @param  int  $id

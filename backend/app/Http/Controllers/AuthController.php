@@ -53,7 +53,15 @@ class AuthController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[a-z]/',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+                'confirmed'
+            ],
             'role' => 'required|in:student',
         ];
 
@@ -98,6 +106,9 @@ class AuthController extends Controller
             'postal_code.required' => 'PSČ je povinné',
             'street.required' => 'Ulica je povinná',
             'house_number.required' => 'Číslo domu je povinné',
+            'password.min' => 'Heslo musí mať aspoň 8 znakov',
+            'password.regex' => 'Heslo musí obsahovať aspoň jedno malé písmeno, jedno veľké písmeno a jedno číslo',
+            'password.confirmed' => 'Potvrdenie hesla sa nezhoduje',
         ];
 
         $validated = $request->validate($rules, $messages);

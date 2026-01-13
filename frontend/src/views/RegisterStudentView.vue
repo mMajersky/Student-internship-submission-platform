@@ -97,6 +97,27 @@
                 </small>
               </div>
 
+              <!-- Password Confirmation -->
+              <div class="mb-3">
+                <label for="password_confirmation" class="form-label">
+                  {{ $t('auth.register.passwordConfirmation') }} <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="password"
+                  class="form-control"
+                  :class="{ 'is-invalid': errors.password_confirmation }"
+                  id="password_confirmation"
+                  v-model="formData.password_confirmation"
+                  @input="validatePasswordConfirmation"
+                  required
+                  minlength="8"
+                  :placeholder="$t('auth.register.passwordConfirmationPlaceholder')"
+                />
+                <div v-if="errors.password_confirmation" class="invalid-feedback">
+                  {{ errors.password_confirmation }}
+                </div>
+              </div>
+
               <!-- Alternative Email -->
               <div class="mb-3">
                 <label for="alternative_email" class="form-label">{{ $t('auth.register.alternativeEmail') }}</label>
@@ -316,6 +337,7 @@ const formData = reactive({
   surname: '',
   email: '',
   password: '',
+  password_confirmation: '',
   alternative_email: '',
   phone_number: '',
   study_level: '',
@@ -390,6 +412,18 @@ const validatePassword = () => {
   }
 }
 
+const validatePasswordConfirmation = () => {
+  if (!formData.password_confirmation) {
+    errors.password_confirmation = null
+    return
+  }
+  if (formData.password !== formData.password_confirmation) {
+    errors.password_confirmation = t('auth.register.validation.passwordConfirmationMismatch')
+  } else {
+    errors.password_confirmation = null
+  }
+}
+
 const validatePhone = () => {
   if (!formData.phone_number) {
     errors.phone_number = null
@@ -437,6 +471,17 @@ const validateForm = () => {
   validatePassword()
   if (errors.password) {
     errorMessage.value = errors.password
+    return false
+  }
+
+  if (!formData.password_confirmation) {
+    errorMessage.value = t('auth.register.validation.passwordConfirmationRequired')
+    return false
+  }
+
+  validatePasswordConfirmation()
+  if (errors.password_confirmation) {
+    errorMessage.value = errors.password_confirmation
     return false
   }
 

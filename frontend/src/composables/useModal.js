@@ -9,6 +9,7 @@ export function useModal() {
   const messageModalTitle = ref('')
   const messageModalMessage = ref('')
   const messageModalType = ref('info')
+  const messageModalCallback = ref(null)
 
   // Confirmation modal state
   const showConfirmModal = ref(false)
@@ -39,14 +40,20 @@ export function useModal() {
       messageModalType.value = type
       showMessageModal.value = true
       
-      // Store resolve to call when modal closes
-      const originalClose = () => {
+      messageModalCallback.value = () => {
         showMessageModal.value = false
         resolve()
       }
-      // We'll handle this in the component
-      window.__modalResolve = originalClose
     })
+  }
+
+  const closeMessageModal = () => {
+    if (messageModalCallback.value) {
+      messageModalCallback.value()
+      messageModalCallback.value = null
+    } else {
+      showMessageModal.value = false
+    }
   }
 
   // Confirm function
@@ -136,7 +143,7 @@ export function useModal() {
     showSuccess,
     showError,
     showWarning,
-    showInfo
+    showInfo,
+    closeMessageModal
   }
 }
-
