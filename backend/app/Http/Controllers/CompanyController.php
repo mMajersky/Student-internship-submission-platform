@@ -132,6 +132,19 @@ class CompanyController extends Controller
         }
 
         try {
+            // Check if email already exists in users or contact_persons table
+            $emailExists = User::where('email', $request->contact_person_email)->exists() ||
+                           ContactPerson::where('email', $request->contact_person_email)->exists();
+            
+            if ($emailExists) {
+                return response()->json([
+                    'message' => 'This email address is already registered in the system. Please use a different email address.',
+                    'errors' => [
+                        'contact_person_email' => ['This email address is already in use.']
+                    ]
+                ], 422);
+            }
+
             DB::beginTransaction();
             
             $user = $request->user('api'); // Use 'api' guard to get authenticated user
@@ -285,6 +298,17 @@ class CompanyController extends Controller
             if (!$contactPerson) {
                 return response()->json([
                     'message' => 'No contact person found for this company.'
+                ], 400);
+            }
+
+            // Check if a user with this email already exists
+            $existingUser = User::where('email', $contactPerson->email)->first();
+            
+            if ($existingUser) {
+                // Email already exists - cannot approve this company
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'A user account with this email address already exists. The company cannot be approved with a duplicate email. Please contact the company to use a different email address.'
                 ], 400);
             }
 
