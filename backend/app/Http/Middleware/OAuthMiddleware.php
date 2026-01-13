@@ -18,9 +18,11 @@ class OAuthMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Only allow client_credentials grants (client authenticated, no user)
-        // Reject password grants (client + user) and user JWTs to prevent token reuse
-        if (Auth::guard('api')->client() !== null && Auth::guard('api')->user() === null) {
+        // Only allow client_credentials grants
+        // Reject personal access tokens and password grants
+        $client = Auth::guard('api')->client();
+
+        if ($client !== null && in_array('client_credentials', $client->grant_types)) {
             return $next($request);
         }
 

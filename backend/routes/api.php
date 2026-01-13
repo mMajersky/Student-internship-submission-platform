@@ -163,8 +163,14 @@ Route::middleware(['auth:api', 'role:company'])->prefix('company')->group(functi
     Route::post('/internships/{internship}/documents/{document}/validate', [InternshipDocumentController::class, 'companyValidate']);
 });
 
+// External third-party API routes - OAuth client authenticated only (no user JWTs, no role restrictions)
+Route::middleware(['auth:api', 'oauth'])->prefix('external')->group(function () {
+    // Get all internships as objects
+    Route::get('/internships', [ExternalInternshipController::class, 'index']);
 
-
+    // Defend internship - change status from 'schválená' to 'obhájená'
+    Route::post('/internships/{id}/defend', [ExternalInternshipController::class, 'defend']);
+});
 
 //charts
 use App\Http\Controllers\StatsController;
@@ -178,13 +184,4 @@ Route::prefix('stats')
         Route::get('/all-companies', [StatsController::class, 'allCompanies']);
         Route::get('/internship-summary', [StatsController::class, 'internshipSummary']);
         Route::get('/internships/export', [StatsController::class, 'exportCsv']);
-
-// External third-party API routes - OAuth client authenticated only (no user JWTs, no role restrictions)
-    Route::middleware(['oauth'])->prefix('external')->group(function () {
-        // Get all internships as objects
-        Route::get('/internships', [ExternalInternshipController::class, 'index']);
-
-        // Defend internship - change status from 'schválená' to 'obhájená'
-        Route::post('/internships/{id}/defend', [ExternalInternshipController::class, 'defend']);
     });
-});
