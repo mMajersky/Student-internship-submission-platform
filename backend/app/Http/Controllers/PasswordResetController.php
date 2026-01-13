@@ -23,7 +23,7 @@ class PasswordResetController extends Controller
      */
     protected function sendPasswordResetEmail(User $user, string $token): void
     {
-        $resetUrl = url('/password/reset') . '?' . http_build_query([
+        $resetUrl = config('app.url') . '/password/reset?' . http_build_query([
             'token' => $token,
             'email' => $user->email,
         ]);
