@@ -15,29 +15,18 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'name' => Role::ADMIN,
-                'display_name' => 'Administrator',
-                'description' => 'System administrator with full access to all features',
+                'name' => Role::GARANT,
+                'display_name' => 'Garant',
+                'description' => 'Academic supervisor responsible for internship oversight',
                 'permissions' => [
                     'manage_users',
                     'manage_announcements',
                     'manage_internships',
                     'manage_companies',
                     'view_reports',
-                    'system_settings'
-                ],
-                'is_active' => true,
-            ],
-            [
-                'name' => Role::GARANT,
-                'display_name' => 'Garant',
-                'description' => 'Academic supervisor responsible for internship oversight',
-                'permissions' => [
-                    'manage_announcements',
-                    'manage_internships',
+                    'system_settings',
                     'approve_internships',
-                    'view_student_progress',
-                    'manage_companies'
+                    'view_student_progress'
                 ],
                 'is_active' => true,
             ],
