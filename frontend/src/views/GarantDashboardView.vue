@@ -320,7 +320,7 @@
                     </td>
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
-                    <td>{{ getYear(internship.start_date) }}</td>
+                    <td>{{ internship.academy_year || getYear(internship.start_date) }}</td>
                     <td><span class="badge bg-secondary">{{ getSemester(internship.start_date) }}</span></td>
                     <td>{{ formatDate(internship.start_date) }}</td>
                     <td>{{ formatDate(internship.end_date) }}</td>
@@ -454,7 +454,7 @@
                   <tr v-for="internship in filteredInternships" :key="internship.id">
                     <td>{{ getStudentFullName(internship) }}</td>
                     <td>{{ internship.company?.name || '-' }}</td>
-                    <td>{{ getYear(internship.start_date) }}</td>
+                    <td>{{ internship.academy_year || getYear(internship.start_date) }}</td>
                     <td><span class="badge bg-secondary">{{ getSemester(internship.start_date) }}</span></td>
                     <td>
                       <span class="badge" :class="getStatusClass(internship.status)">
