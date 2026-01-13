@@ -172,8 +172,7 @@ Route::middleware(['auth:api', 'role:admin'])->group(function () {
 //charts
 use App\Http\Controllers\StatsController;
 
-Route::middleware('auth:api')
-    ->prefix('stats')
+Route::prefix('stats')
     ->group(function () {
 
         Route::get('/students-trend', [StatsController::class, 'studentsTrend']);
