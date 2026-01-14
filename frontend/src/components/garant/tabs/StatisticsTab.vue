@@ -550,8 +550,6 @@ const pieChartOptions = {
   }
 }
 
-const API_BASE = import.meta.env.VITE_API_URL
-
 const downloadCsv = async () => {
   const params = new URLSearchParams()
 
@@ -564,7 +562,7 @@ const downloadCsv = async () => {
   }
 
   // 🔥 TU JE HLAVNÁ OPRAVA
-  const url = `${API_BASE}/api/stats/internships/export?${params.toString()}`
+  const url = `/api/stats/internships/export?${params.toString()}`
 
   const response = await fetch(url, {
     headers: {
@@ -616,4 +614,3 @@ const downloadCsv = async () => {
 }
 
 </style>
-
